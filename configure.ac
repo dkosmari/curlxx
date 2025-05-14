@@ -20,10 +20,14 @@ AC_LANG([C++])
 AC_PROG_RANLIB
 
 
-PKG_CHECK_MODULES([CURL], [libcurl])
+AC_ARG_ENABLE([static],
+              [AS_HELP_STRING([--enable-static], [use static libcurl.])])
 
+AS_IF([test $enable_static = xyes],
+      [PKG_CHECK_MODULES_STATIC([CURL], [libcurl])],
+      [PKG_CHECK_MODULES([CURL], [libcurl])]
+)
 
-AC_FUNC_ERROR_AT_LINE
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

@@ -38,6 +38,8 @@ libcurlxx_a_SOURCES = \
 	src/multi.cpp \
 	src/slist.cpp
 
+libcurlxx_a_LIBADD = $(CURL_LIBS)
+
 
 .PHONY: company
 company: compile_flags.txt
