@@ -12,6 +12,7 @@
 #include "error.hpp"
 #include "escape.hpp"
 #include "header.hpp"
+#include "multi.hpp"
 #include "slist.hpp"
 
 #endif

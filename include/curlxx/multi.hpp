@@ -40,7 +40,8 @@ namespace curl {
             noexcept = default;
 
 
-        ~multi() noexcept;
+        ~multi()
+            noexcept;
 
 
         void
