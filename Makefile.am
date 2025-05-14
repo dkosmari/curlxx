@@ -1,7 +1,7 @@
 
 EXTRA_DIST = \
 	bootstrap \
-	COPYING.LGPLv3 \
+	COPYING.LGPL \
 	README.md
 
 
