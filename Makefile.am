@@ -10,8 +10,7 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/include
 
 
-LIBS = \
-	$(CURL_LIBS)
+LIBS = $(CURL_LIBS)
 
 
 curlxx_HEADERS = \
