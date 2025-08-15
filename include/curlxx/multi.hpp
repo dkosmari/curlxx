@@ -9,6 +9,7 @@
 #define CURLXX_MULTI_HPP
 
 #include <expected>
+#include <vector>
 
 #include <curl/curl.h>
 
@@ -75,6 +76,18 @@ namespace curl {
         std::expected<unsigned, error>
         try_perform()
             noexcept;
+
+
+
+
+        struct msg_done {
+            easy* handle;
+            CURLcode result;
+        };
+
+        // Corresponds to curl_multi_info_read()
+        std::vector<msg_done>
+        get_done();
 
 
         // CURLMOPT_MAXCONNECTS

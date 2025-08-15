@@ -111,6 +111,22 @@ namespace curl {
     }
 
 
+    std::vector<multi::msg_done>
+    multi::get_done()
+    {
+        std::vector<msg_done> result;
+        int pending;
+        while (auto msg = curl_multi_info_read(raw, &pending)) {
+            // ignore unknown messages
+            if (msg->msg != CURLMSG_DONE)
+                continue;
+            result.emplace_back(easy::get_wrapper(msg->easy_handle),
+                                msg->data.result);
+        }
+        return result;
+    }
+
+
     void
     multi::set_max_connections(long n)
     {
