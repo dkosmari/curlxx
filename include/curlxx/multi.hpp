@@ -76,6 +76,76 @@ namespace curl {
         try_perform()
             noexcept;
 
+
+        // CURLMOPT_MAXCONNECTS
+        // Size of connection cache.
+
+        void
+        set_max_connections(long n);
+
+        std::expected<void, error>
+        try_set_max_connections(long n)
+            noexcept;
+
+
+        // CURLMOPT_MAX_CONCURRENT_STREAMS
+        // Max concurrent streams for http2.
+
+        void
+        set_max_concurrent_streams(long n);
+
+        std::expected<void, error>
+        try_set_max_concurrent_streams(long n)
+            noexcept;
+
+
+        // CURLMOPT_MAX_HOST_CONNECTIONS
+        // Max number of connections to a single host.
+
+        void
+        set_max_host_connections(long n);
+
+        std::expected<void, error>
+        try_set_max_host_connections(long n)
+            noexcept;
+
+
+        // CURLMOPT_MAX_TOTAL_CONNECTIONS
+        // Max simultaneously open connections.
+
+        void
+        set_max_total_connections(long n);
+
+        std::expected<void, error>
+        try_set_max_total_connections(long n)
+            noexcept;
+
+
+        // CURLMOPT_NETWORK_CHANGED
+        // Signal that the network has changed. TODO
+
+        // CURLMOPT_PIPELINING
+        // Enable HTTP multiplexing. TODO
+
+        // CURLMOPT_PUSHDATA
+        // Pointer to pass to push callback. TODO
+
+        // CURLMOPT_PUSHFUNCTION
+        // Callback that approves or denies server pushes. TODO
+
+        // CURLMOPT_SOCKETDATA
+        // Custom pointer passed to the socket callback. TODO
+
+        // CURLMOPT_SOCKETFUNCTION
+        // Callback informed about what to wait for. TODO
+
+        // CURLMOPT_TIMERDATA
+        // Custom pointer to pass to timer callback. TODO
+
+        // CURLMOPT_TIMERFUNCTION
+        // Callback to receive timeout values. TODO
+
+
     };
 
 

@@ -110,4 +110,85 @@ namespace curl {
         return running_handles;
     }
 
+
+    void
+    multi::set_max_connections(long n)
+    {
+        auto result = try_set_max_connections(n);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_max_connections(long n)
+        noexcept
+    {
+        auto e = curl_multi_setopt(raw, CURLMOPT_MAXCONNECTS, n);
+        if (e)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
+    void
+    multi::set_max_concurrent_streams(long n)
+    {
+        auto result = try_set_max_concurrent_streams(n);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_max_concurrent_streams(long n)
+        noexcept
+    {
+        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_CONCURRENT_STREAMS, n);
+        if (e)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
+    void
+    multi::set_max_host_connections(long n)
+    {
+        auto result = try_set_max_host_connections(n);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_max_host_connections(long n)
+        noexcept
+    {
+        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_HOST_CONNECTIONS, n);
+        if (e)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
+    void
+    multi::set_max_total_connections(long n)
+    {
+        auto result = try_set_max_total_connections(n);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_max_total_connections(long n)
+        noexcept
+    {
+        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_TOTAL_CONNECTIONS, n);
+        if (e)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
 } // namespace curl
