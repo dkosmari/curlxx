@@ -366,6 +366,28 @@ namespace curl {
 
 
     void
+    easy::set_ssl_verify_peer(bool enabled)
+    {
+        auto result = try_set_ssl_verify_peer(enabled);
+        if (!result)
+            throw result.error();
+    }
+
+
+    expected<void, error>
+    easy::try_set_ssl_verify_peer(bool enabled)
+        noexcept
+    {
+        auto e = curl_easy_setopt(raw,
+                                  CURLOPT_SSL_VERIFYPEER,
+                                  long{enabled});
+        if (e != CURLE_OK)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
+    void
     easy::set_read_function(std::function<read_function_t> fn)
     {
         auto result = try_set_read_function(std::move(fn));
@@ -387,28 +409,6 @@ namespace curl {
         if (e2 != CURLE_OK)
             return unexpected{error{e2}};
         state.read_callback = std::move(fn);
-        return {};
-    }
-
-
-    void
-    easy::set_ssl_verify_peer(bool enabled)
-    {
-        auto result = try_set_ssl_verify_peer(enabled);
-        if (!result)
-            throw result.error();
-    }
-
-
-    expected<void, error>
-    easy::try_set_ssl_verify_peer(bool enabled)
-        noexcept
-    {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_SSL_VERIFYPEER,
-                                  long{enabled});
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
         return {};
     }
 
@@ -436,16 +436,16 @@ namespace curl {
 
 
     void
-    easy::set_url()
+    easy::unset_url()
     {
-        auto result = try_set_url();
+        auto result = try_unset_url();
         if (!result)
             throw result.error();
     }
 
 
     expected<void, error>
-    easy::try_set_url()
+    easy::try_unset_url()
         noexcept
     {
         auto e = curl_easy_setopt(raw,
