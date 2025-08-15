@@ -55,7 +55,7 @@ namespace curl {
         try {
             if (!ez->state.read_callback)
                 return CURL_READFUNC_ABORT;
-            return ez->state.read_callback(buf, size);
+            return ez->state.read_callback({buf, size});
         }
         catch (std::exception& e) {
             cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
@@ -85,7 +85,7 @@ namespace curl {
         try {
             if (!ez->state.write_callback)
                 return CURL_WRITEFUNC_ERROR;
-            return ez->state.write_callback(buffer, size);
+            return ez->state.write_callback({buffer, size});
         }
         catch (std::exception& e) {
             cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;

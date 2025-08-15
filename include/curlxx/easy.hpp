@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <functional>
+#include <span>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -33,9 +34,8 @@ namespace curl {
 
         using base_type = detail::basic_wrapper<CURL*>;
 
-        using read_function_t = std::size_t(char*, std::size_t);
-
-        using write_function_t = std::size_t(const char*, std::size_t);
+        using read_function_t = std::size_t(std::span<char>);
+        using write_function_t = std::size_t(std::span<const char>);
 
         struct extra_state_type {
             std::vector<char> error_buffer;
