@@ -1114,14 +1114,16 @@ namespace curl {
         get_header(const std::string& name,
                    std::size_t index = 0,
                    unsigned origin = CURLH_HEADER,
-                   int request = -1);
+                   int request = -1)
+            const;
 
 
         std::expected<header, error>
         try_get_header(const std::string& name,
                        std::size_t index = 0,
                        unsigned origin = CURLH_HEADER,
-                       int request = -1) noexcept;
+                       int request = -1)
+            const noexcept;
 
 
         [[nodiscard]]

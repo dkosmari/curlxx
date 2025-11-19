@@ -522,6 +522,7 @@ namespace curl {
                      std::size_t index,
                      unsigned origin,
                      int request)
+        const
     {
         auto result = try_get_header(name, index, origin, request);
         if (!result)
@@ -535,7 +536,7 @@ namespace curl {
                          std::size_t index,
                          unsigned origin,
                          int request)
-        noexcept
+        const noexcept
     {
         curl_header* h = nullptr;
         auto e = curl_easy_header(raw,
