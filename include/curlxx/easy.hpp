@@ -9,6 +9,7 @@
 #define CURLXX_EASY_HPP
 
 #include <expected>
+#include <filesystem>
 #include <functional>
 #include <span>
 #include <string>
@@ -69,6 +70,12 @@ namespace curl {
                                 std::size_t,
                                 std::size_t size,
                                 CURL* handle)
+            noexcept;
+
+
+        template<typename T>
+        std::expected<void, error>
+        try_setopt(CURLoption opt, T&& arg)
             noexcept;
 
 
@@ -149,7 +156,14 @@ namespace curl {
 
 
         // CURLOPT_ABSTRACT_UNIX_SOCKET
-        // Path to an abstract Unix domain socket. TODO
+        // Path to an abstract Unix domain socket.
+        void
+        set_abstract_unix_socket(const std::filesystem::path& socket_path);
+
+        std::expected<void, error>
+        try_set_abstract_unix_socket(const std::filesystem::path& socket_path)
+            noexcept;
+
 
         // CURLOPT_ACCEPTTIMEOUT_MS
         // Timeout for waiting for the server's connect back to be accepted. TODO
@@ -440,6 +454,8 @@ namespace curl {
         std::expected<void, error>
         try_set_http_headers(const std::vector<std::string>& headers)
             noexcept;
+
+        // TODO: add append_headers too
 
 
         // CURLOPT_HTTPPROXYTUNNEL

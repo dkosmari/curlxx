@@ -98,6 +98,18 @@ namespace curl {
     }
 
 
+    template<typename T>
+    expected<void, error>
+    easy::try_setopt(CURLoption opt, T&& arg)
+        noexcept
+    {
+        auto e = curl_easy_setopt(raw, opt, arg);
+        if (e != CURLE_OK)
+            return unexpected{error{e}};
+        return {};
+    }
+
+
     easy::easy()
     {
         create();
@@ -287,6 +299,23 @@ namespace curl {
 
 
     void
+    easy::set_abstract_unix_socket(const std::filesystem::path& socket_path)
+    {
+        auto result = try_set_abstract_unix_socket(socket_path);
+        if (!result)
+            throw result.error();
+    }
+
+
+    expected<void, error>
+    easy::try_set_abstract_unix_socket(const std::filesystem::path& socket_path)
+        noexcept
+    {
+        return try_setopt(CURLOPT_ABSTRACT_UNIX_SOCKET, socket_path.c_str());
+    }
+
+
+    void
     easy::set_follow(bool enable)
     {
         auto result = try_set_follow(enable);
@@ -299,12 +328,7 @@ namespace curl {
     easy::try_set_follow(bool enable)
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_FOLLOWLOCATION,
-                                  long{enable});
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_FOLLOWLOCATION, long{enable});
     }
 
 
@@ -321,26 +345,16 @@ namespace curl {
     easy::try_set_forbid_reuse(bool forbid)
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_FORBID_REUSE,
-                                  long{forbid});
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_FORBID_REUSE, long{forbid});
     }
 
 
     void
     easy::set_http_headers(const std::vector<std::string>& headers)
     {
-        state.header_list.destroy();
-        for (auto& h : headers)
-            state.header_list.append(h);
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_HTTPHEADER,
-                                  state.header_list.data());
-        if (e != CURLE_OK)
-            throw error{e};
+        auto result = try_set_http_headers(headers);
+        if (!result)
+            throw result.error();
     }
 
 
@@ -352,11 +366,7 @@ namespace curl {
             state.header_list.destroy();
             for (auto& h : headers)
                 state.header_list.append(h);
-            auto e = curl_easy_setopt(raw,
-                                      CURLOPT_HTTPHEADER,
-                                      state.header_list.data());
-            if (e != CURLE_OK)
-                return unexpected{error{e}};
+            return try_setopt(CURLOPT_HTTPHEADER, state.header_list.data());
         }
         catch (std::bad_alloc&) {
             return unexpected{error{CURLE_OUT_OF_MEMORY}};
@@ -378,12 +388,7 @@ namespace curl {
     easy::try_set_ssl_verify_peer(bool enabled)
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_SSL_VERIFYPEER,
-                                  long{enabled});
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_SSL_VERIFYPEER, long{enabled});
     }
 
 
@@ -400,14 +405,14 @@ namespace curl {
     easy::try_set_read_function(std::function<read_function_t> fn)
         noexcept
     {
-        auto e1 = curl_easy_setopt(raw,
-                                   CURLOPT_READFUNCTION,
-                                   &dispatch_read_callback);
-        if (e1 != CURLE_OK)
-            return unexpected{error{e1}};
-        auto e2 = curl_easy_setopt(raw, CURLOPT_READDATA, raw);
-        if (e2 != CURLE_OK)
-            return unexpected{error{e2}};
+        auto data_res = try_setopt(CURLOPT_READDATA, raw);
+        if (!data_res)
+            return data_res;
+
+        auto func_res = try_setopt(CURLOPT_READFUNCTION, &dispatch_read_callback);
+        if (!func_res)
+            return func_res;
+
         state.read_callback = std::move(fn);
         return {};
     }
@@ -426,12 +431,7 @@ namespace curl {
     easy::try_set_url(const std::string& url)
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_URL,
-                                  url.data());
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_URL, url.data());
     }
 
 
@@ -448,12 +448,7 @@ namespace curl {
     easy::try_unset_url()
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_URL,
-                                  nullptr);
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_URL, nullptr);
     }
 
 
@@ -470,12 +465,7 @@ namespace curl {
     easy::try_set_user_agent(const std::string& ua)
         noexcept
     {
-        auto e = curl_easy_setopt(raw,
-                                  CURLOPT_USERAGENT,
-                                  ua.data());
-        if (e != CURLE_OK)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLOPT_USERAGENT, ua.data());
     }
 
 
@@ -483,9 +473,7 @@ namespace curl {
     easy::set_verbose(bool v)
         noexcept
     {
-         curl_easy_setopt(raw,
-                          CURLOPT_VERBOSE,
-                          long{v});
+        try_setopt(CURLOPT_VERBOSE, long{v});
     }
 
 
@@ -502,16 +490,14 @@ namespace curl {
     easy::try_set_write_function(std::function<write_function_t> fn)
         noexcept
     {
-        auto e1 = curl_easy_setopt(raw,
-                                   CURLOPT_WRITEFUNCTION,
-                                   &dispatch_write_callback);
-        if (e1 != CURLE_OK)
-            return unexpected{error{e1}};
-        auto e2 = curl_easy_setopt(raw,
-                                   CURLOPT_WRITEDATA,
-                                   raw);
-        if (e2 != CURLE_OK)
-            return unexpected{error{e2}};
+        auto data_res = try_setopt(CURLOPT_WRITEDATA, raw);
+        if (!data_res)
+            return data_res;
+
+        auto func_res = try_setopt(CURLOPT_WRITEFUNCTION, &dispatch_write_callback);
+        if (!func_res)
+            return func_res;
+
         state.write_callback = std::move(fn);
         return {};
     }
