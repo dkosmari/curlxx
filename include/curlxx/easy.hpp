@@ -8,6 +8,7 @@
 #ifndef CURLXX_EASY_HPP
 #define CURLXX_EASY_HPP
 
+#include <chrono>
 #include <expected>
 #include <filesystem>
 #include <functional>
@@ -43,6 +44,7 @@ namespace curl {
             std::function<read_function_t> read_callback;
             std::function<write_function_t> write_callback;
             slist header_list;
+            slist connect_to_list;
         };
 
         using state_type = std::tuple<raw_type, extra_state_type>;
@@ -155,8 +157,14 @@ namespace curl {
             noexcept;
 
 
+        /****************************
+         * Start of option setters. *
+         ****************************/
+
+
         // CURLOPT_ABSTRACT_UNIX_SOCKET
         // Path to an abstract Unix domain socket.
+
         void
         set_abstract_unix_socket(const std::filesystem::path& socket_path);
 
@@ -164,48 +172,189 @@ namespace curl {
         try_set_abstract_unix_socket(const std::filesystem::path& socket_path)
             noexcept;
 
+        void
+        unset_abstract_unix_socket()
+            noexcept;
+
 
         // CURLOPT_ACCEPTTIMEOUT_MS
-        // Timeout for waiting for the server's connect back to be accepted. TODO
+        // Timeout for waiting for the server's connect back to be accepted.
+
+        void
+        set_accept_timeout(std::chrono::milliseconds timeout);
+
+        std::expected<void, error>
+        try_set_accept_timeout(std::chrono::milliseconds timeout)
+            noexcept;
+
 
         // CURLOPT_ACCEPT_ENCODING
-        // Accept-Encoding and automatic decompressing data. TODO
+        // Accept-Encoding and automatic decompressing data.
+
+        void
+        set_accept_encoding(const std::string& enc);
+
+        std::expected<void, error>
+        try_set_accept_encoding(const std::string& enc)
+            noexcept;
+
+        void
+        unset_accept_encoding()
+            noexcept;
+
 
         // CURLOPT_ADDRESS_SCOPE
-        // IPv6 scope for local addresses. TODO
+        // IPv6 scope for local addresses.
+
+        void
+        set_address_scope(long scope_id);
+
+        std::expected<void, error>
+        try_set_address_scope(long scope_id)
+            noexcept;
+
 
         // CURLOPT_ALTSVC
-        // Specify the Alt-Svc: cache filename. TODO
+        // Specify the Alt-Svc: cache filename.
+
+        void
+        set_alt_svc(const std::filesystem::path& cache_file);
+
+        std::expected<void, error>
+        try_set_alt_svc(const std::filesystem::path& cache_file)
+            noexcept;
+
+        void
+        unset_alt_svc()
+            noexcept;
+
 
         // CURLOPT_ALTSVC_CTRL
-        // Enable and configure Alt-Svc: treatment. TODO
+        // Enable and configure Alt-Svc: treatment.
+
+        void
+        set_alt_svc_ctrl(long mask);
+
+        std::expected<void, error>
+        try_set_alt_svc_ctrl(long mask)
+            noexcept;
+
 
         // CURLOPT_APPEND
-        // Append to remote file. TODO
+        // Append to remote file.
+
+        void
+        set_append(bool enable);
+
+        std::expected<void, error>
+        try_set_append(bool enable)
+            noexcept;
+
 
         // CURLOPT_AUTOREFERER
-        // Automatically set Referer: header. TODO
+        // Automatically set Referer: header.
+
+        void
+        set_auto_referer(bool enable);
+
+        std::expected<void, error>
+        try_set_auto_referer(bool enable)
+            noexcept;
+
 
         // CURLOPT_AWS_SIGV4
-        // AWS HTTP V4 Signature. TODO
+        // AWS HTTP V4 Signature.
+
+        void
+        set_aws_sig_v4(const std::string& arg);
+
+        std::expected<void, error>
+        try_set_aws_sig_v4(const std::string& arg)
+            noexcept;
+
+        void
+        unset_aws_sig_v4()
+            noexcept;
+
 
         // CURLOPT_BUFFERSIZE
-        // Ask for alternate buffer size. TODO
+        // Ask for alternate buffer size.
+
+        void
+        set_buffer_size(long size);
+
+        std::expected<void, error>
+        try_set_buffer_size(long size)
+            noexcept;
+
 
         // CURLOPT_CAINFO
-        // CA cert bundle. TODO
+        // CA cert bundle.
+
+        void
+        set_ca_info(const std::filesystem::path& bundle_file);
+
+        std::expected<void, error>
+        try_set_ca_info(const std::filesystem::path& bundle_file)
+            noexcept;
+
+        void
+        unset_ca_info()
+            noexcept;
+
 
         // CURLOPT_CAINFO_BLOB
-        // CA cert bundle memory buffer. TODO
+        // CA cert bundle memory buffer.
+        // TODO: add some convenience wrappers for the blob
+
+        void
+        set_ca_info_blob(curl_blob* bundle);
+
+        std::expected<void, error>
+        try_set_ca_info_blob(curl_blob* bundle)
+            noexcept;
+
 
         // CURLOPT_CAPATH
-        // Path to CA cert bundle. TODO
+        // Path to CA cert bundle.
+
+        void
+        set_ca_path(const std::filesystem::path& bundle_dir);
+
+        std::expected<void, error>
+        try_set_ca_path(const std::filesystem::path& bundle_dir)
+            noexcept;
+
+        void
+        unset_ca_path()
+            noexcept;
+
 
         // CURLOPT_CA_CACHE_TIMEOUT
-        // Timeout for CA cache. TODO
+        // Timeout for CA cache.
+
+        void
+        set_ca_cache_timeout(std::chrono::seconds timeout);
+
+        std::expected<void, error>
+        try_set_ca_cache_timeout(std::chrono::seconds timeout)
+            noexcept;
+
+        void
+        unset_cache_timeout()
+            noexcept;
+
 
         // CURLOPT_CERTINFO
-        // Extract certificate info. TODO
+        // Extract certificate info.
+
+        void
+        set_cert_info(bool enable);
+
+        std::expected<void, error>
+        try_set_cert_info(bool enable)
+            noexcept;
+
 
         // CURLOPT_CHUNK_BGN_FUNCTION
         // Callback for wildcard download start of chunk. TODO
@@ -216,53 +365,194 @@ namespace curl {
         // CURLOPT_CHUNK_END_FUNCTION
         // Callback for wildcard download end of chunk. TODO
 
+
         // CURLOPT_CLOSESOCKETDATA
         // Data pointer to pass to the close socket callback. TODO
 
         // CURLOPT_CLOSESOCKETFUNCTION
         // Callback for closing socket. TODO
 
+
         // CURLOPT_CONNECTTIMEOUT
-        // Timeout for the connection phase. TODO
+        // Timeout for the connection phase.
+
+        void
+        set_connect_timeout(std::chrono::seconds timeout);
+
+        std::expected<void, error>
+        try_set_connect_timeout(std::chrono::seconds timeout)
+            noexcept;
+
 
         // CURLOPT_CONNECTTIMEOUT_MS
-        // Millisecond timeout for the connection phase. TODO
+        // Millisecond timeout for the connection phase.
+
+        void
+        set_connect_timeout(std::chrono::milliseconds timeout);
+
+        std::expected<void, error>
+        try_set_connect_timeout(std::chrono::milliseconds timeout)
+            noexcept;
+
 
         // CURLOPT_CONNECT_ONLY
-        // Only connect, nothing else. TODO
+        // Only connect, nothing else.
+
+        enum class connect_only : long {
+            disable = 0,
+            enable = 1,
+            websocket = 2,
+        };
+
+        void
+        set_connect_only(connect_only opt);
+
+        std::expected<void, error>
+        try_set_connect_only(connect_only opt)
+            noexcept;
+
 
         // CURLOPT_CONNECT_TO
-        // Connect to a specific host and port. TODO
+        // Connect to a specific host and port.
+
+        void
+        set_connect_to(const std::vector<std::string>& hosts);
+
+        std::expected<void, error>
+        try_set_connect_to(const std::vector<std::string>& hosts)
+            noexcept;
+
 
         // CURLOPT_COOKIE
-        // Cookie(s) to send. TODO
+        // Cookie(s) to send.
+
+        void
+        set_cookie(const std::string& cookie);
+
+        std::expected<void, error>
+        try_set_cookie(const std::string& cookie)
+            noexcept;
+
+        void
+        unset_cookie()
+            noexcept;
+
 
         // CURLOPT_COOKIEFILE
-        // File to read cookies from. TODO
+        // File to read cookies from.
+
+        void
+        set_cookie_file(const std::filesystem::path& cookie_file);
+
+        std::expected<void, error>
+        try_set_cookie_file(const std::filesystem::path& cookie_file)
+            noexcept;
+
+        void
+        unset_cookie_file()
+            noexcept;
+
 
         // CURLOPT_COOKIEJAR
-        // File to write cookies to. TODO
+        // File to write cookies to.
+
+        void
+        set_cookie_jar(const std::filesystem::path& jar_file);
+
+        std::expected<void, error>
+        try_set_cookie_jar(const std::filesystem::path& jar_file)
+            noexcept;
+
+        void
+        unset_cookie_jar()
+            noexcept;
+
 
         // CURLOPT_COOKIELIST
-        // Add or control cookies. TODO
+        // Add or control cookies.
+
+        void
+        set_cookie_list(const std::string& cookies);
+
+        std::expected<void, error>
+        try_set_cookie_list(const std::string& cookies)
+            noexcept;
+
+        void
+        unset_cookie_list()
+            noexcept;
+
 
         // CURLOPT_COOKIESESSION
-        // Start a new cookie session. TODO
+        // Start a new cookie session.
+
+        void
+        set_cookie_session(bool start_anew);
+
+        std::expected<void, error>
+        try_set_cookie_session(bool start_anew)
+            noexcept;
+
 
         // CURLOPT_COPYPOSTFIELDS
-        // Send a POST with this data - and copy it. TODO
+        // Send a POST with this data - and copy it.
+
+        void
+        set_copy_post_fields(const std::string& fields);
+
+        std::expected<void, error>
+        try_set_copy_post_fields(const std::string& fields)
+            noexcept;
+
+        void
+        unset_copy_post_fields()
+            noexcept;
+
 
         // CURLOPT_CRLF
-        // Convert newlines. TODO
+        // Convert newlines.
+
+        void
+        set_crlf(bool convert);
+
+        std::expected<void, error>
+        try_set_crlf(bool convert)
+            noexcept;
+
 
         // CURLOPT_CRLFILE
-        // Certificate Revocation List. TODO
+        // Certificate Revocation List.
+
+        void
+        set_crl_file(const std::filesystem::path& crl_file);
+
+        std::expected<void, error>
+        try_set_crl_file(const std::filesystem::path& crl_file)
+            noexcept;
+
+        void
+        unset_crl_file()
+            noexcept;
+
 
         // CURLOPT_CURLU
         // Set URL to work on with a URL handle. TODO
 
+
         // CURLOPT_CUSTOMREQUEST
-        // Custom request/method. TODO
+        // Custom request/method.
+
+        void
+        set_custom_request(const std::string& method);
+
+        std::expected<void, error>
+        try_set_custom_request(const std::string& method)
+            noexcept;
+
+        void
+        unset_custom_request()
+            noexcept;
+
 
         // CURLOPT_DEBUGDATA
         // Data pointer to pass to the debug callback. TODO
@@ -270,17 +560,51 @@ namespace curl {
         // CURLOPT_DEBUGFUNCTION
         // Callback for debug information. TODO
 
+
         // CURLOPT_DEFAULT_PROTOCOL
-        // Default protocol. TODO
+        // Default protocol.
+
+        void
+        set_default_protocol(const std::string& protocol);
+
+        std::expected<void, error>
+        try_set_default_protocol(const std::string& protocol)
+            noexcept;
+
+        void
+        unset_default_protocol()
+            noexcept;
+
 
         // CURLOPT_DIRLISTONLY
         // List only. TODO
 
+
         // CURLOPT_DISALLOW_USERNAME_IN_URL
-        // Do not allow username in URL. TODO
+        // Do not allow username in URL.
+
+        void
+        set_disallow_username_in_url(bool disallow);
+
+        std::expected<void, error>
+        try_set_disallow_username_in_url(bool disallow)
+            noexcept;
+
 
         // CURLOPT_DNS_CACHE_TIMEOUT
-        // Timeout for DNS cache. TODO
+        // Timeout for DNS cache.
+
+        void
+        set_dns_cache_timeout(std::chrono::seconds timeout);
+
+        std::expected<void, error>
+        try_set_dns_cache_timeout(std::chrono::seconds timeout)
+            noexcept;
+
+        void
+        unset_dns_cache_timeout()
+            noexcept;
+
 
         // CURLOPT_DNS_INTERFACE
         // Bind name resolves to this interface. TODO
@@ -321,8 +645,17 @@ namespace curl {
         // CURLOPT_FAILONERROR
         // Fail on HTTP 4xx errors. CURLOPT_FAILONERROR
 
+
         // CURLOPT_FILETIME
-        // Request file modification date and time. TODO
+        // Request file modification date and time.
+
+        void
+        set_file_time(bool enable);
+
+        std::expected<void, error>
+        try_set_file_time(bool enable)
+            noexcept;
+
 
         // CURLOPT_FNMATCH_DATA
         // Data pointer to pass to the wildcard matching callback. TODO
@@ -335,10 +668,10 @@ namespace curl {
         // Follow HTTP redirects.
 
         void
-        set_follow(bool enable = true);
+        set_follow_location(bool enable);
 
         std::expected<void, error>
-        try_set_follow(bool enable = true)
+        try_set_follow_location(bool enable)
             noexcept;
 
 
@@ -346,16 +679,24 @@ namespace curl {
         // Prevent subsequent connections from reusing this.
 
         void
-        set_forbid_reuse(bool forbid = true);
+        set_forbid_reuse(bool forbid);
 
         std::expected<void, error>
-        try_set_forbid_reuse(bool forbid = true)
+        try_set_forbid_reuse(bool forbid)
             noexcept;
 
 
 
         // CURLOPT_FRESH_CONNECT
         // Use a new connection. CURLOPT_FRESH_CONNECT
+
+        void
+        set_fresh_connect(bool enable);
+
+        std::expected<void, error>
+        try_set_fresh_connect(bool enable)
+            noexcept;
+
 
         // CURLOPT_FTPPORT
         // Use active FTP. TODO
@@ -393,8 +734,17 @@ namespace curl {
         // CURLOPT_GSSAPI_DELEGATION
         // Disable GSS-API delegation. TODO
 
+
         // CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
-        // Timeout for happy eyeballs. TODO
+        // Timeout for happy eyeballs.
+
+        void
+        set_happy_eyeballs_timeout(std::chrono::milliseconds timeout);
+
+        std::expected<void, error>
+        try_set_happy_eyeballs_timeout(std::chrono::milliseconds timeout)
+            noexcept;
+
 
         // CURLOPT_HAPROXYPROTOCOL
         // Send an HAProxy PROXY protocol v1 header. TODO
@@ -411,8 +761,17 @@ namespace curl {
         // CURLOPT_HEADERFUNCTION
         // Callback for writing received headers. TODO
 
+
         // CURLOPT_HEADEROPT
-        // Control custom headers. TODO
+        // Control custom headers.
+
+        void
+        set_header_opt(long mask);
+
+        std::expected<void, error>
+        try_set_header_opt(long mask)
+            noexcept;
+
 
         // CURLOPT_HSTS
         // Set HSTS cache file. TODO
@@ -438,11 +797,27 @@ namespace curl {
         // CURLOPT_HTTP200ALIASES
         // Alternative versions of 200 OK. TODO
 
+
         // CURLOPT_HTTPAUTH
-        // HTTP server authentication methods. TODO
+        // HTTP server authentication methods.
+
+        void
+        set_http_auth(long mask);
+
+        std::expected<void, error>
+        try_set_http_auth(long mask)
+            noexcept;
+
 
         // CURLOPT_HTTPGET
-        // Do an HTTP GET request. TODO
+        // Do an HTTP GET request.
+
+        void
+        set_http_get(bool use_get);
+
+        std::expected<void, error>
+        try_set_http_get(bool use_get)
+            noexcept;
 
 
         // CURLOPT_HTTPHEADER
@@ -459,7 +834,7 @@ namespace curl {
 
 
         // CURLOPT_HTTPPROXYTUNNEL
-        // Tunnel through the HTTP proxy. CURLOPT_HTTPPROXYTUNNEL
+        // Tunnel through the HTTP proxy. TODO
 
         // CURLOPT_HTTP_CONTENT_DECODING
         // Disable Content decoding. TODO
@@ -467,17 +842,48 @@ namespace curl {
         // CURLOPT_HTTP_TRANSFER_DECODING
         // Disable Transfer decoding. TODO
 
+
         // CURLOPT_HTTP_VERSION
-        // HTTP version to use. CURLOPT_HTTP_VERSION
+        // HTTP version to use.
+
+        enum class http_version : long {
+            none                = CURL_HTTP_VERSION_NONE,
+            v_1_0               = CURL_HTTP_VERSION_1_0,
+            v_1_1               = CURL_HTTP_VERSION_1_1,
+            v_2_0               = CURL_HTTP_VERSION_2_0,
+            v_2tls              = CURL_HTTP_VERSION_2TLS,
+            v_2_prior_knowledge = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
+            v_3                 = CURL_HTTP_VERSION_3,
+            v_3_only            = CURL_HTTP_VERSION_3ONLY,
+        };
+
+        void
+        set_http_version(http_version ver);
+
+        std::expected<void, error>
+        try_set_http_version(http_version ver)
+            noexcept;
+
 
         // CURLOPT_IGNORE_CONTENT_LENGTH
         // Ignore Content-Length. TODO
 
-        // CURLOPT_INFILESIZE
-        // Size of file to send. CURLOPT_INFILESIZE
 
+        // CURLOPT_INFILESIZE
         // CURLOPT_INFILESIZE_LARGE
-        // Size of file to send. CURLOPT_INFILESIZE_LARGE
+        // Size of file to send.
+
+        void
+        set_input_file_size(curl_off_t size);
+
+        std::expected<void, error>
+        try_set_input_file_size(curl_off_t size)
+            noexcept;
+
+        void
+        unset_input_file_size()
+            noexcept;
+
 
         // CURLOPT_INTERFACE
         // Bind connection locally to this. TODO
@@ -498,7 +904,7 @@ namespace curl {
         // Issuer certificate memory buffer. TODO
 
         // CURLOPT_KEEP_SENDING_ON_ERROR
-        // Keep sending on HTTP >= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR
+        // Keep sending on HTTP >= 300 errors. TODO
 
         // CURLOPT_KEYPASSWD
         // Client key password. TODO
@@ -515,11 +921,28 @@ namespace curl {
         // CURLOPT_LOGIN_OPTIONS
         // Login options. TODO
 
+
         // CURLOPT_LOW_SPEED_LIMIT
-        // Low speed limit to abort transfer. TODO
+        // Low speed limit to abort transfer.
+
+        void
+        set_low_speed_limit(long limit);
+
+        std::expected<void, error>
+        try_set_low_speed_limit(long limit)
+            noexcept;
+
 
         // CURLOPT_LOW_SPEED_TIME
-        // Time to be below the speed to trigger low speed abort. TODO
+        // Time to be below the speed to trigger low speed abort.
+
+        void
+        set_low_speed_time(std::chrono::seconds time);
+
+        std::expected<void, error>
+        try_set_low_speed_time(std::chrono::seconds time)
+            noexcept;
+
 
         // CURLOPT_MAIL_AUTH
         // Authentication address. TODO
@@ -533,17 +956,40 @@ namespace curl {
         // CURLOPT_MAIL_RCPT_ALLOWFAILS
         // Allow RCPT TO command to fail for some recipients. TODO
 
+
         // CURLOPT_MAXAGE_CONN
-        // Limit the age (idle time) of connections for reuse. TODO
+        // Limit the age (idle time) of connections for reuse.
+
+        void
+        set_max_age_conn(std::chrono::seconds age);
+
+        std::expected<void, error>
+        try_set_max_age_conn(std::chrono::seconds age)
+            noexcept;
+
 
         // CURLOPT_MAXCONNECTS
-        // Maximum number of connections in the connection pool. TODO
+        // Maximum number of connections in the connection pool.
+
+        void
+        set_max_connects(long amount);
+
+        std::expected<void, error>
+        try_set_max_connects(long amount)
+            noexcept;
+
 
         // CURLOPT_MAXFILESIZE
-        // Maximum file size to get. TODO
-
         // CURLOPT_MAXFILESIZE_LARGE
-        // Maximum file size to get. TODO
+        // Maximum file size to get.
+
+        void
+        set_max_file_size(curl_off_t size);
+
+        std::expected<void, error>
+        try_set_max_file_size(curl_off_t size)
+            noexcept;
+
 
         // CURLOPT_MAXLIFETIME_CONN
         // Limit the age (since creation) of connections for reuse. TODO
@@ -582,7 +1028,7 @@ namespace curl {
         // Shut off the progress meter. TODO
 
         // CURLOPT_NOPROXY
-        // Filter out hosts from proxy use. CURLOPT_NOPROXY
+        // Filter out hosts from proxy use. TODO
 
         // CURLOPT_NOSIGNAL
         // Do not install signal handlers. TODO
@@ -693,7 +1139,7 @@ namespace curl {
         // Set the proxy's pinned SSL public key. TODO
 
         // CURLOPT_PROXY_SERVICE_NAME
-        // Proxy authentication service name. CURLOPT_PROXY_SERVICE_NAME
+        // Proxy authentication service name. TODO
 
         // CURLOPT_PROXY_SSLCERT
         // Proxy client cert. TODO
@@ -728,14 +1174,6 @@ namespace curl {
 
         // CURLOPT_PROXY_SSL_VERIFYPEER
         // Verify the proxy SSL certificate.
-
-        void
-        set_ssl_verify_peer(bool enabled);
-
-        std::expected<void, error>
-        try_set_ssl_verify_peer(bool enabled)
-            noexcept;
-
 
         // CURLOPT_PROXY_TLS13_CIPHERS
         // Proxy TLS 1.3 cipher suites to use. TODO
@@ -783,7 +1221,7 @@ namespace curl {
         // Referer: header. TODO
 
         // CURLOPT_REQUEST_TARGET
-        // Set the request target. CURLOPT_REQUEST_TARGET
+        // Set the request target. TODO
 
         // CURLOPT_RESOLVE
         // Provide fixed/fake name resolves. TODO
@@ -837,7 +1275,7 @@ namespace curl {
         // Timeout for server responses. TODO
 
         // CURLOPT_SERVICE_NAME
-        // Authentication service name. CURLOPT_SERVICE_NAME
+        // Authentication service name. TODO
 
         // CURLOPT_SHARE
         // Share object to use. TODO
@@ -938,14 +1376,39 @@ namespace curl {
         // CURLOPT_SSL_SIGNATURE_ALGORITHMS
         // TLS signature algorithms to use. TODO
 
+
         // CURLOPT_SSL_VERIFYHOST
-        // Verify the hostname in the SSL certificate. TODO
+        // Verify the hostname in the SSL certificate.
+
+        void
+        set_ssl_verify_host(bool enable);
+
+        std::expected<void, error>
+        try_set_ssl_verify_host(bool enable)
+            noexcept;
+
 
         // CURLOPT_SSL_VERIFYPEER
-        // Verify the SSL certificate. TODO
+        // Verify the SSL certificate.
+
+        void
+        set_ssl_verify_peer(bool enable);
+
+        std::expected<void, error>
+        try_set_ssl_verify_peer(bool enable)
+            noexcept;
+
 
         // CURLOPT_SSL_VERIFYSTATUS
-        // Verify the SSL certificate's status. TODO
+        // Verify the SSL certificate's status.
+
+        void
+        set_ssl_verify_status(bool enable);
+
+        std::expected<void, error>
+        try_set_ssl_verify_status(bool enable)
+            noexcept;
+
 
         // CURLOPT_STDERR
         // Redirect stderr to another stream. TODO
@@ -965,20 +1428,65 @@ namespace curl {
         // CURLOPT_TCP_FASTOPEN
         // Enable TCP Fast Open. TODO
 
+
         // CURLOPT_TCP_KEEPALIVE
-        // Enable TCP keep-alive. TODO
+        // Enable TCP keep-alive.
+
+        void
+        set_tcp_keep_alive(bool enable);
+
+        std::expected<void, error>
+        try_set_tcp_keep_alive(bool enable)
+            noexcept;
+
+
+#if CURL_AT_LEAST_VERSION(8, 9, 0)
 
         // CURLOPT_TCP_KEEPCNT
-        // Maximum number of keep-alive probes. TODO
+        // Maximum number of keep-alive probes.
+
+        void
+        set_tcp_keep_cnt(long count);
+
+        std::expected<void, error>
+        try_set_tcp_keep_cnt(long count)
+            noexcept;
+
+#endif
+
 
         // CURLOPT_TCP_KEEPIDLE
-        // Idle time before sending keep-alive. TODO
+        // Idle time before sending keep-alive.
+
+        void
+        set_tcp_keep_idle(std::chrono::seconds delay);
+
+        std::expected<void, error>
+        try_set_tcp_keep_idle(std::chrono::seconds delay)
+            noexcept;
+
 
         // CURLOPT_TCP_KEEPINTVL
-        // Interval between keep-alive probes. TODO
+        // Interval between keep-alive probes.
+
+        void
+        set_tcp_keep_intvl(std::chrono::seconds interval);
+
+        std::expected<void, error>
+        try_set_tcp_keep_intvl(std::chrono::seconds interval)
+            noexcept;
+
 
         // CURLOPT_TCP_NODELAY
-        // Disable the Nagle algorithm. TODO
+        // Disable the Nagle algorithm.
+
+        void
+        set_tcp_no_delay(bool no_delay);
+
+        std::expected<void, error>
+        try_set_tcp_no_delay(bool no_delay)
+            noexcept;
+
 
         // CURLOPT_TELNETOPTIONS
         // TELNET options. TODO
@@ -992,11 +1500,28 @@ namespace curl {
         // CURLOPT_TIMECONDITION
         // Make a time conditional request. TODO
 
+
         // CURLOPT_TIMEOUT
-        // Timeout for the entire request. TODO
+        // Timeout for the entire request.
+
+        void
+        set_timeout(std::chrono::seconds timeout);
+
+        std::expected<void, error>
+        try_set_timeout(std::chrono::seconds timeout)
+            noexcept;
+
 
         // CURLOPT_TIMEOUT_MS
-        // Millisecond timeout for the entire request. TODO
+        // Millisecond timeout for the entire request.
+
+        void
+        set_timeout(std::chrono::milliseconds timeout);
+
+        std::expected<void, error>
+        try_set_timeout(std::chrono::milliseconds timeout)
+            noexcept;
+
 
         // CURLOPT_TIMEVALUE
         // Time value for the time conditional request. TODO
@@ -1022,17 +1547,34 @@ namespace curl {
         // CURLOPT_TRAILERFUNCTION
         // Set callback for sending trailing headers. TODO
 
+
         // CURLOPT_TRANSFERTEXT
-        // Use text transfer. TODO
+        // Use text transfer.
+
+        void
+        set_transfer_text(bool enable);
+
+        std::expected<void, error>
+        try_set_transfer_text(bool enable)
+            noexcept;
+
 
         // CURLOPT_TRANSFER_ENCODING
-        // Request Transfer-Encoding. TODO
+        // Request Transfer-Encoding.
+
+        void
+        set_transfer_encoding(bool enable);
+
+        std::expected<void, error>
+        try_set_transfer_encoding(bool enable)
+            noexcept;
+
 
         // CURLOPT_UNIX_SOCKET_PATH
         // Path to a Unix domain socket. TODO
 
         // CURLOPT_UNRESTRICTED_AUTH
-        // Do not restrict authentication to original host. CURLOPT_UNRESTRICTED_AUTH
+        // Do not restrict authentication to original host. TODO
 
         // CURLOPT_UPKEEP_INTERVAL_MS
         // Sets the interval at which connection upkeep are performed. TODO
@@ -1058,10 +1600,7 @@ namespace curl {
             noexcept;
 
         void
-        unset_url();
-
-        std::expected<void, error>
-        try_unset_url()
+        unset_url()
             noexcept;
 
 
@@ -1075,6 +1614,9 @@ namespace curl {
         try_set_user_agent(const std::string& ua)
             noexcept;
 
+        void
+        unset_user_agent()
+            noexcept;
 
 
         // CURLOPT_USERNAME
@@ -1083,15 +1625,30 @@ namespace curl {
         // CURLOPT_USERPWD
         // Username and password. TODO
 
+
         // CURLOPT_USE_SSL
-        // Use TLS/SSL. TODO
+        // Use TLS/SSL.
+
+        enum class ssl_level : long {
+            none = CURLUSESSL_NONE ,
+            optional = CURLUSESSL_TRY,
+            control = CURLUSESSL_CONTROL,
+            all = CURLUSESSL_ALL,
+        };
+
+        void
+        set_use_ssl(ssl_level level);
+
+        std::expected<void, error>
+        try_set_use_ssl(ssl_level level)
+            noexcept;
 
 
         // CURLOPT_VERBOSE
         // Display verbose information.
 
         void
-        set_verbose(bool v = true)
+        set_verbose(bool v)
             noexcept;
 
 
@@ -1114,7 +1671,15 @@ namespace curl {
 
 
         // CURLOPT_WS_OPTIONS
-        // Set WebSocket options. TODO
+        // Set WebSocket options.
+
+        void
+        set_ws_options(long mask);
+
+        std::expected<void, error>
+        try_set_ws_options(long mask)
+            noexcept;
+
 
         // CURLOPT_XFERINFODATA
         // Data pointer to pass to the progress meter callback. TODO
@@ -1124,6 +1689,233 @@ namespace curl {
 
         // CURLOPT_XOAUTH2_BEARER
         // OAuth2 bearer token. TODO
+
+
+        /**************************
+         * End of option setters. *
+         **************************/
+
+
+        /**************************
+         * Start of info getters. *
+         **************************/
+
+
+        /*
+          TODO
+
+          CURLINFO_ACTIVESOCKET
+          The session's active socket. See CURLINFO_ACTIVESOCKET
+
+          CURLINFO_APPCONNECT_TIME
+          The time it took from the start until the SSL connect/handshake with the remote host was completed as a double in number of seconds.
+
+          CURLINFO_APPCONNECT_TIME_T
+          The time it took from the start until the SSL connect/handshake with the remote host was completed in number of microseconds. (Added in 7.60.0) See CURLINFO_APPCONNECT_TIME_T
+
+          CURLINFO_CAINFO
+          Get the default value for CURLOPT_CAINFO. See CURLINFO_CAINFO
+
+          CURLINFO_CAPATH
+          Get the default value for CURLOPT_CAPATH. See CURLINFO_CAPATH
+
+          CURLINFO_CERTINFO
+          Certificate chain. See CURLINFO_CERTINFO
+
+          CURLINFO_CONDITION_UNMET
+          Whether or not a time conditional was met or 304 HTTP response. See CURLINFO_CONDITION_UNMET
+
+          CURLINFO_CONNECT_TIME
+          The time it took from the start until the connect to the remote host (or proxy) was completed. As a double. See CURLINFO_CONNECT_TIME
+
+          CURLINFO_CONNECT_TIME_T
+          The time it took from the start until the connect to the remote host (or proxy) was completed. In microseconds. See CURLINFO_CONNECT_TIME_T.
+
+          CURLINFO_CONN_ID
+          The ID of the last connection used by the transfer. (Added in 8.2.0) See CURLINFO_CONN_ID
+
+          CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
+          Content length from the Content-Length header. See CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
+
+          CURLINFO_CONTENT_LENGTH_UPLOAD_T
+          Upload size. See CURLINFO_CONTENT_LENGTH_UPLOAD_T
+
+          CURLINFO_CONTENT_TYPE
+          Content type from the Content-Type: header. We recommend using curl_easy_header instead. See CURLINFO_CONTENT_TYPE
+
+          CURLINFO_COOKIELIST
+          List of all known cookies. See CURLINFO_COOKIELIST
+
+          CURLINFO_EARLYDATA_SENT_T
+          Amount of TLS early data sent (in number of bytes) when CURLSSLOPT_EARLYDATA is enabled.
+
+          CURLINFO_EFFECTIVE_METHOD
+          Last used HTTP method. See CURLINFO_EFFECTIVE_METHOD
+
+          CURLINFO_EFFECTIVE_URL
+          Last used URL. See CURLINFO_EFFECTIVE_URL
+
+          CURLINFO_FILETIME
+          Remote time of the retrieved document. See CURLINFO_FILETIME
+
+          CURLINFO_FILETIME_T
+          Remote time of the retrieved document. See CURLINFO_FILETIME_T
+
+          CURLINFO_FTP_ENTRY_PATH
+          The entry path after logging in to an FTP server. See CURLINFO_FTP_ENTRY_PATH
+
+          CURLINFO_HEADER_SIZE
+          Number of bytes of all headers received. See CURLINFO_HEADER_SIZE
+
+          CURLINFO_HTTPAUTH_AVAIL
+          Available HTTP authentication methods. See CURLINFO_HTTPAUTH_AVAIL
+
+          CURLINFO_HTTPAUTH_USED
+          Used HTTP authentication method. See CURLINFO_HTTPAUTH_USED
+
+          CURLINFO_HTTP_CONNECTCODE
+          Last proxy CONNECT response code. See CURLINFO_HTTP_CONNECTCODE
+
+          CURLINFO_HTTP_VERSION
+          The http version used in the connection. See CURLINFO_HTTP_VERSION
+
+          CURLINFO_LOCAL_IP
+          Source IP address of the last connection. See CURLINFO_LOCAL_IP
+
+          CURLINFO_LOCAL_PORT
+          Source port number of the last connection. See CURLINFO_LOCAL_PORT
+
+          CURLINFO_NAMELOOKUP_TIME
+          Time from start until name resolving completed as a double. See CURLINFO_NAMELOOKUP_TIME
+
+          CURLINFO_NAMELOOKUP_TIME_T
+          Time from start until name resolving completed in number of microseconds. See CURLINFO_NAMELOOKUP_TIME_T
+
+          CURLINFO_NUM_CONNECTS
+          Number of new successful connections used for previous transfer. See CURLINFO_NUM_CONNECTS
+
+          CURLINFO_OS_ERRNO
+          The errno from the last failure to connect. See CURLINFO_OS_ERRNO
+
+          CURLINFO_POSTTRANSFER_TIME_T
+          The time it took from the start until the last byte is sent by libcurl. In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T
+
+          CURLINFO_PRETRANSFER_TIME
+          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. See CURLINFO_PRETRANSFER_TIME
+
+          CURLINFO_PRETRANSFER_TIME_T
+          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. In microseconds. See CURLINFO_PRETRANSFER_TIME_T
+
+          CURLINFO_PRIMARY_IP
+          Destination IP address of the last connection. See CURLINFO_PRIMARY_IP
+
+          CURLINFO_PRIMARY_PORT
+          Destination port of the last connection. See CURLINFO_PRIMARY_PORT
+
+          CURLINFO_PRIVATE
+          User's private data pointer. See CURLINFO_PRIVATE
+
+          CURLINFO_PROXYAUTH_AVAIL
+          Available HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_AVAIL
+
+          CURLINFO_PROXYAUTH_USED
+          Used HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_USED
+
+          CURLINFO_PROXY_ERROR
+          Detailed proxy error. See CURLINFO_PROXY_ERROR
+
+          CURLINFO_PROXY_SSL_VERIFYRESULT
+          Proxy certificate verification result. See CURLINFO_PROXY_SSL_VERIFYRESULT
+
+          CURLINFO_QUEUE_TIME_T
+          The time during which the transfer was held in a waiting queue before it could start for real in number of microseconds. (Added in 8.6.0) See CURLINFO_QUEUE_TIME_T
+
+          CURLINFO_REDIRECT_COUNT
+          Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT
+
+          CURLINFO_REDIRECT_TIME
+          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. As a double. See CURLINFO_REDIRECT_TIME
+
+          CURLINFO_REDIRECT_TIME_T
+          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. In number of microseconds. See CURLINFO_REDIRECT_TIME_T
+
+          CURLINFO_REDIRECT_URL
+          URL a redirect would take you to, had you enabled redirects. See CURLINFO_REDIRECT_URL
+
+          CURLINFO_REFERER
+          Referrer header. See CURLINFO_REFERER
+
+          CURLINFO_REQUEST_SIZE
+          Number of bytes sent in the issued HTTP requests. See CURLINFO_REQUEST_SIZE
+
+          CURLINFO_RESPONSE_CODE
+          Last received response code. See CURLINFO_RESPONSE_CODE
+
+          CURLINFO_RETRY_AFTER
+          The value from the Retry-After header. See CURLINFO_RETRY_AFTER
+
+          CURLINFO_RTSP_CLIENT_CSEQ
+          The RTSP client CSeq that is expected next. See CURLINFO_RTSP_CLIENT_CSEQ
+
+          CURLINFO_RTSP_CSEQ_RECV
+          RTSP CSeq last received. See CURLINFO_RTSP_CSEQ_RECV
+
+          CURLINFO_RTSP_SERVER_CSEQ
+          The RTSP server CSeq that is expected next. See CURLINFO_RTSP_SERVER_CSEQ
+
+          CURLINFO_RTSP_SESSION_ID
+          RTSP session ID. See CURLINFO_RTSP_SESSION_ID
+
+          CURLINFO_SCHEME
+          The scheme used for the connection. See CURLINFO_SCHEME
+
+          CURLINFO_SIZE_DOWNLOAD_T
+          Number of bytes downloaded. See CURLINFO_SIZE_DOWNLOAD_T
+
+          CURLINFO_SIZE_UPLOAD_T
+          Number of bytes uploaded. See CURLINFO_SIZE_UPLOAD_T
+
+          CURLINFO_SPEED_DOWNLOAD_T
+          Average download speed. See CURLINFO_SPEED_DOWNLOAD_T
+
+          CURLINFO_SPEED_UPLOAD_T
+          Average upload speed in number of bytes per second. See CURLINFO_SPEED_UPLOAD_T
+
+          CURLINFO_SSL_ENGINES
+          A list of OpenSSL crypto engines. See CURLINFO_SSL_ENGINES
+
+          CURLINFO_SSL_VERIFYRESULT
+          Certificate verification result. See CURLINFO_SSL_VERIFYRESULT
+
+          CURLINFO_STARTTRANSFER_TIME
+          The time it took from the start until the first byte is received by libcurl. As a double. See CURLINFO_STARTTRANSFER_TIME
+
+          CURLINFO_STARTTRANSFER_TIME_T
+          The time it took from the start until the first byte is received by libcurl. In microseconds. See CURLINFO_STARTTRANSFER_TIME_T
+
+          CURLINFO_TLS_SESSION
+          (Deprecated) TLS session info that can be used for further processing. See CURLINFO_TLS_SESSION. Use CURLINFO_TLS_SSL_PTR instead.
+
+          CURLINFO_TLS_SSL_PTR
+          TLS session info that can be used for further processing. See CURLINFO_TLS_SSL_PTR
+
+          CURLINFO_TOTAL_TIME
+          Total time of previous transfer. See CURLINFO_TOTAL_TIME
+
+          CURLINFO_TOTAL_TIME_T
+          Total time of previous transfer. See CURLINFO_TOTAL_TIME_T
+
+          CURLINFO_USED_PROXY
+          Whether the proxy was used (Added in 8.7.0). See CURLINFO_USED_PROXY
+
+          CURLINFO_XFER_ID
+          The ID of the transfer. (Added in 8.2.0) See CURLINFO_XFER_ID
+        */
+
+
+        /************************
+         * End of info getters. *
+         ************************/
 
 
         header
