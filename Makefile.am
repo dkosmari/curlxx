@@ -26,10 +26,10 @@ curlxx_HEADERS = \
 curlxxdir = $(includedir)/curlxx
 
 
-lib_LIBRARIES = libcurlxx.a
+lib_LTLIBRARIES = lib/libcurlxx.la
 
 
-libcurlxx_a_SOURCES = \
+lib_libcurlxx_la_SOURCES = \
 	src/curl.cpp \
 	src/easy.cpp \
 	src/error.cpp \
