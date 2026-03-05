@@ -1,6 +1,6 @@
 /*
  * curlxx - A C++ wrapper for libcurl.
- * Copyright 2025  Daniel K. O. (dkosmari)
+ * Copyright 2025-2026  Daniel K. O. (dkosmari)
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
@@ -12,6 +12,7 @@
 #include "error.hpp"
 #include "escape.hpp"
 #include "header.hpp"
+#include "global.hpp"
 #include "multi.hpp"
 #include "slist.hpp"
 
