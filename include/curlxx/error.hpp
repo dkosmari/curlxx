@@ -16,7 +16,6 @@
 
 namespace curl {
 
-
     std::string
     to_string(CURLcode code);
 
@@ -41,6 +40,8 @@ namespace curl {
         error(CURLMcode code);
 
         error(CURLHcode code);
+
+        error(CURLsslset code);
 
     };
 

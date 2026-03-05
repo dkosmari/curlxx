@@ -19,6 +19,7 @@ curlxx_HEADERS = \
 	include/curlxx/easy.hpp \
 	include/curlxx/error.hpp \
 	include/curlxx/escape.hpp \
+	include/curlxx/global.hpp \
 	include/curlxx/header.hpp \
 	include/curlxx/multi.hpp \
 	include/curlxx/slist.hpp
@@ -34,6 +35,7 @@ lib_libcurlxx_la_SOURCES = \
 	src/easy.cpp \
 	src/error.cpp \
 	src/escape.cpp \
+	src/global.cpp \
 	src/header.cpp \
 	src/multi.cpp \
 	src/slist.cpp

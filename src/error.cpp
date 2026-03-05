@@ -54,6 +54,24 @@ namespace curl {
     }
 
 
+    string
+    to_string(CURLsslset code)
+    {
+        switch (code) {
+            case CURLSSLSET_OK:
+                return "no error";
+            case CURLSSLSET_UNKNOWN_BACKEND:
+                return "unknown SSL backend";
+            case CURLSSLSET_TOO_LATE:
+                return "SSL backend set too late";
+            case CURLSSLSET_NO_BACKENDS:
+                return "no SSL backends";
+            default:
+                return "invalid";
+        }
+    }
+
+
     error::error(const char* msg) :
         runtime_error{msg}
     {}
@@ -75,6 +93,11 @@ namespace curl {
 
 
     error::error(CURLHcode code) :
+        runtime_error{to_string(code)}
+    {}
+
+
+    error::error(CURLsslset code) :
         runtime_error{to_string(code)}
     {}
 
