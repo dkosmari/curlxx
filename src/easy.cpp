@@ -1274,6 +1274,48 @@ namespace curl {
 
 
     void
+    easy::set_mime_post(mime& data)
+    {
+        auto result = try_set_mime_post(data);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_mime_post(mime& data)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MIMEPOST, data.data());
+    }
+
+
+    void
+    easy::unset_mime_post()
+        noexcept
+    {
+        try_setopt(CURLOPT_MIMEPOST, nullptr);
+    }
+
+
+    void
+    easy::set_mime_options(long options)
+    {
+        auto result = try_set_mime_options(options);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_mime_options(long options)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MIME_OPTIONS, options);
+    }
+
+
+    void
     easy::set_post(bool enable)
     {
         auto result = try_set_post(enable);

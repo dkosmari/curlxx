@@ -13,6 +13,7 @@
 #include "escape.hpp"
 #include "header.hpp"
 #include "global.hpp"
+#include "mime.hpp"
 #include "multi.hpp"
 #include "slist.hpp"
 

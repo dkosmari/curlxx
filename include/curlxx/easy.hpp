@@ -22,6 +22,7 @@
 #include "basic_wrapper.hpp"
 #include "error.hpp"
 #include "header.hpp"
+#include "mime.hpp"
 #include "slist.hpp"
 
 
@@ -1061,11 +1062,32 @@ namespace curl {
         // CURLOPT_MAX_SEND_SPEED_LARGE
         // Cap the upload speed to this. TODO
 
+
         // CURLOPT_MIMEPOST
-        // Post/send MIME data. TODO
+        // Post/send MIME data.
+
+        void
+        set_mime_post(mime& data);
+
+        std::expected<void, error>
+        try_set_mime_post(mime& data)
+            noexcept;
+
+        void
+        unset_mime_post()
+            noexcept;
+
 
         // CURLOPT_MIME_OPTIONS
-        // Set MIME option flags. TODO
+        // Set MIME option flags.
+
+        void
+        set_mime_options(long options);
+
+        std::expected<void, error>
+        try_set_mime_options(long options)
+            noexcept;
+
 
         // CURLOPT_NETRC
         // Enable .netrc parsing. TODO

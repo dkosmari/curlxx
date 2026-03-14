@@ -21,7 +21,9 @@ curlxx_HEADERS = \
 	include/curlxx/escape.hpp \
 	include/curlxx/global.hpp \
 	include/curlxx/header.hpp \
+	include/curlxx/mime.hpp \
 	include/curlxx/multi.hpp \
+	include/curlxx/owner_wrapper.hpp \
 	include/curlxx/slist.hpp
 
 curlxxdir = $(includedir)/curlxx
@@ -37,6 +39,7 @@ lib_libcurlxx_la_SOURCES = \
 	src/escape.cpp \
 	src/global.cpp \
 	src/header.cpp \
+	src/mime.cpp \
 	src/multi.cpp \
 	src/slist.cpp
 

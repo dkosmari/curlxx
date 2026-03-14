@@ -8,12 +8,12 @@
  *   SPDX-License-Identifier: LGPL-3.0-or-later
  *   SPDX-License-Identifier: MIT
  *   SPDX-License-Identifier: Zlib
-*/
+ *
+ * Source: https://github.com/dkosmari/basic_wrapper
+ */
 
 #ifndef CURLXX_DETAIL_BASIC_WRAPPER_HPP
 #define CURLXX_DETAIL_BASIC_WRAPPER_HPP
-
-// Source: https://github.com/dkosmari/basic_wrapper
 
 
 namespace curl::detail {
