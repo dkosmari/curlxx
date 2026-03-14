@@ -1316,6 +1316,48 @@ namespace curl {
 
 
     void
+    easy::set_netrc(CURL_NETRC_OPTION level)
+    {
+        auto result = try_set_netrc(level);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_netrc(CURL_NETRC_OPTION level)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NETRC, long{level});
+    }
+
+
+    void
+    easy::set_netrc_file(const std::filesystem::path& filename)
+    {
+        auto result = try_set_netrc_file(filename);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_netrc_file(const std::filesystem::path& filename)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NETRC_FILE, filename.c_str());
+    }
+
+
+    void
+    easy::unset_netrc_file()
+        noexcept
+    {
+        try_setopt(CURLOPT_NETRC_FILE, nullptr);
+    }
+
+
+    void
     easy::set_post(bool enable)
     {
         auto result = try_set_post(enable);

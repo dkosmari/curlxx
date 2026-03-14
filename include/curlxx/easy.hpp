@@ -1090,10 +1090,30 @@ namespace curl {
 
 
         // CURLOPT_NETRC
-        // Enable .netrc parsing. TODO
+        // Enable .netrc parsing.
+
+        void
+        set_netrc(CURL_NETRC_OPTION level);
+
+        std::expected<void, error>
+        try_set_netrc(CURL_NETRC_OPTION level)
+            noexcept;
+
 
         // CURLOPT_NETRC_FILE
-        // .netrc filename. TODO
+        // .netrc filename.
+
+        void
+        set_netrc_file(const std::filesystem::path& filename);
+
+        std::expected<void, error>
+        try_set_netrc_file(const std::filesystem::path& filename)
+            noexcept;
+
+        void
+        unset_netrc_file()
+            noexcept;
+
 
         // CURLOPT_NEW_DIRECTORY_PERMS
         // Mode for creating new remote directories. TODO
