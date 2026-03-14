@@ -498,15 +498,73 @@ namespace curl {
         // Send a POST with this data - and copy it.
 
         void
-        set_copy_post_fields(const std::string& fields);
-
-        std::expected<void, error>
-        try_set_copy_post_fields(const std::string& fields)
-            noexcept;
+        set_copy_post_field(const std::string& data);
 
         void
-        unset_copy_post_fields()
+        set_copy_post_field(const void* data,
+                            std::size_t size);
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        void
+        set_copy_post_field(std::span<T, E> data)
+        {
+            set_copy_post_field(data.data(), data.size_bytes());
+        }
+
+        // alias: _fields -> _field
+        template<typename... T>
+        inline
+        void
+        set_copy_post_fields(T... args)
+        {
+            set_copy_post_field(args...);
+        }
+
+
+        std::expected<void, error>
+        try_set_copy_post_field(const std::string& data)
             noexcept;
+
+        std::expected<void, error>
+        try_set_copy_post_field(const void* data,
+                                std::size_t size)
+            noexcept;
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::expected<void, error>
+        try_set_copy_post_field(std::span<T, E> data)
+            noexcept
+        {
+            return try_set_copy_post_field(data.data(), data.size_bytes());
+        }
+
+        // alias: _fields -> _field
+        template<typename... T>
+        inline
+        std::expected<void, error>
+        try_set_copy_post_fields(T... args)
+            noexcept
+        {
+            return try_set_copy_post_field(args...);
+        }
+
+
+        void
+        unset_copy_post_field()
+            noexcept;
+
+        // alias: _fields -> _field
+        inline
+        void
+        unset_copy_post_fields()
+            noexcept
+        {
+            unset_copy_post_field();
+        }
 
 
         // CURLOPT_CRLF
@@ -1054,14 +1112,103 @@ namespace curl {
         // CURLOPT_PORT
         // Port number to connect to. TODO
 
+
         // CURLOPT_POST
-        // Make an HTTP POST. TODO
+        // Make an HTTP POST.
+
+        void
+        set_post(bool enable);
+
+        std::expected<void, error>
+        try_set_post(bool enable)
+            noexcept;
+
+
+        // CURLOPT_POSTFIELDS
+        // Send a POST with this data - does not copy it.
+
+        void
+        set_post_field(const std::string& data);
+
+        void
+        set_post_field(const void* data,
+                       std::size_t size);
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        void
+        set_post_field(std::span<T, E> data)
+        {
+            set_post_field(data.data(), data.size_bytes());
+        }
+
+        // alias: _fields -> _field
+        template<typename... T>
+        inline
+        void
+        set_post_fields(T... args)
+        {
+            set_post_field(args...);
+        }
+
+
+        std::expected<void, error>
+        try_set_post_field(const std::string& data)
+            noexcept;
+
+        std::expected<void, error>
+        try_set_post_field(const void* data,
+                           std::size_t size)
+            noexcept;
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::expected<void, error>
+        try_set_post_field(std::span<T, E> data)
+            noexcept
+        {
+            return try_set_post_field(data.data(), data.size_bytes());
+        }
+
+        // alias: _fields -> _field
+        template<typename... T>
+        inline
+        std::expected<void, error>
+        try_set_post_fields(T... args)
+            noexcept
+        {
+            return try_set_post_field(args...);
+        }
+
+
+        void
+        unset_post_field()
+            noexcept;
+
+        // alias: _fields -> _field
+        inline
+        void
+        unset_post_fields()
+            noexcept
+        {
+            unset_post_field();
+        }
+
 
         // CURLOPT_POSTFIELDSIZE
-        // The POST data is this big. TODO
-
         // CURLOPT_POSTFIELDSIZE_LARGE
-        // The POST data is this big. TODO
+        // The POST data is this big.
+
+        void
+        set_post_field_size(curl_off_t size);
+
+        std::expected<void, error>
+        try_set_post_field_size(curl_off_t size)
+            noexcept;
+
+
 
         // CURLOPT_POSTQUOTE
         // Commands to run after transfer. TODO

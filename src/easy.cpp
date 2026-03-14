@@ -804,25 +804,44 @@ namespace curl {
 
 
     void
-    easy::set_copy_post_fields(const std::string& fields)
+    easy::set_copy_post_field(const std::string& data)
     {
-        auto result = try_set_copy_post_fields(fields);
+        set_copy_post_field(data.data(), data.size());
+    }
+
+
+    void
+    easy::set_copy_post_field(const void* data,
+                              std::size_t size)
+    {
+        auto result = try_set_copy_post_field(data, size);
         if (!result)
             throw result.error();
     }
 
 
     std::expected<void, error>
-    easy::try_set_copy_post_fields(const std::string& fields)
+    easy::try_set_copy_post_field(const std::string& data)
         noexcept
     {
-        try_setopt(CURLOPT_POSTFIELDSIZE_LARGE, curl_off_t(fields.size()));
-        return try_setopt(CURLOPT_COPYPOSTFIELDS, fields.data());
+        return try_set_copy_post_field(data.data(), data.size());
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_copy_post_field(const void* data,
+                                  std::size_t size)
+        noexcept
+    {
+        auto res = try_set_post_field_size(size);
+        if (!res)
+            return res;
+        return try_setopt(CURLOPT_COPYPOSTFIELDS, data);
     }
 
 
     void
-    easy::unset_copy_post_fields()
+    easy::unset_copy_post_field()
         noexcept
     {
         try_setopt(CURLOPT_COPYPOSTFIELDS, nullptr);
@@ -1251,6 +1270,83 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_MAXFILESIZE_LARGE, size);
+    }
+
+
+    void
+    easy::set_post(bool enable)
+    {
+        auto result = try_set_post(enable);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_post(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_POST, long{enable});
+    }
+
+
+    void
+    easy::set_post_field(const std::string& data)
+    {
+        set_post_field(data.data(), data.size());
+    }
+
+
+    void
+    easy::set_post_field(const void* data,
+                         std::size_t size)
+    {
+        auto result = try_set_post_field(data, size);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_post_field(const std::string& data)
+        noexcept
+    {
+        return try_set_post_field(data.data(), data.size());
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_post_field(const void* data,
+                              std::size_t size)
+        noexcept
+    {
+        auto res = try_set_post_field_size(size);
+        if (!res)
+            return res;
+        return try_setopt(CURLOPT_POSTFIELDS, data);
+    }
+
+
+    void
+    easy::unset_post_field()
+        noexcept
+    {
+        try_setopt(CURLOPT_POSTFIELDS, nullptr);
+    }
+
+
+    void
+    easy::set_post_field_size(curl_off_t size)
+    {
+        auto result = try_set_post_field_size(size);
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_post_field_size(curl_off_t size)
+        noexcept
+    {
+        return try_setopt(CURLOPT_POSTFIELDSIZE_LARGE, size);
     }
 
 
