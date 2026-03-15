@@ -1171,8 +1171,21 @@ namespace curl {
         // CURLOPT_OPENSOCKETFUNCTION
         // Callback for socket creation. TODO
 
+
         // CURLOPT_PASSWORD
-        // Password. TODO
+        // Password.
+
+        void
+        set_password(const std::string& password);
+
+        std::expected<void, error>
+        try_set_password(const std::string& password)
+            noexcept;
+
+        void
+        unset_password()
+            noexcept;
+
 
         // CURLOPT_PATH_AS_IS
         // Disable squashing /../ and /./ sequences in the path. TODO
@@ -1849,7 +1862,19 @@ namespace curl {
 
 
         // CURLOPT_USERNAME
-        // Username. TODO
+        // Username.
+
+        void
+        set_username(const std::string& username);
+
+        std::expected<void, error>
+        try_set_username(const std::string& username)
+            noexcept;
+
+        void
+        unset_username()
+            noexcept;
+
 
         // CURLOPT_USERPWD
         // Username and password. TODO

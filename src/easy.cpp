@@ -1426,6 +1426,31 @@ namespace curl {
 
 
     void
+    easy::set_password(const std::string& password)
+    {
+        auto result = try_set_password(password);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_password(const std::string& password)
+        noexcept
+    {
+        return try_setopt(CURLOPT_PASSWORD, password.data());
+    }
+
+
+    void
+    easy::unset_password()
+        noexcept
+    {
+        try_setopt(CURLOPT_PASSWORD, nullptr);
+    }
+
+
+    void
     easy::set_port(std::uint16_t port)
     {
         auto result = try_set_port(port);
@@ -1801,6 +1826,31 @@ namespace curl {
         noexcept
     {
         try_setopt(CURLOPT_USERAGENT, nullptr);
+    }
+
+
+    void
+    easy::set_username(const std::string& username)
+    {
+        auto result = try_set_username(username);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_username(const std::string& username)
+        noexcept
+    {
+        return try_setopt(CURLOPT_USERNAME, username.data());
+    }
+
+
+    void
+    easy::unset_username()
+    noexcept
+    {
+        try_setopt(CURLOPT_USERNAME, nullptr);
     }
 
 
