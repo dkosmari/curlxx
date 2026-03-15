@@ -1116,16 +1116,48 @@ namespace curl {
 
 
         // CURLOPT_NEW_DIRECTORY_PERMS
-        // Mode for creating new remote directories. TODO
+        // Mode for creating new remote directories.
+
+        void
+        set_new_directory_perms(long mode);
+
+        std::expected<void, error>
+        try_set_new_directory_perms(long mode)
+            noexcept;
+
 
         // CURLOPT_NEW_FILE_PERMS
-        // Mode for creating new remote files. TODO
+        // Mode for creating new remote files.
+
+        void
+        set_new_file_perms(long mode);
+
+        std::expected<void, error>
+        try_set_new_file_perms(long mode)
+            noexcept;
+
 
         // CURLOPT_NOBODY
-        // Do not get the body contents. TODO
+        // Do not get the body contents.
+
+        void
+        set_no_body(bool no_body);
+
+        std::expected<void, error>
+        try_set_no_body(bool no_body)
+            noexcept;
+
 
         // CURLOPT_NOPROGRESS
-        // Shut off the progress meter. TODO
+        // Shut off the progress meter.
+
+        void
+        set_no_progress(bool no_progress);
+
+        std::expected<void, error>
+        try_set_no_progress(bool no_progress)
+            noexcept;
+
 
         // CURLOPT_NOPROXY
         // Filter out hosts from proxy use. TODO
@@ -1151,8 +1183,16 @@ namespace curl {
         // CURLOPT_PIPEWAIT
         // Wait on connection to pipeline on it. TODO
 
+
         // CURLOPT_PORT
-        // Port number to connect to. TODO
+        // Port number to connect to.
+
+        void
+        set_port(std::uint16_t port);
+
+        std::expected<void, error>
+        try_set_port(std::uint16_t port)
+            noexcept;
 
 
         // CURLOPT_POST

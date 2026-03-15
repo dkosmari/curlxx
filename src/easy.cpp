@@ -1358,6 +1358,91 @@ namespace curl {
 
 
     void
+    easy::set_new_directory_perms(long mode)
+    {
+        auto result = try_set_new_directory_perms(mode);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_new_directory_perms(long mode)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NEW_DIRECTORY_PERMS, mode);
+    }
+
+
+    void
+    easy::set_new_file_perms(long mode)
+    {
+        auto result = try_set_new_file_perms(mode);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_new_file_perms(long mode)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NEW_FILE_PERMS, mode);
+    }
+
+
+    void
+    easy::set_no_body(bool no_body)
+    {
+        auto result = try_set_no_body(no_body);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_no_body(bool no_body)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NOBODY, long{no_body});
+    }
+
+
+    void
+    easy::set_no_progress(bool no_progress)
+    {
+        auto result = try_set_no_progress(no_progress);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_no_progress(bool no_progress)
+        noexcept
+    {
+        return try_setopt(CURLOPT_NOPROGRESS, long{no_progress});
+    }
+
+
+    void
+    easy::set_port(std::uint16_t port)
+    {
+        auto result = try_set_port(port);
+        if (!result)
+            throw result.error();
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_port(std::uint16_t port)
+        noexcept
+    {
+        return try_setopt(CURLOPT_PORT, long{port});
+    }
+
+
+    void
     easy::set_post(bool enable)
     {
         auto result = try_set_post(enable);
