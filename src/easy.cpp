@@ -21,99 +21,6 @@ using curl::utils::value_or_throw;
 
 namespace curl {
 
-    void
-    easy::setup_extra_state()
-    {
-        if (raw) {
-            // Link the C++ wrapper to the C instance.
-            curl_easy_setopt(raw, CURLOPT_PRIVATE, this);
-
-            // Make sure we got space in the error buffer to report detailed error messages.
-            extra_state.error_buffer.resize(CURL_ERROR_SIZE);
-            extra_state.error_buffer[0] = '\0';
-            curl_easy_setopt(raw,
-                             CURLOPT_ERRORBUFFER,
-                             extra_state.error_buffer.data());
-
-            curl_easy_setopt(raw, CURLOPT_STDERR, stdout); // TODO: remove this
-        } else {
-            extra_state = {};
-        }
-    }
-
-
-    std::size_t
-    easy::read_function_helper(char* buf,
-                               std::size_t,
-                               std::size_t size,
-                               CURL* handle)
-        noexcept
-    {
-        if (!handle)
-            return CURL_READFUNC_ABORT;
-
-        easy* ez = get_wrapper(handle);
-        if (!ez)
-            return CURL_READFUNC_ABORT;
-
-        try {
-            if (!ez->extra_state.read_func)
-                return CURL_READFUNC_ABORT;
-            return ez->extra_state.read_func({buf, size});
-        }
-        catch (std::exception& e) {
-            // cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
-            return CURL_READFUNC_ABORT;
-        }
-        catch (...) {
-            // cout << "Unknown error in easy::dispatch_read_callback()" << endl;
-            return CURL_READFUNC_ABORT;
-        }
-    }
-
-
-    std::size_t
-    easy::write_function_helper(const char* buffer,
-                                std::size_t,
-                                std::size_t size,
-                                CURL* handle)
-        noexcept
-    {
-        if (!handle)
-            return CURL_WRITEFUNC_ERROR;
-
-        easy* ez = get_wrapper(handle);
-        if (!ez)
-            return CURL_WRITEFUNC_ERROR;
-
-        try {
-            if (!ez->extra_state.write_func)
-                return CURL_WRITEFUNC_ERROR;
-            return ez->extra_state.write_func({buffer, size});
-        }
-        catch (std::exception& e) {
-            // cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;
-            return CURL_WRITEFUNC_ERROR;
-        }
-        catch (...) {
-            // cout << "Unknown error in easy::dispatch_write_callback()" << endl;
-            return CURL_WRITEFUNC_ERROR;
-        }
-    }
-
-
-    template<typename T>
-    std::expected<void, error>
-    easy::try_setopt(CURLoption opt, T&& arg)
-        noexcept
-    {
-        auto e = curl_easy_setopt(raw, opt, arg);
-        if (e != CURLE_OK)
-            return std::unexpected{error{e}};
-        return {};
-    }
-
-
     easy::easy()
     {
         create();
@@ -1869,6 +1776,99 @@ namespace curl {
         if (e != CURLE_OK)
             return nullptr;
         return result;
+    }
+
+
+        void
+    easy::setup_extra_state()
+    {
+        if (raw) {
+            // Link the C++ wrapper to the C instance.
+            curl_easy_setopt(raw, CURLOPT_PRIVATE, this);
+
+            // Make sure we got space in the error buffer to report detailed error messages.
+            extra_state.error_buffer.resize(CURL_ERROR_SIZE);
+            extra_state.error_buffer[0] = '\0';
+            curl_easy_setopt(raw,
+                             CURLOPT_ERRORBUFFER,
+                             extra_state.error_buffer.data());
+
+            curl_easy_setopt(raw, CURLOPT_STDERR, stdout); // TODO: remove this
+        } else {
+            extra_state = {};
+        }
+    }
+
+
+    std::size_t
+    easy::read_function_helper(char* buf,
+                               std::size_t,
+                               std::size_t size,
+                               CURL* handle)
+        noexcept
+    {
+        if (!handle)
+            return CURL_READFUNC_ABORT;
+
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return CURL_READFUNC_ABORT;
+
+        try {
+            if (!ez->extra_state.read_func)
+                return CURL_READFUNC_ABORT;
+            return ez->extra_state.read_func({buf, size});
+        }
+        catch (std::exception& e) {
+            // cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
+            return CURL_READFUNC_ABORT;
+        }
+        catch (...) {
+            // cout << "Unknown error in easy::dispatch_read_callback()" << endl;
+            return CURL_READFUNC_ABORT;
+        }
+    }
+
+
+    std::size_t
+    easy::write_function_helper(const char* buffer,
+                                std::size_t,
+                                std::size_t size,
+                                CURL* handle)
+        noexcept
+    {
+        if (!handle)
+            return CURL_WRITEFUNC_ERROR;
+
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return CURL_WRITEFUNC_ERROR;
+
+        try {
+            if (!ez->extra_state.write_func)
+                return CURL_WRITEFUNC_ERROR;
+            return ez->extra_state.write_func({buffer, size});
+        }
+        catch (std::exception& e) {
+            // cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;
+            return CURL_WRITEFUNC_ERROR;
+        }
+        catch (...) {
+            // cout << "Unknown error in easy::dispatch_write_callback()" << endl;
+            return CURL_WRITEFUNC_ERROR;
+        }
+    }
+
+
+    template<typename T>
+    std::expected<void, error>
+    easy::try_setopt(CURLoption opt, T&& arg)
+        noexcept
+    {
+        auto e = curl_easy_setopt(raw, opt, arg);
+        if (e != CURLE_OK)
+            return std::unexpected{error{e}};
+        return {};
     }
 
 } // namespace curl

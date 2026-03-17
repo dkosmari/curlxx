@@ -100,6 +100,11 @@ namespace curl {
         get_done();
 
 
+        /* ------------------------ */
+        /* Start of option setters. */
+        /* ------------------------ */
+
+
         // CURLMOPT_MAXCONNECTS
         // Size of connection cache.
 
@@ -144,13 +149,38 @@ namespace curl {
             noexcept;
 
 
-        // CURLMOPT_NETWORK_CHANGED
-        // Signal that the network has changed. TODO
+#if CURL_AT_LEAST_VERSION(8, 16, 0)
 
+        // CURLMOPT_NETWORK_CHANGED
+        // Signal that the network has changed.
+
+        void
+        set_network_changed(long mask);
+
+        std::expected<void, error>
+        try_set_network_changed(long mask)
+            noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 16, 0)
+
+
+        // CURLMOPT_NOTIFYDATA
+        // Custom pointer passed to the notify callback. TODO
+
+        // CURLMOPT_NOTIFYFUNCTION
+        // Callback that receives notifications. TODO
 
 
         // CURLMOPT_PIPELINING
-        // Enable HTTP multiplexing. TODO
+        // Enable HTTP multiplexing.
+
+        void
+        set_pipelining(long mask);
+
+        std::expected<void, error>
+        try_set_pipelining(long mask)
+            noexcept;
+
 
         // CURLMOPT_PUSHDATA
         // Pointer to pass to push callback. TODO
@@ -171,8 +201,19 @@ namespace curl {
         // Callback to receive timeout values. TODO
 
 
-    };
+        /* ---------------------- */
+        /* End of option setters. */
+        /* ---------------------- */
 
+
+    private:
+
+        template<typename T>
+        std::expected<void, error>
+        try_setopt(CURLMoption opt, T&& arg)
+            noexcept;
+
+    };
 
 } // namespace curl
 

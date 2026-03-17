@@ -148,10 +148,7 @@ namespace curl {
     multi::try_set_max_connections(long n)
         noexcept
     {
-        auto e = curl_multi_setopt(raw, CURLMOPT_MAXCONNECTS, n);
-        if (e)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLMOPT_MAXCONNECTS, n);
     }
 
 
@@ -166,10 +163,7 @@ namespace curl {
     multi::try_set_max_concurrent_streams(long n)
         noexcept
     {
-        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_CONCURRENT_STREAMS, n);
-        if (e)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLMOPT_MAX_CONCURRENT_STREAMS, n);
     }
 
 
@@ -184,10 +178,7 @@ namespace curl {
     multi::try_set_max_host_connections(long n)
         noexcept
     {
-        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_HOST_CONNECTIONS, n);
-        if (e)
-            return unexpected{error{e}};
-        return {};
+        return try_setopt(CURLMOPT_MAX_HOST_CONNECTIONS, n);
     }
 
 
@@ -202,9 +193,52 @@ namespace curl {
     multi::try_set_max_total_connections(long n)
         noexcept
     {
-        auto e = curl_multi_setopt(raw, CURLMOPT_MAX_TOTAL_CONNECTIONS, n);
-        if (e)
-            return unexpected{error{e}};
+        return try_setopt(CURLMOPT_MAX_TOTAL_CONNECTIONS, n);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 16, 0)
+
+    void
+    multi::set_network_changed(long mask)
+    {
+        return value_or_throw(try_set_network_changed(mask));
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_network_changed(long mask)
+        noexcept
+    {
+        return try_setopt(CURLMOPT_NETWORK_CHANGED, mask);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 16, 0)
+
+
+    void
+    multi::set_pipelining(long mask)
+    {
+        return value_or_throw(try_set_pipelining(mask));
+    }
+
+
+    std::expected<void, error>
+    multi::try_set_pipelining(long mask)
+        noexcept
+    {
+        return try_setopt(CURLMOPT_PIPELINING, mask);
+    }
+
+
+    template<typename T>
+    std::expected<void, error>
+    multi::try_setopt(CURLMoption opt, T&& arg)
+        noexcept
+    {
+        auto e = curl_multi_setopt(raw, opt, arg);
+        if (e != CURLM_OK)
+            return std::unexpected{error{e}};
         return {};
     }
 

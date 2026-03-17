@@ -59,38 +59,6 @@ namespace curl {
         using state_type = std::tuple<base_type::state_type, extra_state_type>;
 
 
-    private:
-
-        extra_state_type extra_state;
-
-        void
-        setup_extra_state();
-
-        static
-        std::size_t
-        read_function_helper(char* buffer,
-                             std::size_t,
-                             std::size_t size,
-                             CURL* handle)
-            noexcept;
-
-        static
-        std::size_t
-        write_function_helper(const char* buffer,
-                              std::size_t,
-                              std::size_t size,
-                              CURL* handle)
-            noexcept;
-
-
-        template<typename T>
-        std::expected<void, error>
-        try_setopt(CURLoption opt, T&& arg)
-            noexcept;
-
-
-    public:
-
         /// Default constructor.
         easy();
 
@@ -179,9 +147,9 @@ namespace curl {
             noexcept;
 
 
-        /****************************
-         * Start of option setters. *
-         ****************************/
+        /* ------------------------ */
+        /* Start of option setters. */
+        /* ------------------------ */
 
 
         // CURLOPT_ABSTRACT_UNIX_SOCKET
@@ -1726,7 +1694,7 @@ namespace curl {
         try_set_tcp_keep_cnt(long count)
             noexcept;
 
-#endif
+#endif // CURL_AT_LEAST_VERSION(8, 9, 0)
 
 
         // CURLOPT_TCP_KEEPIDLE
@@ -1981,14 +1949,14 @@ namespace curl {
         // OAuth2 bearer token. TODO
 
 
-        /**************************
-         * End of option setters. *
-         **************************/
+        /* ---------------------- */
+        /* End of option setters. */
+        /* ---------------------- */
 
 
-        /**************************
-         * Start of info getters. *
-         **************************/
+        /* ---------------------- */
+        /* Start of info getters. */
+        /* ---------------------- */
 
 
         /*
@@ -2215,9 +2183,9 @@ namespace curl {
         */
 
 
-        /************************
-         * End of info getters. *
-         ************************/
+        /* -------------------- */
+        /* End of info getters. */
+        /* -------------------- */
 
 
         header
@@ -2240,6 +2208,37 @@ namespace curl {
         static
         easy*
         get_wrapper(CURL* h)
+            noexcept;
+
+
+    private:
+        // TODO move this to the end
+
+        extra_state_type extra_state;
+
+        void
+        setup_extra_state();
+
+        static
+        std::size_t
+        read_function_helper(char* buffer,
+                             std::size_t,
+                             std::size_t size,
+                             CURL* handle)
+            noexcept;
+
+        static
+        std::size_t
+        write_function_helper(const char* buffer,
+                              std::size_t,
+                              std::size_t size,
+                              CURL* handle)
+            noexcept;
+
+
+        template<typename T>
+        std::expected<void, error>
+        try_setopt(CURLoption opt, T&& arg)
             noexcept;
 
 
