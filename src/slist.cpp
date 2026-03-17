@@ -9,6 +9,11 @@
 
 #include "curlxx/slist.hpp"
 
+#include "utils.hpp"
+
+
+using curl::utils::value_or_throw;
+
 
 namespace curl {
 
@@ -31,9 +36,7 @@ namespace curl {
     void
     slist::append(const std::string& str)
     {
-        auto result = try_append(str);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_append(str));
     }
 
 
