@@ -213,6 +213,48 @@ namespace curl {
     }
 
 
+    std::size_t
+    easy::recv(void* buffer,
+               std::size_t size)
+    {
+        return value_or_throw(try_recv(buffer, size));
+    }
+
+
+    std::expected<std::size_t, error>
+    easy::try_recv(void* buffer,
+                   std::size_t size)
+        noexcept
+    {
+        std::size_t received;
+        auto e = curl_easy_recv(raw, buffer, size, &received);
+        if (e)
+            return std::unexpected{error{e}};
+        return received;
+    }
+
+
+    std::size_t
+    easy::send(const void* buffer,
+               std::size_t size)
+    {
+        return value_or_throw(try_send(buffer, size));
+    }
+
+
+    std::expected<std::size_t, error>
+    easy::try_send(const void* buffer,
+                   std::size_t size)
+        noexcept
+    {
+        std::size_t sent;
+        auto e = curl_easy_send(raw, buffer, size, &sent);
+        if (e)
+            return std::unexpected{error{e}};
+        return sent;
+    }
+
+
     void
     easy::set_abstract_unix_socket(const std::filesystem::path& socket_path)
     {

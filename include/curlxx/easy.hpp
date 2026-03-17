@@ -147,6 +147,64 @@ namespace curl {
             noexcept;
 
 
+        std::size_t
+        recv(void* buffer,
+             std::size_t size);
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::span<T>
+        recv(std::span<T, E> buffer)
+        {
+            auto received = recv(buffer.data(), buffer.size_bytes());
+            return buffer.first(received);
+        }
+
+
+        std::expected<std::size_t, error>
+        try_recv(void* buffer,
+                 std::size_t size)
+            noexcept;
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::expected<std::span<T>, error>
+        try_recv(std::span<T, E> buffer)
+            noexcept;
+
+
+        std::size_t
+        send(const void* buffer,
+             std::size_t size);
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::size_t
+        send(std::span<T, E> buffer)
+        {
+            return send(buffer.data(), buffer.size_bytes());
+        }
+
+
+        std::expected<std::size_t, error>
+        try_send(const void* buffer,
+                 std::size_t size)
+            noexcept;
+
+        template<typename T,
+                 std::size_t E>
+        inline
+        std::size_t
+        try_send(std::span<T, E> buffer)
+            noexcept
+        {
+            return try_send(buffer.data(), buffer.size_bytes());
+        }
+
+
         /* ------------------------ */
         /* Start of option setters. */
         /* ------------------------ */
