@@ -10,37 +10,43 @@
 
 #include "curlxx/easy.hpp"
 
+#include "utils.hpp"
+
 
 using std::cout;
 using std::endl;
+
+using curl::utils::value_or_throw;
 
 
 namespace curl {
 
     void
-    easy::init_error_buffer()
+    easy::setup_extra_state()
     {
-        state.error_buffer.resize(CURL_ERROR_SIZE);
-        state.error_buffer[0] = '\0';
-        curl_easy_setopt(raw,
-                         CURLOPT_ERRORBUFFER,
-                         state.error_buffer.data());
-        curl_easy_setopt(raw, CURLOPT_STDERR, stdout);
-    }
+        if (raw) {
+            // Link the C++ wrapper to the C instance.
+            curl_easy_setopt(raw, CURLOPT_PRIVATE, this);
 
+            // Make sure we got space in the error buffer to report detailed error messages.
+            extra_state.error_buffer.resize(CURL_ERROR_SIZE);
+            extra_state.error_buffer[0] = '\0';
+            curl_easy_setopt(raw,
+                             CURLOPT_ERRORBUFFER,
+                             extra_state.error_buffer.data());
 
-    void
-    easy::link_this()
-    {
-        curl_easy_setopt(raw, CURLOPT_PRIVATE, this);
+            curl_easy_setopt(raw, CURLOPT_STDERR, stdout); // TODO: remove this
+        } else {
+            extra_state = {};
+        }
     }
 
 
     std::size_t
-    easy::dispatch_read_callback(char* buf,
-                                 std::size_t,
-                                 std::size_t size,
-                                 CURL* handle)
+    easy::read_function_helper(char* buf,
+                               std::size_t,
+                               std::size_t size,
+                               CURL* handle)
         noexcept
     {
         if (!handle)
@@ -51,26 +57,26 @@ namespace curl {
             return CURL_READFUNC_ABORT;
 
         try {
-            if (!ez->state.read_callback)
+            if (!ez->extra_state.read_func)
                 return CURL_READFUNC_ABORT;
-            return ez->state.read_callback({buf, size});
+            return ez->extra_state.read_func({buf, size});
         }
         catch (std::exception& e) {
-            cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
+            // cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
             return CURL_READFUNC_ABORT;
         }
         catch (...) {
-            cout << "Unknown error in easy::dispatch_read_callback()" << endl;
+            // cout << "Unknown error in easy::dispatch_read_callback()" << endl;
             return CURL_READFUNC_ABORT;
         }
     }
 
 
     std::size_t
-    easy::dispatch_write_callback(const char* buffer,
-                                  std::size_t,
-                                  std::size_t size,
-                                  CURL* handle)
+    easy::write_function_helper(const char* buffer,
+                                std::size_t,
+                                std::size_t size,
+                                CURL* handle)
         noexcept
     {
         if (!handle)
@@ -81,16 +87,16 @@ namespace curl {
             return CURL_WRITEFUNC_ERROR;
 
         try {
-            if (!ez->state.write_callback)
+            if (!ez->extra_state.write_func)
                 return CURL_WRITEFUNC_ERROR;
-            return ez->state.write_callback({buffer, size});
+            return ez->extra_state.write_func({buffer, size});
         }
         catch (std::exception& e) {
-            cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;
+            // cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;
             return CURL_WRITEFUNC_ERROR;
         }
         catch (...) {
-            cout << "Unknown error in easy::dispatch_write_callback()" << endl;
+            // cout << "Unknown error in easy::dispatch_write_callback()" << endl;
             return CURL_WRITEFUNC_ERROR;
         }
     }
@@ -111,6 +117,12 @@ namespace curl {
     easy::easy()
     {
         create();
+    }
+
+
+    easy::easy(CURL* handle)
+    {
+        create(handle);
     }
 
 
@@ -167,6 +179,14 @@ namespace curl {
 
 
     void
+    easy::create(CURL* handle)
+    {
+        destroy();
+        acquire(handle);
+    }
+
+
+    void
     easy::create(const easy& other)
     {
         if (!other) {
@@ -199,9 +219,8 @@ namespace curl {
          noexcept
     {
         base_type::acquire(get<0>(new_state));
-        state = std::move(get<1>(new_state));
-        init_error_buffer();
-        link_this();
+        extra_state = std::move(get<1>(new_state));
+        setup_extra_state();
     }
 
 
@@ -209,8 +228,7 @@ namespace curl {
     easy::acquire(raw_type new_raw)
     {
         base_type::acquire(new_raw);
-        init_error_buffer();
-        link_this();
+        setup_extra_state();
     }
 
 
@@ -220,13 +238,9 @@ namespace curl {
     {
         state_type result{
             base_type::release(),
-            extra_state_type{
-                std::move(state.error_buffer),
-                std::move(state.read_callback),
-                std::move(state.write_callback)
-            }
+            std::move(extra_state)
         };
-        state = {};
+        extra_state = {};
         return result;
     }
 
@@ -236,8 +250,8 @@ namespace curl {
     {
         if (raw) {
             curl_easy_reset(raw);
-            link_this();
-            init_error_buffer();
+            extra_state = {};
+            setup_extra_state();
         }
     }
 
@@ -246,9 +260,7 @@ namespace curl {
     easy::pause(bool pause_recv,
                 bool pause_send)
     {
-        auto result = try_pause(pause_recv, pause_send);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_pause(pause_recv, pause_send));
     }
 
 
@@ -279,9 +291,7 @@ namespace curl {
     void
     easy::perform()
     {
-        auto result = try_perform();
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_perform());
     }
 
 
@@ -299,9 +309,7 @@ namespace curl {
     void
     easy::set_abstract_unix_socket(const std::filesystem::path& socket_path)
     {
-        auto result = try_set_abstract_unix_socket(socket_path);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_abstract_unix_socket(socket_path));
     }
 
 
@@ -324,9 +332,7 @@ namespace curl {
     void
     easy::set_accept_timeout(std::chrono::milliseconds timeout)
     {
-        auto result = try_set_accept_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_accept_timeout(timeout));
     }
 
 
@@ -341,9 +347,7 @@ namespace curl {
     void
     easy::set_accept_encoding(const std::string& enc)
     {
-        auto result = try_set_accept_encoding(enc);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_accept_encoding(enc));
     }
 
 
@@ -366,9 +370,7 @@ namespace curl {
     void
     easy::set_address_scope(long scope_id)
     {
-        auto result = try_set_address_scope(scope_id);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_address_scope(scope_id));
     }
 
 
@@ -383,9 +385,7 @@ namespace curl {
     void
     easy::set_alt_svc(const std::filesystem::path& cache_file)
     {
-        auto result = try_set_alt_svc(cache_file);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_alt_svc(cache_file));
     }
 
 
@@ -408,9 +408,7 @@ namespace curl {
     void
     easy::set_alt_svc_ctrl(long mask)
     {
-        auto result = try_set_alt_svc_ctrl(mask);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_alt_svc_ctrl(mask));
     }
 
 
@@ -425,9 +423,7 @@ namespace curl {
     void
     easy::set_append(bool enable)
     {
-        auto result = try_set_append(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_append(enable));
     }
 
 
@@ -442,9 +438,7 @@ namespace curl {
     void
     easy::set_auto_referer(bool enable)
     {
-        auto result = try_set_auto_referer(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_auto_referer(enable));
     }
 
 
@@ -459,9 +453,7 @@ namespace curl {
     void
     easy::set_aws_sig_v4(const std::string& arg)
     {
-        auto result = try_set_aws_sig_v4(arg);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_aws_sig_v4(arg));
     }
 
 
@@ -484,9 +476,7 @@ namespace curl {
     void
     easy::set_buffer_size(long size)
     {
-        auto result = try_set_buffer_size(size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_buffer_size(size));
     }
 
 
@@ -501,9 +491,7 @@ namespace curl {
     void
     easy::set_ca_info(const std::filesystem::path& bundle_file)
     {
-        auto result = try_set_ca_info(bundle_file);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ca_info(bundle_file));
     }
 
 
@@ -526,9 +514,7 @@ namespace curl {
     void
     easy::set_ca_info_blob(curl_blob* bundle)
     {
-        auto result = try_set_ca_info_blob(bundle);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ca_info_blob(bundle));
     }
 
 
@@ -543,9 +529,7 @@ namespace curl {
     void
     easy::set_ca_path(const std::filesystem::path& bundle_dir)
     {
-        auto result = try_set_ca_path(bundle_dir);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ca_path(bundle_dir));
     }
 
 
@@ -568,9 +552,7 @@ namespace curl {
     void
     easy::set_ca_cache_timeout(std::chrono::seconds timeout)
     {
-        auto result = try_set_ca_cache_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ca_cache_timeout(timeout));
     }
 
 
@@ -593,9 +575,7 @@ namespace curl {
     void
     easy::set_cert_info(bool enable)
     {
-        auto result = try_set_cert_info(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cert_info(enable));
     }
 
 
@@ -610,9 +590,7 @@ namespace curl {
     void
     easy::set_connect_timeout(std::chrono::seconds timeout)
     {
-        auto result = try_set_connect_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_connect_timeout(timeout));
     }
 
 
@@ -627,9 +605,7 @@ namespace curl {
     void
     easy::set_connect_timeout(std::chrono::milliseconds timeout)
     {
-        auto result = try_set_connect_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_connect_timeout(timeout));
     }
 
 
@@ -644,9 +620,7 @@ namespace curl {
     void
     easy::set_connect_only(connect_only opt)
     {
-        auto result = try_set_connect_only(opt);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_connect_only(opt));
     }
 
 
@@ -661,9 +635,7 @@ namespace curl {
     void
     easy::set_connect_to(const std::vector<std::string>& hosts)
     {
-        auto result = try_set_connect_to(hosts);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_connect_to(hosts));
     }
 
 
@@ -672,10 +644,13 @@ namespace curl {
         noexcept
     {
         try {
-            state.connect_to_list.destroy();
+            slist new_connect_to_list;
             for (auto& host : hosts)
-                state.connect_to_list.append(host);
-            return try_setopt(CURLOPT_CONNECT_TO, state.connect_to_list.data());
+                new_connect_to_list.append(host);
+            auto result = try_setopt(CURLOPT_CONNECT_TO, new_connect_to_list.data());
+            if (result)
+                extra_state.connect_to_list = std::move(new_connect_to_list);
+            return result;
         }
         catch (std::bad_alloc&) {
             return std::unexpected{error{CURLE_OUT_OF_MEMORY}};
@@ -689,9 +664,7 @@ namespace curl {
     void
     easy::set_cookie(const std::string& cookie)
     {
-        auto result = try_set_cookie(cookie);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cookie(cookie));
     }
 
 
@@ -714,9 +687,7 @@ namespace curl {
     void
     easy::set_cookie_file(const std::filesystem::path& cookie_file)
     {
-        auto result = try_set_cookie_file(cookie_file);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cookie_file(cookie_file));
     }
 
 
@@ -739,9 +710,7 @@ namespace curl {
     void
     easy::set_cookie_jar(const std::filesystem::path& jar_file)
     {
-        auto result = try_set_cookie_jar(jar_file);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cookie_jar(jar_file));
     }
 
 
@@ -764,9 +733,7 @@ namespace curl {
     void
     easy::set_cookie_list(const std::string& cookies)
     {
-        auto result = try_set_cookie_list(cookies);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cookie_list(cookies));
     }
 
 
@@ -789,9 +756,7 @@ namespace curl {
     void
     easy::set_cookie_session(bool start_anew)
     {
-        auto result = try_set_cookie_session(start_anew);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_cookie_session(start_anew));
     }
 
 
@@ -814,9 +779,7 @@ namespace curl {
     easy::set_copy_post_field(const void* data,
                               std::size_t size)
     {
-        auto result = try_set_copy_post_field(data, size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_copy_post_field(data, size));
     }
 
 
@@ -849,11 +812,17 @@ namespace curl {
 
 
     void
+    easy::set_private(std::any private_data)
+        noexcept
+    {
+        extra_state.private_data = std::move(private_data);
+    }
+
+
+    void
     easy::set_crlf(bool convert)
     {
-        auto result = try_set_crlf(convert);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_crlf(convert));
     }
 
 
@@ -868,9 +837,7 @@ namespace curl {
     void
     easy::set_crl_file(const std::filesystem::path& crl_file)
     {
-        auto result = try_set_crl_file(crl_file);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_crl_file(crl_file));
     }
 
 
@@ -893,9 +860,7 @@ namespace curl {
     void
     easy::set_custom_request(const std::string& method)
     {
-        auto result = try_set_custom_request(method);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_custom_request(method));
     }
 
 
@@ -918,9 +883,7 @@ namespace curl {
     void
     easy::set_default_protocol(const std::string& protocol)
     {
-        auto result = try_set_default_protocol(protocol);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_default_protocol(protocol));
     }
 
 
@@ -943,9 +906,7 @@ namespace curl {
     void
     easy::set_disallow_username_in_url(bool disallow)
     {
-        auto result = try_set_disallow_username_in_url(disallow);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_disallow_username_in_url(disallow));
     }
 
 
@@ -960,9 +921,7 @@ namespace curl {
     void
     easy::set_dns_cache_timeout(std::chrono::seconds timeout)
     {
-        auto result = try_set_dns_cache_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_dns_cache_timeout(timeout));
     }
 
 
@@ -985,9 +944,7 @@ namespace curl {
     void
     easy::set_file_time(bool enable)
     {
-        auto result = try_set_file_time(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_file_time(enable));
     }
 
 
@@ -1002,9 +959,7 @@ namespace curl {
     void
     easy::set_follow_location(bool enable)
     {
-        auto result = try_set_follow_location(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_follow_location(enable));
     }
 
 
@@ -1019,9 +974,7 @@ namespace curl {
     void
     easy::set_forbid_reuse(bool forbid)
     {
-        auto result = try_set_forbid_reuse(forbid);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_forbid_reuse(forbid));
     }
 
 
@@ -1036,9 +989,7 @@ namespace curl {
     void
     easy::set_fresh_connect(bool enable)
     {
-        auto result = try_set_fresh_connect(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_fresh_connect(enable));
     }
 
 
@@ -1053,9 +1004,7 @@ namespace curl {
     void
     easy::set_happy_eyeballs_timeout(std::chrono::milliseconds timeout)
     {
-        auto result = try_set_happy_eyeballs_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_happy_eyeballs_timeout(timeout));
     }
 
 
@@ -1070,9 +1019,7 @@ namespace curl {
     void
     easy::set_header_opt(long mask)
     {
-        auto result = try_set_header_opt(mask);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_header_opt(mask));
     }
 
 
@@ -1087,9 +1034,7 @@ namespace curl {
     void
     easy::set_http_auth(long mask)
     {
-        auto result = try_set_http_auth(mask);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_http_auth(mask));
     }
 
 
@@ -1104,9 +1049,7 @@ namespace curl {
     void
     easy::set_http_headers(const std::vector<std::string>& headers)
     {
-        auto result = try_set_http_headers(headers);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_http_headers(headers));
     }
 
 
@@ -1115,10 +1058,13 @@ namespace curl {
         noexcept
     {
         try {
-            state.header_list.destroy();
+            slist new_header_list;
             for (auto& h : headers)
-                state.header_list.append(h);
-            return try_setopt(CURLOPT_HTTPHEADER, state.header_list.data());
+                new_header_list.append(h);
+            auto result = try_setopt(CURLOPT_HTTPHEADER, new_header_list.data());
+            if (result)
+                extra_state.header_list = std::move(new_header_list);
+            return result;
         }
         catch (std::bad_alloc&) {
             return std::unexpected{error{CURLE_OUT_OF_MEMORY}};
@@ -1132,9 +1078,7 @@ namespace curl {
     void
     easy::set_http_get(bool use_get)
     {
-        auto result = try_set_http_get(use_get);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_http_get(use_get));
     }
 
 
@@ -1149,9 +1093,7 @@ namespace curl {
     void
     easy::set_http_version(http_version ver)
     {
-        auto result = try_set_http_version(ver);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_http_version(ver));
     }
 
 
@@ -1166,9 +1108,7 @@ namespace curl {
     void
     easy::set_input_file_size(curl_off_t size)
     {
-        auto result = try_set_input_file_size(size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_input_file_size(size));
     }
 
 
@@ -1191,9 +1131,7 @@ namespace curl {
     void
     easy::set_low_speed_limit(long limit)
     {
-        auto result = try_set_low_speed_limit(limit);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_low_speed_limit(limit));
     }
 
 
@@ -1208,9 +1146,7 @@ namespace curl {
     void
     easy::set_low_speed_time(std::chrono::seconds time)
     {
-        auto result = try_set_low_speed_time(time);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_low_speed_time(time));
     }
 
 
@@ -1225,9 +1161,7 @@ namespace curl {
     void
     easy::set_max_age_conn(std::chrono::seconds age)
     {
-        auto result = try_set_max_age_conn(age);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_age_conn(age));
     }
 
 
@@ -1242,9 +1176,7 @@ namespace curl {
     void
     easy::set_max_connects(long amount)
     {
-        auto result = try_set_max_connects(amount);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_connects(amount));
     }
 
 
@@ -1259,9 +1191,7 @@ namespace curl {
     void
     easy::set_max_file_size(curl_off_t size)
     {
-        auto result = try_set_max_file_size(size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_file_size(size));
     }
 
 
@@ -1276,9 +1206,7 @@ namespace curl {
     void
     easy::set_mime_post(mime& data)
     {
-        auto result = try_set_mime_post(data);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_mime_post(data));
     }
 
 
@@ -1301,9 +1229,7 @@ namespace curl {
     void
     easy::set_mime_options(long options)
     {
-        auto result = try_set_mime_options(options);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_mime_options(options));
     }
 
 
@@ -1318,9 +1244,7 @@ namespace curl {
     void
     easy::set_netrc(CURL_NETRC_OPTION level)
     {
-        auto result = try_set_netrc(level);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_netrc(level));
     }
 
 
@@ -1335,9 +1259,7 @@ namespace curl {
     void
     easy::set_netrc_file(const std::filesystem::path& filename)
     {
-        auto result = try_set_netrc_file(filename);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_netrc_file(filename));
     }
 
 
@@ -1360,9 +1282,7 @@ namespace curl {
     void
     easy::set_new_directory_perms(long mode)
     {
-        auto result = try_set_new_directory_perms(mode);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_new_directory_perms(mode));
     }
 
 
@@ -1377,9 +1297,7 @@ namespace curl {
     void
     easy::set_new_file_perms(long mode)
     {
-        auto result = try_set_new_file_perms(mode);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_new_file_perms(mode));
     }
 
 
@@ -1394,9 +1312,7 @@ namespace curl {
     void
     easy::set_no_body(bool no_body)
     {
-        auto result = try_set_no_body(no_body);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_no_body(no_body));
     }
 
 
@@ -1411,9 +1327,7 @@ namespace curl {
     void
     easy::set_no_progress(bool no_progress)
     {
-        auto result = try_set_no_progress(no_progress);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_no_progress(no_progress));
     }
 
 
@@ -1428,9 +1342,7 @@ namespace curl {
     void
     easy::set_password(const std::string& password)
     {
-        auto result = try_set_password(password);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_password(password));
     }
 
 
@@ -1453,9 +1365,7 @@ namespace curl {
     void
     easy::set_port(std::uint16_t port)
     {
-        auto result = try_set_port(port);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_port(port));
     }
 
 
@@ -1470,9 +1380,7 @@ namespace curl {
     void
     easy::set_post(bool enable)
     {
-        auto result = try_set_post(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_post(enable));
     }
 
 
@@ -1495,9 +1403,7 @@ namespace curl {
     easy::set_post_field(const void* data,
                          std::size_t size)
     {
-        auto result = try_set_post_field(data, size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_post_field(data, size));
     }
 
 
@@ -1532,7 +1438,7 @@ namespace curl {
     void
     easy::set_post_field_size(curl_off_t size)
     {
-        auto result = try_set_post_field_size(size);
+        return value_or_throw(try_set_post_field_size(size));
     }
 
 
@@ -1545,37 +1451,42 @@ namespace curl {
 
 
     void
-    easy::set_read_function(std::function<read_function_t> fn)
+    easy::set_read_function(read_function_t read_func)
     {
-        auto result = try_set_read_function(std::move(fn));
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_read_function(std::move(read_func)));
     }
 
 
     std::expected<void, error>
-    easy::try_set_read_function(std::function<read_function_t> fn)
+    easy::try_set_read_function(read_function_t read_func)
         noexcept
     {
         auto data_res = try_setopt(CURLOPT_READDATA, raw);
         if (!data_res)
             return data_res;
 
-        auto func_res = try_setopt(CURLOPT_READFUNCTION, &dispatch_read_callback);
+        auto func_res = try_setopt(CURLOPT_READFUNCTION, &read_function_helper);
         if (!func_res)
             return func_res;
 
-        state.read_callback = std::move(fn);
+        extra_state.read_func = std::move(read_func);
         return {};
+    }
+
+
+    void
+    easy::unset_read_function()
+        noexcept
+    {
+        extra_state.read_func = {};
+        try_setopt(CURLOPT_READFUNCTION, nullptr);
     }
 
 
     void
     easy::set_ssl_verify_host(bool enable)
     {
-        auto result = try_set_ssl_verify_host(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ssl_verify_host(enable));
     }
 
 
@@ -1590,9 +1501,7 @@ namespace curl {
     void
     easy::set_ssl_verify_peer(bool enable)
     {
-        auto result = try_set_ssl_verify_peer(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ssl_verify_peer(enable));
     }
 
 
@@ -1607,9 +1516,7 @@ namespace curl {
     void
     easy::set_ssl_verify_status(bool enable)
     {
-        auto result = try_set_ssl_verify_status(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ssl_verify_status(enable));
     }
 
 
@@ -1624,9 +1531,7 @@ namespace curl {
     void
     easy::set_tcp_keep_alive(bool enable)
     {
-        auto result = try_set_tcp_keep_alive(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_tcp_keep_alive(enable));
     }
 
 
@@ -1643,9 +1548,7 @@ namespace curl {
     void
     easy::set_tcp_keep_cnt(long count)
     {
-        auto result = try_set_tcp_keep_cnt(count);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_tcp_keep_cnt(count));
     }
 
 
@@ -1662,9 +1565,7 @@ namespace curl {
     void
     easy::set_tcp_keep_idle(std::chrono::seconds delay)
     {
-        auto result = try_set_tcp_keep_idle(delay);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_tcp_keep_idle(delay));
     }
 
 
@@ -1679,9 +1580,7 @@ namespace curl {
     void
     easy::set_tcp_keep_intvl(std::chrono::seconds interval)
     {
-        auto result = try_set_tcp_keep_intvl(interval);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_tcp_keep_intvl(interval));
     }
 
 
@@ -1696,9 +1595,7 @@ namespace curl {
     void
     easy::set_tcp_no_delay(bool no_delay)
     {
-        auto result = try_set_tcp_no_delay(no_delay);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_tcp_no_delay(no_delay));
     }
 
 
@@ -1713,9 +1610,7 @@ namespace curl {
     void
     easy::set_timeout(std::chrono::seconds timeout)
     {
-        auto result = try_set_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_timeout(timeout));
     }
 
 
@@ -1730,9 +1625,7 @@ namespace curl {
     void
     easy::set_timeout(std::chrono::milliseconds timeout)
     {
-        auto result = try_set_timeout(timeout);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_timeout(timeout));
     }
 
 
@@ -1747,9 +1640,7 @@ namespace curl {
     void
     easy::set_transfer_text(bool enable)
     {
-        auto result = try_set_transfer_text(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_transfer_text(enable));
     }
 
 
@@ -1764,9 +1655,7 @@ namespace curl {
     void
     easy::set_transfer_encoding(bool enable)
     {
-        auto result = try_set_transfer_encoding(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_transfer_encoding(enable));
     }
 
 
@@ -1781,9 +1670,7 @@ namespace curl {
     void
     easy::set_url(const std::string& url)
     {
-        auto result = try_set_url(url);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_url(url));
     }
 
 
@@ -1805,19 +1692,17 @@ namespace curl {
 
 
     void
-    easy::set_user_agent(const std::string& ua)
+    easy::set_user_agent(const std::string& user_agent)
     {
-        auto result = try_set_user_agent(ua);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_user_agent(user_agent));
     }
 
 
     std::expected<void, error>
-    easy::try_set_user_agent(const std::string& ua)
+    easy::try_set_user_agent(const std::string& user_agent)
         noexcept
     {
-        return try_setopt(CURLOPT_USERAGENT, ua.data());
+        return try_setopt(CURLOPT_USERAGENT, user_agent.data());
     }
 
 
@@ -1832,9 +1717,7 @@ namespace curl {
     void
     easy::set_username(const std::string& username)
     {
-        auto result = try_set_username(username);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_username(username));
     }
 
 
@@ -1857,9 +1740,7 @@ namespace curl {
     void
     easy::set_use_ssl(ssl_level level)
     {
-        auto result = try_set_use_ssl(level);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_use_ssl(level));
     }
 
 
@@ -1880,37 +1761,42 @@ namespace curl {
 
 
     void
-    easy::set_write_function(std::function<write_function_t> fn)
+    easy::set_write_function(write_function_t write_func)
     {
-        auto result = try_set_write_function(std::move(fn));
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_write_function(std::move(write_func)));
     }
 
 
     std::expected<void, error>
-    easy::try_set_write_function(std::function<write_function_t> fn)
+    easy::try_set_write_function(write_function_t write_func)
         noexcept
     {
         auto data_res = try_setopt(CURLOPT_WRITEDATA, raw);
         if (!data_res)
             return data_res;
 
-        auto func_res = try_setopt(CURLOPT_WRITEFUNCTION, &dispatch_write_callback);
+        auto func_res = try_setopt(CURLOPT_WRITEFUNCTION, &write_function_helper);
         if (!func_res)
             return func_res;
 
-        state.write_callback = std::move(fn);
+        extra_state.write_func = std::move(write_func);
         return {};
+    }
+
+
+    void
+    easy::unset_write_function()
+        noexcept
+    {
+        extra_state.write_func = {};
+        try_setopt(CURLOPT_WRITEFUNCTION, nullptr);
     }
 
 
     void
     easy::set_ws_options(long mask)
     {
-        auto result = try_set_ws_options(mask);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_ws_options(mask));
     }
 
 
@@ -1922,6 +1808,21 @@ namespace curl {
     }
 
 
+    const std::any&
+    easy::get_private()
+        const
+    {
+        return extra_state.private_data;
+    }
+
+
+    std::any&
+    easy::get_private()
+    {
+        return extra_state.private_data;
+    }
+
+
     header
     easy::get_header(const std::string& name,
                      std::size_t index,
@@ -1929,10 +1830,7 @@ namespace curl {
                      int request)
         const
     {
-        auto result = try_get_header(name, index, origin, request);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_get_header(name, index, origin, request));
     }
 
 

@@ -41,7 +41,8 @@ lib_libcurlxx_la_SOURCES = \
 	src/header.cpp \
 	src/mime.cpp \
 	src/multi.cpp \
-	src/slist.cpp
+	src/slist.cpp \
+	src/utils.hpp
 
 
 .PHONY: company

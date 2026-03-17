@@ -1,6 +1,6 @@
 /*
  * curlxx - A C++ wrapper for libcurl.
- * Copyright 2025  Daniel K. O. (dkosmari)
+ * Copyright 2025-2026  Daniel K. O. (dkosmari)
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
@@ -8,10 +8,13 @@
 #include "curlxx/multi.hpp"
 
 #include "curlxx/easy.hpp"
+#include "utils.hpp"
 
 
 using std::expected;
 using std::unexpected;
+
+using curl::utils::value_or_throw;
 
 
 namespace curl {
@@ -19,6 +22,12 @@ namespace curl {
     multi::multi()
     {
         create();
+    }
+
+
+    multi::multi(CURLM* handle)
+    {
+        create(handle);
     }
 
 
@@ -41,6 +50,14 @@ namespace curl {
 
 
     void
+    multi::create(CURLM* handle)
+    {
+        destroy();
+        acquire(handle);
+    }
+
+
+    void
     multi::destroy()
         noexcept
     {
@@ -52,9 +69,7 @@ namespace curl {
     void
     multi::add(easy& ez)
     {
-        auto result = try_add(ez);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_add(ez));
     }
 
 
@@ -72,9 +87,7 @@ namespace curl {
     void
     multi::remove(easy& ez)
     {
-        auto result = try_remove(ez);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_remove(ez));
     }
 
 
@@ -92,10 +105,7 @@ namespace curl {
     unsigned
     multi::perform()
     {
-        auto result = try_perform();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_perform());
     }
 
 
@@ -130,9 +140,7 @@ namespace curl {
     void
     multi::set_max_connections(long n)
     {
-        auto result = try_set_max_connections(n);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_connections(n));
     }
 
 
@@ -150,9 +158,7 @@ namespace curl {
     void
     multi::set_max_concurrent_streams(long n)
     {
-        auto result = try_set_max_concurrent_streams(n);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_concurrent_streams(n));
     }
 
 
@@ -170,9 +176,7 @@ namespace curl {
     void
     multi::set_max_host_connections(long n)
     {
-        auto result = try_set_max_host_connections(n);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_host_connections(n));
     }
 
 
@@ -190,9 +194,7 @@ namespace curl {
     void
     multi::set_max_total_connections(long n)
     {
-        auto result = try_set_max_total_connections(n);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_max_total_connections(n));
     }
 
 
@@ -205,6 +207,5 @@ namespace curl {
             return unexpected{error{e}};
         return {};
     }
-
 
 } // namespace curl

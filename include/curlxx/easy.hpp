@@ -8,7 +8,9 @@
 #ifndef CURLXX_EASY_HPP
 #define CURLXX_EASY_HPP
 
+#include <any>
 #include <chrono>
+#include <cstddef>
 #include <expected>
 #include <filesystem>
 #include <functional>
@@ -37,42 +39,47 @@ namespace curl {
 
         using base_type = detail::basic_wrapper<CURL*>;
 
-        using read_function_t = std::size_t(std::span<char>);
-        using write_function_t = std::size_t(std::span<const char>);
+        using read_function_sig = std::size_t(std::span<char>);
+        using read_function_t = std::move_only_function<read_function_sig>;
+
+        using write_function_sig = std::size_t(std::span<const char>);
+        using write_function_t = std::move_only_function<write_function_sig>;
+
 
         struct extra_state_type {
             std::vector<char> error_buffer;
-            std::function<read_function_t> read_callback;
-            std::function<write_function_t> write_callback;
+            read_function_t read_func;
+            write_function_t write_func;
             slist header_list;
             slist connect_to_list;
+            std::any private_data;
         };
 
-        using state_type = std::tuple<raw_type, extra_state_type>;
+        // combine base_type::state_type and extra_state_type
+        using state_type = std::tuple<base_type::state_type, extra_state_type>;
 
 
     private:
 
-        extra_state_type state;
+        extra_state_type extra_state;
 
-
-        void init_error_buffer();
-        void link_this();
+        void
+        setup_extra_state();
 
         static
         std::size_t
-        dispatch_read_callback(char* buffer,
-                               std::size_t,
-                               std::size_t size,
-                               CURL* handle)
+        read_function_helper(char* buffer,
+                             std::size_t,
+                             std::size_t size,
+                             CURL* handle)
             noexcept;
 
         static
         std::size_t
-        dispatch_write_callback(const char* buffer,
-                                std::size_t,
-                                std::size_t size,
-                                CURL* handle)
+        write_function_helper(const char* buffer,
+                              std::size_t,
+                              std::size_t size,
+                              CURL* handle)
             noexcept;
 
 
@@ -84,31 +91,45 @@ namespace curl {
 
     public:
 
-        // Inherit constructors.
-        using base_type::base_type;
-
-
+        /// Default constructor.
         easy();
 
+        /// Empty constructor.
+        inline
+        easy(nullptr_t)
+            noexcept
+        {}
+
+        /// Conversion constructor.
+        explicit
+        easy(CURL* handle);
+
+        /// Copy constructor.
         easy(const easy& other);
 
+        /// Move constructor
         easy(easy&& other)
             noexcept;
 
+        /// Copy assignment.
         easy&
         operator =(const easy& other);
 
+        /// Move assignment.
         easy&
         operator =(easy&& other)
             noexcept;
 
-
+        /// Destructor.
         ~easy()
             noexcept;
 
 
         void
         create();
+
+        void
+        create(CURL* handle);
 
         void
         create(const easy& other);
@@ -1323,8 +1344,15 @@ namespace curl {
         // CURLOPT_PRE_PROXY
         // Socks proxy to use. TODO
 
+
         // CURLOPT_PRIVATE
-        // Private pointer to store. TODO
+        // Private pointer to store.
+        // Note: this does not actually set CURLOPT_PRIVATE, that's reserved for the wrapper.
+
+        void
+        set_private(std::any private_data)
+            noexcept;
+
 
         // CURLOPT_PROGRESSDATA
         // Data pointer to pass to the progress meter callback. TODO
@@ -1449,10 +1477,14 @@ namespace curl {
         // Callback for reading data.
 
         void
-        set_read_function(std::function<read_function_t> fn);
+        set_read_function(read_function_t read_func);
 
         std::expected<void, error>
-        try_set_read_function(std::function<read_function_t> fn)
+        try_set_read_function(read_function_t read_func)
+            noexcept;
+
+        void
+        unset_read_function()
             noexcept;
 
 
@@ -1850,10 +1882,10 @@ namespace curl {
         // User-Agent: header.
 
         void
-        set_user_agent(const std::string& ua);
+        set_user_agent(const std::string& user_agent);
 
         std::expected<void, error>
-        try_set_user_agent(const std::string& ua)
+        try_set_user_agent(const std::string& user_agent)
             noexcept;
 
         void
@@ -1917,10 +1949,14 @@ namespace curl {
         // Callback for writing data.
 
         void
-        set_write_function(std::function<write_function_t> fn);
+        set_write_function(write_function_t write_func);
 
         std::expected<void, error>
-        try_set_write_function(std::function<write_function_t> fn)
+        try_set_write_function(write_function_t write_func)
+            noexcept;
+
+        void
+        unset_write_function()
             noexcept;
 
 
@@ -2066,9 +2102,21 @@ namespace curl {
           CURLINFO_PRIMARY_PORT
           Destination port of the last connection. See CURLINFO_PRIMARY_PORT
 
-          CURLINFO_PRIVATE
-          User's private data pointer. See CURLINFO_PRIVATE
+        */
 
+        // CURLINFO_PRIVATE
+        // User's private data pointer. See CURLINFO_PRIVATE
+
+        const std::any&
+        get_private()
+            const;
+
+        std::any&
+        get_private();
+
+
+
+        /*
           CURLINFO_PROXYAUTH_AVAIL
           Available HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_AVAIL
 

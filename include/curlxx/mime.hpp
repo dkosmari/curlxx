@@ -32,26 +32,22 @@ namespace curl {
 
         using base_type = detail::owner_wrapper<curl_mime*>;
 
-        using base_type::raw_type;
-
-        using base_type::state_type;
-
 
         // Note: this is a non-owning object, its lifetime is tied to the mime object.
         struct part {
 
-            using read_callback_t = std::size_t (char* buffer,
-                                                 std::size_t element_size,
-                                                 std::size_t num_elements);
+            using read_function_sig = std::size_t (char* buffer,
+                                                   std::size_t element_size,
+                                                   std::size_t num_elements);
 
-            using seek_callback_t = int (curl_off_t offset,
-                                         int origin);
+            using seek_function_sig = int (curl_off_t offset,
+                                           int origin);
 
-            using free_callback_t = void ();
+            using free_function_sig = void ();
 
-            using read_func_t = std::function<read_callback_t>;
-            using seek_func_t = std::function<seek_callback_t>;
-            using free_func_t = std::function<free_callback_t>;
+            using read_function_t = std::move_only_function<read_function_sig>;
+            using seek_function_t = std::move_only_function<seek_function_sig>;
+            using free_function_t = std::move_only_function<free_function_sig>;
 
 
             const curl_mimepart*
@@ -113,15 +109,15 @@ namespace curl {
 
             void
             set_data_callbacks(curl_off_t size,
-                               read_func_t read_func,
-                               seek_func_t seek_func = {},
-                               free_func_t free_func = {});
+                               read_function_t read_func,
+                               seek_function_t seek_func = {},
+                               free_function_t free_func = {});
 
             std::expected<void, error>
             try_set_data_callbacks(curl_off_t size,
-                                   read_func_t read_func,
-                                   seek_func_t seek_func = {},
-                                   free_func_t free_func = {})
+                                   read_function_t read_func,
+                                   seek_function_t seek_func = {},
+                                   free_function_t free_func = {})
                 noexcept;
 
 
@@ -231,30 +227,7 @@ namespace curl {
 
             friend class mime;
 
-            struct context {
-
-                read_func_t read_func;
-                seek_func_t seek_func;
-                free_func_t free_func;
-
-                static
-                std::size_t
-                read_helper(char* buffer,
-                            std::size_t element_size,
-                            std::size_t num_elements,
-                            void* arg);
-
-                static
-                int
-                seek_helper(void* arg,
-                            curl_off_t offset,
-                            int origin);
-
-                static
-                void
-                free_helper(void *arg);
-
-            }; // struct context
+            struct context;
 
         }; // struct part
 

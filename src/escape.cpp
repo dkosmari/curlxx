@@ -23,9 +23,16 @@ namespace curl {
         char* s = curl_easy_escape(nullptr, input.data(), input.size());
         if (!s)
             throw error{"failed to escape string"};
-        string result = s;
-        curl_free(s);
-        return result;
+        try {
+            string result = s;
+            curl_free(s);
+            s = nullptr;
+            return result;
+        }
+        catch (...) {
+            curl_free(s);
+            throw;
+        }
     }
 
 
@@ -36,9 +43,16 @@ namespace curl {
         char* s = curl_easy_unescape(nullptr, input.data(), input.size(), &out_size);
         if (!s)
             throw error{"failed to unescape string"};
-        string result{s, static_cast<string::size_type>(out_size)};
-        curl_free(s);
-        return result;
+        try {
+            string result{s, static_cast<string::size_type>(out_size)};
+            curl_free(s);
+            s = nullptr;
+            return result;
+        }
+        catch (...) {
+            curl_free(s);
+            throw;
+        }
     }
 
 } // namespace curl

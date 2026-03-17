@@ -43,7 +43,7 @@ namespace curl {
 
         error(CURLsslset code);
 
-    };
+    }; // struct error
 
 } // namespace curl
 

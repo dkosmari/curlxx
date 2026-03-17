@@ -1,6 +1,6 @@
 /*
  * curlxx - A C++ wrapper for libcurl.
- * Copyright 2025  Daniel K. O. (dkosmari)
+ * Copyright 2025-2026  Daniel K. O. (dkosmari)
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
@@ -8,6 +8,7 @@
 #ifndef CURLXX_MULTI_HPP
 #define CURLXX_MULTI_HPP
 
+#include <cstddef>
 #include <expected>
 #include <vector>
 
@@ -27,26 +28,37 @@ namespace curl {
         using base_type = detail::basic_wrapper<CURLM*>;
 
 
-        // Inherit constructors.
-        using base_type::base_type;
-
-
+        /// Default constructor.
         multi();
 
+        /// Empty constructor.
+        constexpr
+        multi(std::nullptr_t)
+            noexcept
+        {}
+
+        explicit
+        multi(CURLM* handle);
+
+        /// Move constructor.
         multi(multi&& other)
             noexcept = default;
 
+        /// Move assignment.
         multi&
         operator =(multi&& other)
             noexcept = default;
 
-
+        /// Destructor.
         ~multi()
             noexcept;
 
 
         void
         create();
+
+        void
+        create(CURLM* handle);
 
 
         void
@@ -76,8 +88,6 @@ namespace curl {
         std::expected<unsigned, error>
         try_perform()
             noexcept;
-
-
 
 
         struct msg_done {
@@ -136,6 +146,8 @@ namespace curl {
 
         // CURLMOPT_NETWORK_CHANGED
         // Signal that the network has changed. TODO
+
+
 
         // CURLMOPT_PIPELINING
         // Enable HTTP multiplexing. TODO

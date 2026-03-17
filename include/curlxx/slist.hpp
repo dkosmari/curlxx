@@ -37,7 +37,7 @@ namespace curl {
         operator =(slist&& other)
             noexcept = default;
 
-
+        /// Destructor.
         ~slist()
             noexcept;
 

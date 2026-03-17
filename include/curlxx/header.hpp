@@ -30,7 +30,7 @@ namespace curl {
 
         header(const curl_header* h);
 
-    };
+    }; // struct header
 
 } // namespace curl
 

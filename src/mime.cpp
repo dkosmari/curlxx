@@ -14,16 +14,53 @@
 
 #include "curlxx/easy.hpp"
 #include "curlxx/slist.hpp"
+#include "utils.hpp"
+
+
+using curl::utils::value_or_throw;
 
 
 namespace curl {
 
+    /* -------------------------- */
+    /* struct mime::part::context */
+    /* -------------------------- */
+
+    struct mime::part::context {
+
+        read_function_t read_func;
+        seek_function_t seek_func;
+        free_function_t free_func;
+
+        static
+        std::size_t
+        read_function_helper(char* buffer,
+                             std::size_t element_size,
+                             std::size_t num_elements,
+                             void* arg);
+
+        static
+        int
+        seek_function_helper(void* arg,
+                             curl_off_t offset,
+                             int origin);
+
+        static
+        void
+        free_function_helper(void *arg);
+
+    }; // struct mime::part::context
+
+
+    /* --------------------------- */
+    /* mime::part::context methods */
+    /* --------------------------- */
 
     std::size_t
-    mime::part::context::read_helper(char* buffer,
-                                     std::size_t element_size,
-                                     std::size_t num_elements,
-                                     void* arg)
+    mime::part::context::read_function_helper(char* buffer,
+                                              std::size_t element_size,
+                                              std::size_t num_elements,
+                                              void* arg)
     {
         try {
             auto ctx = reinterpret_cast<context*>(arg);
@@ -40,9 +77,9 @@ namespace curl {
 
 
     int
-    mime::part::context::seek_helper(void* arg,
-                                     curl_off_t offset,
-                                     int origin)
+    mime::part::context::seek_function_helper(void* arg,
+                                              curl_off_t offset,
+                                              int origin)
     {
         try {
             auto ctx = reinterpret_cast<context*>(arg);
@@ -57,7 +94,7 @@ namespace curl {
 
 
     void
-    mime::part::context::free_helper(void *arg)
+    mime::part::context::free_function_helper(void *arg)
     {
         try {
             auto ctx = reinterpret_cast<context*>(arg);
@@ -68,6 +105,10 @@ namespace curl {
         catch (...) {}
     }
 
+
+    /* ------------------ */
+    /* mime::part methods */
+    /* ------------------ */
 
     const curl_mimepart*
     mime::part::data()
@@ -97,27 +138,21 @@ namespace curl {
     mime::part::set_data(const void* data,
                          std::size_t size)
     {
-        auto result = try_set_data(data, size);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_data(data, size));
     }
 
 
     void
     mime::part::set_data(const std::string& data)
     {
-        auto result = try_set_data(data);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_data(data));
     }
 
 
     void
     mime::part::set_data(std::string_view data)
     {
-        auto result = try_set_data(data);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_data(data));
     }
 
 
@@ -158,24 +193,22 @@ namespace curl {
 
     void
     mime::part::set_data_callbacks(curl_off_t size,
-                                   std::function<read_callback_t> read_cb,
-                                   std::function<seek_callback_t> seek_cb,
-                                   std::function<free_callback_t> free_cb)
+                                   read_function_t read_func,
+                                   seek_function_t seek_func,
+                                   free_function_t free_func)
     {
-        auto result = try_set_data_callbacks(size,
-                                             std::move(read_cb),
-                                             std::move(seek_cb),
-                                             std::move(free_cb));
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_data_callbacks(size,
+                                                     std::move(read_func),
+                                                     std::move(seek_func),
+                                                     std::move(free_func)));
     }
 
 
     std::expected<void, error>
     mime::part::try_set_data_callbacks(curl_off_t size,
-                                       std::function<read_callback_t> read_func,
-                                       std::function<seek_callback_t> seek_func,
-                                       std::function<free_callback_t> free_func)
+                                       read_function_t read_func,
+                                       seek_function_t seek_func,
+                                       free_function_t free_func)
         noexcept
     {
         try {
@@ -189,9 +222,9 @@ namespace curl {
 
             auto e = curl_mime_data_cb(raw,
                                        size,
-                                       context::read_helper,
-                                       context::seek_helper,
-                                       context::free_helper,
+                                       context::read_function_helper,
+                                       context::seek_function_helper,
+                                       context::free_function_helper,
                                        ctx);
             if (e) {
                 delete ctx;
@@ -208,9 +241,7 @@ namespace curl {
     void
     mime::part::set_encoder(const std::string& encoder)
     {
-        auto result = try_set_encoder(encoder);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_encoder(encoder));
     }
 
 
@@ -236,9 +267,7 @@ namespace curl {
     void
     mime::part::set_file_data(const std::filesystem::path& filename)
     {
-        auto result = try_set_file_data(filename);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_file_data(filename));
     }
 
 
@@ -264,9 +293,7 @@ namespace curl {
     void
     mime::part::set_file_name(std::filesystem::path& remote_filename)
     {
-        auto result = try_set_file_name(remote_filename);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_file_name(remote_filename));
     }
 
 
@@ -292,9 +319,7 @@ namespace curl {
     void
     mime::part::set_header(const std::vector<std::string>& headers)
     {
-        auto result = try_set_headers(headers);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_headers(headers));
     }
 
 
@@ -328,9 +353,7 @@ namespace curl {
     void
     mime::part::set_name(const std::string& name)
     {
-        auto result = try_set_name(name);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_name(name));
     }
 
 
@@ -356,9 +379,7 @@ namespace curl {
     void
     mime::part::set_subparts(mime& subparts)
     {
-        auto result = try_set_subparts(subparts);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_subparts(subparts));
     }
 
 
@@ -386,9 +407,7 @@ namespace curl {
     void
     mime::part::set_mime_type(const std::string& mime_type)
     {
-        auto result = try_set_mime_type(mime_type);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_mime_type(mime_type));
     }
 
 
@@ -410,6 +429,10 @@ namespace curl {
         curl_mime_type(raw, nullptr);
     }
 
+
+    /* ------------ */
+    /* mime methods */
+    /* ------------ */
 
     mime::mime()
     {
