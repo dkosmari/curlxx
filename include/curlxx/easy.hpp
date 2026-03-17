@@ -546,73 +546,45 @@ namespace curl {
         // Send a POST with this data - and copy it.
 
         void
-        set_copy_post_field(const std::string& data);
+        set_copy_post_fields(const std::string& data);
 
         void
-        set_copy_post_field(const void* data,
-                            std::size_t size);
+        set_copy_post_fields(const void* data,
+                             std::size_t size);
 
         template<typename T,
                  std::size_t E>
         inline
         void
-        set_copy_post_field(std::span<T, E> data)
+        set_copy_post_fields(std::span<T, E> data)
         {
-            set_copy_post_field(data.data(), data.size_bytes());
-        }
-
-        // alias: _fields -> _field
-        template<typename... T>
-        inline
-        void
-        set_copy_post_fields(T... args)
-        {
-            set_copy_post_field(args...);
+            set_copy_post_fields(data.data(), data.size_bytes());
         }
 
 
         std::expected<void, error>
-        try_set_copy_post_field(const std::string& data)
+        try_set_copy_post_fields(const std::string& data)
             noexcept;
 
         std::expected<void, error>
-        try_set_copy_post_field(const void* data,
-                                std::size_t size)
+        try_set_copy_post_fields(const void* data,
+                                 std::size_t size)
             noexcept;
 
         template<typename T,
                  std::size_t E>
         inline
         std::expected<void, error>
-        try_set_copy_post_field(std::span<T, E> data)
+        try_set_copy_post_fields(std::span<T, E> data)
             noexcept
         {
             return try_set_copy_post_field(data.data(), data.size_bytes());
         }
 
-        // alias: _fields -> _field
-        template<typename... T>
-        inline
-        std::expected<void, error>
-        try_set_copy_post_fields(T... args)
-            noexcept
-        {
-            return try_set_copy_post_field(args...);
-        }
 
-
-        void
-        unset_copy_post_field()
-            noexcept;
-
-        // alias: _fields -> _field
-        inline
         void
         unset_copy_post_fields()
-            noexcept
-        {
-            unset_copy_post_field();
-        }
+            noexcept;
 
 
         // CURLOPT_CRLF
@@ -2016,12 +1988,20 @@ namespace curl {
         /* Start of info getters. */
         /* ---------------------- */
 
+        // CURLINFO_ACTIVESOCKET
+        // The session's active socket.
+
+        curl_socket_t
+        get_active_socket()
+            const;
+
+        std::expected<curl_socket_t, error>
+        try_get_active_socket()
+            const noexcept;
+
 
         /*
           TODO
-
-          CURLINFO_ACTIVESOCKET
-          The session's active socket. See CURLINFO_ACTIVESOCKET
 
           CURLINFO_APPCONNECT_TIME
           The time it took from the start until the SSL connect/handshake with the remote host was completed as a double in number of seconds.
@@ -2047,8 +2027,25 @@ namespace curl {
           CURLINFO_CONNECT_TIME_T
           The time it took from the start until the connect to the remote host (or proxy) was completed. In microseconds. See CURLINFO_CONNECT_TIME_T.
 
-          CURLINFO_CONN_ID
-          The ID of the last connection used by the transfer. (Added in 8.2.0) See CURLINFO_CONN_ID
+        */
+
+
+#if CURL_AT_LEAST_VERSION(8, 2, 0)
+
+        // CURLINFO_CONN_ID
+        // The ID of the last connection used by the transfer.
+
+        curl_off_t
+        get_conn_id()
+            const;
+
+        std::expected<curl_off_t, error>
+        try_get_conn_id()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 2, 0)
+
+        /*
 
           CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
           Content length from the Content-Length header. See CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
@@ -2056,8 +2053,22 @@ namespace curl {
           CURLINFO_CONTENT_LENGTH_UPLOAD_T
           Upload size. See CURLINFO_CONTENT_LENGTH_UPLOAD_T
 
-          CURLINFO_CONTENT_TYPE
-          Content type from the Content-Type: header. We recommend using curl_easy_header instead. See CURLINFO_CONTENT_TYPE
+        */
+
+
+        // CURLINFO_CONTENT_TYPE
+        // Content type from the Content-Type: header.
+
+        std::string
+        get_content_type()
+            const;
+
+        std::expected<std::string, error>
+        try_get_content_type()
+            const noexcept;
+
+
+        /*
 
           CURLINFO_COOKIELIST
           List of all known cookies. See CURLINFO_COOKIELIST
@@ -2298,6 +2309,12 @@ namespace curl {
         std::expected<void, error>
         try_setopt(CURLoption opt, T&& arg)
             noexcept;
+
+
+        template<typename T>
+        std::expected<T, error>
+        try_getinfo(CURLINFO info)
+            const noexcept;
 
 
         friend class multi;

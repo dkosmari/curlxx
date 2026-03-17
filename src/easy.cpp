@@ -718,31 +718,31 @@ namespace curl {
 
 
     void
-    easy::set_copy_post_field(const std::string& data)
+    easy::set_copy_post_fields(const std::string& data)
     {
-        set_copy_post_field(data.data(), data.size());
+        set_copy_post_fields(data.data(), data.size());
     }
 
 
     void
-    easy::set_copy_post_field(const void* data,
-                              std::size_t size)
+    easy::set_copy_post_fields(const void* data,
+                               std::size_t size)
     {
-        return value_or_throw(try_set_copy_post_field(data, size));
+        return value_or_throw(try_set_copy_post_fields(data, size));
     }
 
 
     std::expected<void, error>
-    easy::try_set_copy_post_field(const std::string& data)
+    easy::try_set_copy_post_fields(const std::string& data)
         noexcept
     {
-        return try_set_copy_post_field(data.data(), data.size());
+        return try_set_copy_post_fields(data.data(), data.size());
     }
 
 
     std::expected<void, error>
-    easy::try_set_copy_post_field(const void* data,
-                                  std::size_t size)
+    easy::try_set_copy_post_fields(const void* data,
+                                   std::size_t size)
         noexcept
     {
         auto res = try_set_post_field_size(size);
@@ -753,7 +753,7 @@ namespace curl {
 
 
     void
-    easy::unset_copy_post_field()
+    easy::unset_copy_post_fields()
         noexcept
     {
         try_setopt(CURLOPT_COPYPOSTFIELDS, nullptr);
@@ -1757,6 +1757,64 @@ namespace curl {
     }
 
 
+    curl_socket_t
+    easy::get_active_socket()
+        const
+    {
+        return value_or_throw(try_get_active_socket());
+    }
+
+
+    std::expected<curl_socket_t, error>
+    easy::try_get_active_socket()
+        const noexcept
+    {
+        return try_getinfo<curl_socket_t>(CURLINFO_ACTIVESOCKET);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 2, 0)
+
+    curl_off_t
+    easy::get_conn_id()
+        const
+    {
+        return value_or_throw(try_get_conn_id());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_conn_id()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_CONN_ID);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 2, 0)
+
+
+    std::string
+    easy::get_content_type()
+        const
+    {
+        return value_or_throw(try_get_content_type());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_content_type()
+        const noexcept
+    {
+        auto info = try_getinfo<char*>(CURLINFO_CONTENT_TYPE);
+        if (!info)
+            return info;
+        std::string result;
+        if (*info) // protect against NULL pointer
+            result = *info;
+        return result;
+    }
+
+
     const std::any&
     easy::get_private()
         const
@@ -1821,7 +1879,7 @@ namespace curl {
     }
 
 
-        void
+    void
     easy::setup_extra_state()
     {
         if (raw) {
@@ -1911,6 +1969,19 @@ namespace curl {
         if (e != CURLE_OK)
             return std::unexpected{error{e}};
         return {};
+    }
+
+
+    template<typename T>
+    std::expected<T, error>
+    easy::try_getinfo(CURLINFO info)
+        const noexcept
+    {
+        T result;
+        auto e = curl_easy_getinfo(raw, info, &result);
+        if (e)
+            return std::unexpected{error{e}};
+        return result;
     }
 
 } // namespace curl
