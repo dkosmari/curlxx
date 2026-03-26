@@ -582,31 +582,20 @@ namespace curl {
 
 
     void
-    easy::set_connect_to(const std::vector<std::string>& hosts)
+    easy::set_connect_to(slist hosts)
     {
-        return value_or_throw(try_set_connect_to(hosts));
+        return value_or_throw(try_set_connect_to(std::move(hosts)));
     }
 
 
     std::expected<void, error>
-    easy::try_set_connect_to(const std::vector<std::string>& hosts)
+    easy::try_set_connect_to(slist hosts)
         noexcept
     {
-        try {
-            slist new_connect_to_list;
-            for (auto& host : hosts)
-                new_connect_to_list.append(host);
-            auto result = try_setopt(CURLOPT_CONNECT_TO, new_connect_to_list.data());
-            if (result)
-                extra_state.connect_to_list = std::move(new_connect_to_list);
-            return result;
-        }
-        catch (std::bad_alloc&) {
-            return std::unexpected{error{CURLE_OUT_OF_MEMORY}};
-        }
-        catch (...) {
-            return std::unexpected{error{CURLE_OK}};
-        }
+        auto result = try_setopt(CURLOPT_CONNECT_TO, hosts.data());
+        if (result)
+            extra_state.connect_to_list = std::move(hosts);
+        return result;
     }
 
 
@@ -891,6 +880,21 @@ namespace curl {
 
 
     void
+    easy::set_fail_on_error(bool enable)
+    {
+        return value_or_throw(try_set_fail_on_error(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_fail_on_error(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_FAILONERROR, long{enable});
+    }
+
+
+    void
     easy::set_file_time(bool enable)
     {
         return value_or_throw(try_set_file_time(enable));
@@ -996,31 +1000,38 @@ namespace curl {
 
 
     void
-    easy::set_http_headers(const std::vector<std::string>& headers)
+    easy::set_http_headers(slist headers)
     {
-        return value_or_throw(try_set_http_headers(headers));
+        return value_or_throw(try_set_http_headers(std::move(headers)));
     }
 
 
     std::expected<void, error>
-    easy::try_set_http_headers(const std::vector<std::string>& headers)
+    easy::try_set_http_headers(slist headers)
         noexcept
     {
-        try {
-            slist new_header_list;
-            for (auto& h : headers)
-                new_header_list.append(h);
-            auto result = try_setopt(CURLOPT_HTTPHEADER, new_header_list.data());
-            if (result)
-                extra_state.header_list = std::move(new_header_list);
+        auto result = try_setopt(CURLOPT_HTTPHEADER, headers.data());
+        if (result)
+            extra_state.headers_list = std::move(headers);
+        return result;
+    }
+
+
+    void
+    easy::append_header(const std::string& header)
+    {
+        return value_or_throw(try_append_header(header));
+    }
+
+
+    std::expected<void, error>
+    easy::try_append_header(const std::string& header)
+        noexcept
+    {
+        auto result = extra_state.headers_list.try_append(header);
+        if (!result)
             return result;
-        }
-        catch (std::bad_alloc&) {
-            return std::unexpected{error{CURLE_OUT_OF_MEMORY}};
-        }
-        catch (...) {
-            return std::unexpected{error{CURLE_OK}};
-        }
+        return try_setopt(CURLOPT_HTTPHEADER, extra_state.headers_list.data());
     }
 
 
@@ -1051,6 +1062,21 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_HTTP_VERSION, ver);
+    }
+
+
+    void
+    easy::set_ignore_content_length(bool ignore)
+    {
+        return value_or_throw(try_set_ignore_content_length(ignore));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_ignore_content_length(bool ignore)
+        noexcept
+    {
+        return try_setopt(CURLOPT_IGNORE_CONTENT_LENGTH, long{ignore});
     }
 
 
@@ -1773,6 +1799,54 @@ namespace curl {
     }
 
 
+    std::chrono::microseconds
+    easy::get_app_connect_time()
+        const
+    {
+        return value_or_throw(try_get_app_connect_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_app_connect_time()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t, std::chrono::microseconds>(CURLINFO_APPCONNECT_TIME_T);
+    }
+
+
+    bool
+    easy::get_condition_unmet()
+        const
+    {
+        return value_or_throw(try_get_condition_unmet());
+    }
+
+
+    std::expected<bool, error>
+    easy::try_get_condition_unmet()
+        const noexcept
+    {
+        return try_getinfo<long, bool>(CURLINFO_CONDITION_UNMET);
+    }
+
+
+    std::chrono::microseconds
+    easy::get_connect_time()
+        const
+    {
+        return value_or_throw(try_get_connect_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_connect_time()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t, std::chrono::microseconds>(CURLINFO_CONNECT_TIME_T);
+    }
+
+
 #if CURL_AT_LEAST_VERSION(8, 2, 0)
 
     curl_off_t
@@ -1793,6 +1867,38 @@ namespace curl {
 #endif // CURL_AT_LEAST_VERSION(8, 2, 0)
 
 
+    curl_off_t
+    easy::get_content_length_download()
+        const
+    {
+        return value_or_throw(try_get_content_length_download());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_content_length_download()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_CONTENT_LENGTH_DOWNLOAD_T);
+    }
+
+
+    curl_off_t
+    easy::get_content_length_upload()
+        const
+    {
+        return value_or_throw(try_get_content_length_upload());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_content_length_upload()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_CONTENT_LENGTH_UPLOAD_T);
+    }
+
+
     std::string
     easy::get_content_type()
         const
@@ -1805,13 +1911,110 @@ namespace curl {
     easy::try_get_content_type()
         const noexcept
     {
-        auto info = try_getinfo<char*>(CURLINFO_CONTENT_TYPE);
-        if (!info)
-            return info;
-        std::string result;
-        if (*info) // protect against NULL pointer
-            result = *info;
-        return result;
+        return try_getinfo_str(CURLINFO_CONTENT_TYPE);
+    }
+
+
+    slist
+    easy::get_cookie_list()
+        const
+    {
+        return value_or_throw(try_get_cookie_list());
+    }
+
+
+    std::expected<slist, error>
+    easy::try_get_cookie_list()
+        const noexcept
+    {
+        return try_getinfo<curl_slist*, slist>(CURLINFO_COOKIELIST);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 11, 0)
+
+    curl_off_t
+    easy::get_early_data_sent()
+        const
+    {
+        return value_or_throw(try_get_early_data_sent());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_early_data_sent()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_EARLYDATA_SENT_T);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 11, 0)
+
+
+    std::string
+    easy::get_effective_method()
+        const
+    {
+        return value_or_throw(try_get_effective_method());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_effective_method()
+        const noexcept
+    {
+        return try_getinfo_str(CURLINFO_EFFECTIVE_METHOD);
+    }
+
+
+    std::string
+    easy::get_effective_url()
+        const
+    {
+        return value_or_throw(try_get_effective_url());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_effective_url()
+        const noexcept
+    {
+        return try_getinfo_str(CURLINFO_EFFECTIVE_URL);
+    }
+
+
+    std::chrono::utc_seconds
+    easy::get_file_time()
+        const
+    {
+        return value_or_throw(try_get_file_time());
+    }
+
+
+    std::expected<std::chrono::utc_seconds, error>
+    easy::try_get_file_time()
+        const noexcept
+    {
+        auto value = try_getinfo<curl_off_t>(CURLINFO_FILETIME_T);
+        if (!value)
+            return std::unexpected{std::move(value.error())};
+        return std::chrono::utc_seconds{std::chrono::seconds(*value)};
+    }
+
+
+    easy::http_version
+    easy::get_http_version()
+        const
+    {
+        return value_or_throw(try_get_http_version());
+    }
+
+
+    std::expected<easy::http_version, error>
+    easy::try_get_http_version()
+        const noexcept
+    {
+        return try_getinfo<long, http_version>(CURLINFO_HTTP_VERSION);
     }
 
 
@@ -1827,6 +2030,134 @@ namespace curl {
     easy::get_private()
     {
         return extra_state.private_data;
+    }
+
+
+    long
+    easy::get_response_code()
+        const
+    {
+        return value_or_throw(try_get_response_code());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_response_code()
+        const noexcept
+    {
+        return try_getinfo<long>(CURLINFO_RESPONSE_CODE);
+    }
+
+
+    std::chrono::seconds
+    easy::get_retry_after()
+        const
+    {
+        return value_or_throw(try_get_retry_after());
+    }
+
+
+    std::expected<std::chrono::seconds, error>
+    easy::try_get_retry_after()
+        const noexcept
+    {
+        return try_getinfo<long, std::chrono::seconds>(CURLINFO_RETRY_AFTER);
+    }
+
+
+    curl_off_t
+    easy::get_size_download()
+        const
+    {
+        return value_or_throw(try_get_size_download());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_size_download()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_SIZE_DOWNLOAD_T);
+    }
+
+
+    curl_off_t
+    easy::get_size_upload()
+        const
+    {
+        return value_or_throw(try_get_size_upload());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_size_upload()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_SIZE_UPLOAD_T);
+    }
+
+
+    curl_off_t
+    easy::get_speed_download()
+        const
+    {
+        return value_or_throw(try_get_speed_download());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_speed_download()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_SPEED_DOWNLOAD_T);
+    }
+
+
+    curl_off_t
+    easy::get_speed_upload()
+        const
+    {
+        return value_or_throw(try_get_speed_upload());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_speed_upload()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t>(CURLINFO_SPEED_UPLOAD_T);
+    }
+
+
+    std::chrono::microseconds
+    easy::get_start_transfer_time()
+        const
+    {
+        return value_or_throw(try_get_start_transfer_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_start_transfer_time()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t, std::chrono::microseconds>(CURLINFO_STARTTRANSFER_TIME_T);
+    }
+
+
+    std::chrono::microseconds
+    easy::get_total_time()
+        const
+    {
+        return value_or_throw(try_get_total_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_total_time()
+        const noexcept
+    {
+        return try_getinfo<curl_off_t, std::chrono::microseconds>(CURLINFO_TOTAL_TIME_T);
     }
 
 
@@ -1972,8 +2303,9 @@ namespace curl {
     }
 
 
-    template<typename T>
-    std::expected<T, error>
+    template<typename T,
+             typename U>
+    std::expected<U, error>
     easy::try_getinfo(CURLINFO info)
         const noexcept
     {
@@ -1981,7 +2313,22 @@ namespace curl {
         auto e = curl_easy_getinfo(raw, info, &result);
         if (e)
             return std::unexpected{error{e}};
-        return result;
+        return static_cast<U>(result);
+    }
+
+
+    // Special version that handles null pointers.
+    std::expected<std::string, error>
+    easy::try_getinfo_str(CURLINFO info)
+        const noexcept
+    {
+        char* str;
+        auto e = curl_easy_getinfo(raw, info, &str);
+        if (e)
+            return std::unexpected{error{e}};
+        if (str)
+            return str;
+        return {};
     }
 
 } // namespace curl
