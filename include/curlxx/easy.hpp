@@ -39,19 +39,43 @@ namespace curl {
 
         using base_type = detail::basic_wrapper<CURL*>;
 
-        using read_function_sig = std::size_t(std::span<char>);
+
+        using closesocket_function_sig = int (curl_socket_t fd);
+        using closesocket_function_t = std::move_only_function<closesocket_function_sig>;
+
+        using fnmatch_function_sig = bool (const std::string& pattern,
+                                           const std::string& text);
+        using fnmatch_function_t = std::move_only_function<fnmatch_function_sig>;
+
+        using opensocket_function_sig = curl_socket_t (curlsocktype purpose,
+                                                       curl_sockaddr* address);
+        using opensocket_function_t = std::move_only_function<opensocket_function_sig>;
+
+        using progress_function_sig = int (curl_off_t dltotal,
+                                           curl_off_t dlnow,
+                                           curl_off_t ultotal,
+                                           curl_off_t ulnow);
+        using progress_function_t = std::move_only_function<progress_function_sig>;
+
+        using read_function_sig = std::size_t (std::span<char>);
         using read_function_t = std::move_only_function<read_function_sig>;
 
-        using write_function_sig = std::size_t(std::span<const char>);
+        using write_function_sig = std::size_t (std::span<const char>);
         using write_function_t = std::move_only_function<write_function_sig>;
 
 
         struct extra_state_type {
             std::vector<char> error_buffer;
-            read_function_t read_func;
-            write_function_t write_func;
-            slist headers_list;
-            slist connect_to_list;
+
+            closesocket_function_t closesocket_func;
+            fnmatch_function_t     fnmatch_func;
+            opensocket_function_t  opensocket_func;
+            progress_function_t    progress_func;
+            read_function_t        read_func;
+            write_function_t       write_func;
+
+            slist    headers_list;
+            slist    connect_to_list;
             std::any private_data;
         };
 
@@ -415,10 +439,22 @@ namespace curl {
 
 
         // CURLOPT_CLOSESOCKETDATA
-        // Data pointer to pass to the close socket callback. TODO
+        // Data pointer to pass to the close socket callback.
+        // Note: not implemented, use a lambda with a capture for the closesocket function.
 
         // CURLOPT_CLOSESOCKETFUNCTION
-        // Callback for closing socket. TODO
+        // Callback for closing socket.
+
+        void
+        set_closesocket_function(closesocket_function_t closesocket_func);
+
+        std::expected<void, error>
+        try_set_closesocket_function(closesocket_function_t closesocket_func)
+            noexcept;
+
+        void
+        unset_closesocket_function()
+            noexcept;
 
 
         // CURLOPT_CONNECTTIMEOUT
@@ -717,8 +753,16 @@ namespace curl {
         // CURLOPT_ERRORBUFFER
         // Error message buffer. TODO
 
+
         // CURLOPT_EXPECT_100_TIMEOUT_MS
-        // 100-continue timeout. TODO
+        // 100-continue timeout.
+
+        void
+        set_expect_100_timeout(std::chrono::milliseconds timeout);
+
+        std::expected<void, error>
+        try_set_expect_100_timeout(std::chrono::milliseconds timeout)
+            noexcept;
 
 
         // CURLOPT_FAILONERROR
@@ -744,10 +788,22 @@ namespace curl {
 
 
         // CURLOPT_FNMATCH_DATA
-        // Data pointer to pass to the wildcard matching callback. TODO
+        // Data pointer to pass to the wildcard matching callback.
+        // Note: not implemented, just use a lambda with captures as the fnmatch function.
 
         // CURLOPT_FNMATCH_FUNCTION
-        // Callback for wildcard matching. TODO
+        // Callback for wildcard matching.
+
+        void
+        set_fnmatch_function(fnmatch_function_t fnmatch_func);
+
+        std::expected<void, error>
+        try_set_fnmatch_function(fnmatch_function_t fnmatch_func)
+            noexcept;
+
+        void
+        unset_fnmatch_function()
+            noexcept;
 
 
         // CURLOPT_FOLLOWLOCATION
@@ -1204,11 +1260,24 @@ namespace curl {
         // CURLOPT_NOSIGNAL
         // Do not install signal handlers. TODO
 
+
         // CURLOPT_OPENSOCKETDATA
-        // Data pointer to pass to the open socket callback. TODO
+        // Data pointer to pass to the open socket callback.
+        // Note: not implemented, use a lambda with captures for the opensocket function.
 
         // CURLOPT_OPENSOCKETFUNCTION
-        // Callback for socket creation. TODO
+        // Callback for socket creation.
+
+        void
+        set_opensocket_function(opensocket_function_t opensocket_func);
+
+        std::expected<void, error>
+        try_set_opensocket_function(opensocket_function_t opensocket_func)
+            noexcept;
+
+        void
+        unset_opensocket_function()
+            noexcept;
 
 
         // CURLOPT_PASSWORD
@@ -1372,9 +1441,6 @@ namespace curl {
             noexcept;
 
 
-        // CURLOPT_PROGRESSDATA
-        // Data pointer to pass to the progress meter callback. TODO
-
         // CURLOPT_PROTOCOLS_STR
         // Allowed protocols. TODO
 
@@ -1487,12 +1553,22 @@ namespace curl {
         // CURLOPT_RANGE
         // Range requests. TODO
 
+
         // CURLOPT_READDATA
-        // Data pointer to pass to the read callback. TODO
+        // Data pointer to pass to the read callback.
+        // Note: this overrides the read function back to default: std::fread()
+
+        void
+        set_read_data(void* data_ptr);
+
+        std::expected<void, error>
+        try_set_read_data(void* data_ptr)
+            noexcept;
 
 
         // CURLOPT_READFUNCTION
         // Callback for reading data.
+        // Note: this overrides the read data to point to the easy instance.
 
         void
         set_read_function(read_function_t read_func);
@@ -1957,14 +2033,31 @@ namespace curl {
 
 
         // CURLOPT_WILDCARDMATCH
-        // Transfer multiple files according to a filename pattern. TODO
+        // Transfer multiple files according to a filename pattern.
+
+        void
+        set_wildcard_match(bool enable);
+
+        std::expected<void, error>
+        try_set_wildcard_match(bool enable)
+            noexcept;
+
 
         // CURLOPT_WRITEDATA
-        // Data pointer to pass to the write callback. TODO
+        // Data pointer to pass to the write callback.
+        // Note: this overrides the write function back to default: std::fwrite()
+
+        void
+        set_write_data(void* data_ptr);
+
+        std::expected<void, error>
+        try_set_write_data(void* data_ptr)
+            noexcept;
 
 
         // CURLOPT_WRITEFUNCTION
         // Callback for writing data.
+        // Note: this overrides the write data to the easy instance.
 
         void
         set_write_function(write_function_t write_func);
@@ -1973,6 +2066,8 @@ namespace curl {
         try_set_write_function(write_function_t write_func)
             noexcept;
 
+
+        // Reset the write function back to the default: std::fwrite()
         void
         unset_write_function()
             noexcept;
@@ -1990,10 +2085,23 @@ namespace curl {
 
 
         // CURLOPT_XFERINFODATA
-        // Data pointer to pass to the progress meter callback. TODO
+        // Data pointer to pass to the progress meter callback.
+        // Note: not implemented; just capture all the data you need in your lambda.
 
         // CURLOPT_XFERINFOFUNCTION
-        // Callback for progress meter. TODO
+        // Callback for progress meter.
+
+        void
+        set_xfer_info_function(progress_function_t progress_func);
+
+        std::expected<void, error>
+        try_set_xfer_info_function(progress_function_t progress_func)
+            noexcept;
+
+        void
+        unset_xfer_info_function()
+            noexcept;
+
 
         // CURLOPT_XOAUTH2_BEARER
         // OAuth2 bearer token. TODO
@@ -2476,6 +2584,35 @@ namespace curl {
 
         void
         setup_extra_state();
+
+        static
+        int
+        closesocket_function_helper(CURL* handle,
+                                    curl_socket_t fd)
+            noexcept;
+
+        static
+        int
+        fnmatch_function_helper(CURL* handle,
+                                const char* pattern,
+                                const char* text)
+            noexcept;
+
+        static
+        curl_socket_t
+        opensocket_function_helper(CURL* handle,
+                                  curlsocktype purpose,
+                                  curl_sockaddr* address)
+            noexcept;
+
+        static
+        int
+        progress_function_helper(CURL* handle,
+                                 curl_off_t dltotal,
+                                 curl_off_t dlnow,
+                                 curl_off_t ultotal,
+                                 curl_off_t ulnow)
+            noexcept;
 
         static
         std::size_t

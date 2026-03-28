@@ -5,16 +5,12 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-#include <iostream>
 #include <utility>
 
 #include "curlxx/easy.hpp"
 
 #include "utils.hpp"
 
-
-using std::cout;
-using std::endl;
 
 using curl::utils::value_or_throw;
 
@@ -537,6 +533,43 @@ namespace curl {
 
 
     void
+    easy::set_closesocket_function(closesocket_function_t closesocket_func)
+    {
+        return value_or_throw(try_set_closesocket_function(std::move(closesocket_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_closesocket_function(closesocket_function_t closesocket_func)
+        noexcept
+    {
+        if (!closesocket_func) {
+            unset_closesocket_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_CLOSESOCKETDATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_CLOSESOCKETFUNCTION, &closesocket_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.closesocket_func = std::move(closesocket_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_closesocket_function()
+        noexcept
+    {
+        extra_state.closesocket_func = {};
+        try_setopt(CURLOPT_CLOSESOCKETDATA, nullptr);
+        try_setopt(CURLOPT_CLOSESOCKETFUNCTION, nullptr);
+    }
+
+
+    void
     easy::set_connect_timeout(std::chrono::seconds timeout)
     {
         return value_or_throw(try_set_connect_timeout(timeout));
@@ -880,6 +913,21 @@ namespace curl {
 
 
     void
+    easy::set_expect_100_timeout(std::chrono::milliseconds timeout)
+    {
+        return value_or_throw(try_set_expect_100_timeout(timeout));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_expect_100_timeout(std::chrono::milliseconds timeout)
+        noexcept
+    {
+        return try_setopt(CURLOPT_EXPECT_100_TIMEOUT_MS, long(timeout.count()));
+    }
+
+
+    void
     easy::set_fail_on_error(bool enable)
     {
         return value_or_throw(try_set_fail_on_error(enable));
@@ -906,6 +954,43 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_FILETIME, long{enable});
+    }
+
+
+    void
+    easy::set_fnmatch_function(fnmatch_function_t fnmatch_func)
+    {
+        return value_or_throw(try_set_fnmatch_function(std::move(fnmatch_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_fnmatch_function(fnmatch_function_t fnmatch_func)
+        noexcept
+    {
+        if (!fnmatch_func) {
+            unset_fnmatch_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_FNMATCH_DATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_FNMATCH_FUNCTION, &fnmatch_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.fnmatch_func = std::move(fnmatch_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_fnmatch_function()
+        noexcept
+    {
+        extra_state.fnmatch_func = {};
+        try_setopt(CURLOPT_FNMATCH_DATA, nullptr);
+        try_setopt(CURLOPT_FNMATCH_FUNCTION, nullptr);
     }
 
 
@@ -1315,6 +1400,43 @@ namespace curl {
 
 
     void
+    easy::set_opensocket_function(opensocket_function_t opensocket_func)
+    {
+        return value_or_throw(try_set_opensocket_function(std::move(opensocket_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_opensocket_function(opensocket_function_t opensocket_func)
+        noexcept
+    {
+        if (!opensocket_func) {
+            unset_opensocket_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_OPENSOCKETDATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_OPENSOCKETFUNCTION, &opensocket_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.opensocket_func = std::move(opensocket_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_opensocket_function()
+        noexcept
+    {
+        extra_state.opensocket_func = {};
+        try_setopt(CURLOPT_OPENSOCKETDATA, nullptr);
+        try_setopt(CURLOPT_OPENSOCKETFUNCTION, nullptr);
+    }
+
+
+    void
     easy::set_password(const std::string& password)
     {
         return value_or_throw(try_set_password(password));
@@ -1426,6 +1548,22 @@ namespace curl {
 
 
     void
+    easy::set_read_data(void* data_ptr)
+    {
+        return value_or_throw(try_set_read_data(data_ptr));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_read_data(void* data_ptr)
+        noexcept
+    {
+        unset_read_function();
+        return try_setopt(CURLOPT_READDATA, data_ptr);
+    }
+
+
+    void
     easy::set_read_function(read_function_t read_func)
     {
         return value_or_throw(try_set_read_function(std::move(read_func)));
@@ -1436,6 +1574,11 @@ namespace curl {
     easy::try_set_read_function(read_function_t read_func)
         noexcept
     {
+        if (!read_func) {
+            unset_read_function();
+            return {};
+        }
+
         auto data_res = try_setopt(CURLOPT_READDATA, raw);
         if (!data_res)
             return data_res;
@@ -1736,6 +1879,37 @@ namespace curl {
 
 
     void
+    easy::set_wildcard_match(bool enable)
+    {
+        return value_or_throw(try_set_wildcard_match(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_wildcard_match(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_WILDCARDMATCH, long{enable});
+    }
+
+
+    void
+    easy::set_write_data(void* data_ptr)
+    {
+        return value_or_throw(try_set_write_data(data_ptr));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_write_data(void* data_ptr)
+        noexcept
+    {
+        unset_write_function();
+        return try_setopt(CURLOPT_WRITEDATA, data_ptr);
+    }
+
+
+    void
     easy::set_write_function(write_function_t write_func)
     {
         return value_or_throw(try_set_write_function(std::move(write_func)));
@@ -1746,6 +1920,11 @@ namespace curl {
     easy::try_set_write_function(write_function_t write_func)
         noexcept
     {
+        if (!write_func) {
+            unset_write_function();
+            return {};
+        }
+
         auto data_res = try_setopt(CURLOPT_WRITEDATA, raw);
         if (!data_res)
             return data_res;
@@ -1780,6 +1959,43 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_WS_OPTIONS, mask);
+    }
+
+
+    void
+    easy::set_xfer_info_function(progress_function_t progress_func)
+    {
+        return value_or_throw(try_set_xfer_info_function(std::move(progress_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_xfer_info_function(progress_function_t progress_func)
+        noexcept
+    {
+        if (!progress_func) {
+            unset_xfer_info_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_XFERINFODATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_XFERINFOFUNCTION, &progress_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.progress_func = std::move(progress_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_xfer_info_function()
+        noexcept
+    {
+        extra_state.progress_func = {};
+        try_setopt(CURLOPT_XFERINFODATA, nullptr);
+        try_setopt(CURLOPT_XFERINFOFUNCTION, nullptr);
     }
 
 
@@ -2231,6 +2447,99 @@ namespace curl {
     }
 
 
+    int
+    easy::closesocket_function_helper(CURL* handle,
+                                      curl_socket_t fd)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return 1;
+
+        if (!ez->extra_state.closesocket_func)
+            return 1;
+
+        try {
+            return ez->extra_state.closesocket_func(fd);
+        }
+        catch (...) {
+            return 1;
+        }
+    }
+
+
+
+    int
+    easy::fnmatch_function_helper(CURL* handle,
+                                  const char* pattern,
+                                  const char* text)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return CURL_FNMATCHFUNC_FAIL;
+
+        if (!ez->extra_state.fnmatch_func)
+            return CURL_FNMATCHFUNC_FAIL;
+
+        try {
+            if (ez->extra_state.fnmatch_func(pattern, text))
+                return CURL_FNMATCHFUNC_MATCH;
+            else
+                return CURL_FNMATCHFUNC_NOMATCH;
+        }
+        catch (...) {
+            return CURL_FNMATCHFUNC_FAIL;
+        }
+    }
+
+
+    curl_socket_t
+    easy::opensocket_function_helper(CURL* handle,
+                                     curlsocktype purpose,
+                                     curl_sockaddr* address)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return CURL_SOCKET_BAD;
+
+        if (!ez->extra_state.opensocket_func)
+            return CURL_SOCKET_BAD;
+
+        try {
+            return ez->extra_state.opensocket_func(purpose, address);
+        }
+        catch (...) {
+            return CURL_SOCKET_BAD;
+        }
+    }
+
+
+    int
+    easy::progress_function_helper(CURL* handle,
+                                   curl_off_t dltotal,
+                                   curl_off_t dlnow,
+                                   curl_off_t ultotal,
+                                   curl_off_t ulnow)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return 1; // cause CURLE_ABORTED_BY_CALLBACK error
+
+        if (!ez->extra_state.progress_func)
+            return CURL_PROGRESSFUNC_CONTINUE; // fall back to built-in progress callback
+
+        try {
+            return ez->extra_state.progress_func(dltotal, dlnow, ultotal, ulnow);
+        }
+        catch (...) {
+            return 1; // cause CURLE_ABORTED_BY_CALLBACK error
+        }
+    }
+
+
     std::size_t
     easy::read_function_helper(char* buf,
                                std::size_t,
@@ -2238,24 +2547,17 @@ namespace curl {
                                CURL* handle)
         noexcept
     {
-        if (!handle)
-            return CURL_READFUNC_ABORT;
-
         easy* ez = get_wrapper(handle);
         if (!ez)
             return CURL_READFUNC_ABORT;
 
+        if (!ez->extra_state.read_func)
+            return CURL_READFUNC_ABORT;
+
         try {
-            if (!ez->extra_state.read_func)
-                return CURL_READFUNC_ABORT;
             return ez->extra_state.read_func({buf, size});
         }
-        catch (std::exception& e) {
-            // cout << "Error in easy::dispatch_read_callback(): " << e.what() << endl;
-            return CURL_READFUNC_ABORT;
-        }
         catch (...) {
-            // cout << "Unknown error in easy::dispatch_read_callback()" << endl;
             return CURL_READFUNC_ABORT;
         }
     }
@@ -2268,24 +2570,17 @@ namespace curl {
                                 CURL* handle)
         noexcept
     {
-        if (!handle)
-            return CURL_WRITEFUNC_ERROR;
-
         easy* ez = get_wrapper(handle);
         if (!ez)
             return CURL_WRITEFUNC_ERROR;
 
+        if (!ez->extra_state.write_func)
+            return CURL_WRITEFUNC_ERROR;
+
         try {
-            if (!ez->extra_state.write_func)
-                return CURL_WRITEFUNC_ERROR;
             return ez->extra_state.write_func({buffer, size});
         }
-        catch (std::exception& e) {
-            // cout << "Error in easy::dispatch_write_callback(): " << e.what() << endl;
-            return CURL_WRITEFUNC_ERROR;
-        }
         catch (...) {
-            // cout << "Unknown error in easy::dispatch_write_callback()" << endl;
             return CURL_WRITEFUNC_ERROR;
         }
     }
