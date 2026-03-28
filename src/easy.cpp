@@ -852,6 +852,43 @@ namespace curl {
 
 
     void
+    easy::set_debug_function(debug_function_t debug_func)
+    {
+        return value_or_throw(try_set_debug_function(std::move(debug_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_debug_function(debug_function_t debug_func)
+        noexcept
+    {
+        if (!debug_func) {
+            unset_debug_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_DEBUGDATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_DEBUGFUNCTION, &debug_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.debug_func = std::move(debug_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_debug_function()
+        noexcept
+    {
+        extra_state.debug_func = {};
+        try_setopt(CURLOPT_DEBUGDATA, nullptr);
+        try_setopt(CURLOPT_DEBUGFUNCTION, nullptr);
+    }
+
+
+    void
     easy::set_default_protocol(const std::string& protocol)
     {
         return value_or_throw(try_set_default_protocol(protocol));
@@ -871,6 +908,21 @@ namespace curl {
         noexcept
     {
         try_setopt(CURLOPT_DEFAULT_PROTOCOL, nullptr);
+    }
+
+
+    void
+    easy::set_dir_list_only(bool enable)
+    {
+        return value_or_throw(try_set_dir_list_only(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_dir_list_only(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_DIRLISTONLY, long{enable});
     }
 
 
@@ -909,6 +961,44 @@ namespace curl {
         noexcept
     {
         try_setopt(CURLOPT_DNS_CACHE_TIMEOUT, long(-1));
+    }
+
+
+    void
+    easy::set_dns_servers(const std::string& servers)
+    {
+        return value_or_throw(try_set_dns_servers(servers));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_dns_servers(const std::string& servers)
+        noexcept
+    {
+        return try_setopt(CURLOPT_DNS_SERVERS, servers.data());
+    }
+
+
+    void
+    easy::unset_dns_servers()
+        noexcept
+    {
+        try_setopt(CURLOPT_DNS_SERVERS, nullptr);
+    }
+
+
+    void
+    easy::set_dns_shuffle_addresses(bool enable)
+    {
+        return value_or_throw(try_set_dns_shuffle_addresses(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_dns_shuffle_addresses(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_DNS_SHUFFLE_ADDRESSES, long{enable});
     }
 
 
@@ -1055,6 +1145,58 @@ namespace curl {
 
 
     void
+    easy::set_header(bool enable)
+    {
+        return value_or_throw(try_set_header(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_header(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_HEADER, long{enable});
+    }
+
+
+    void
+    easy::set_header_function(header_function_t header_func)
+    {
+        return value_or_throw(try_set_header_function(std::move(header_func)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_header_function(header_function_t header_func)
+        noexcept
+    {
+        if (!header_func) {
+            unset_header_function();
+            return {};
+        }
+
+        auto data_status = try_setopt(CURLOPT_HEADERDATA, raw);
+        if (!data_status)
+            return data_status;
+        auto func_status = try_setopt(CURLOPT_HEADERFUNCTION, &header_function_helper);
+        if (!func_status)
+            return func_status;
+        extra_state.header_func = std::move(header_func);
+        return {};
+    }
+
+
+    void
+    easy::unset_header_function()
+        noexcept
+    {
+        extra_state.header_func = {};
+        try_setopt(CURLOPT_HEADERDATA, nullptr);
+        try_setopt(CURLOPT_HEADERFUNCTION, nullptr);
+    }
+
+
+    void
     easy::set_header_opt(long mask)
     {
         return value_or_throw(try_set_header_opt(mask));
@@ -1081,6 +1223,21 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_HTTPAUTH, mask);
+    }
+
+
+    void
+    easy::set_http_get(bool use_get)
+    {
+        return value_or_throw(try_set_http_get(use_get));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_http_get(bool use_get)
+        noexcept
+    {
+        return try_setopt(CURLOPT_HTTPGET, long{use_get});
     }
 
 
@@ -1121,17 +1278,32 @@ namespace curl {
 
 
     void
-    easy::set_http_get(bool use_get)
+    easy::set_http_content_decoding(bool enable)
     {
-        return value_or_throw(try_set_http_get(use_get));
+        return value_or_throw(try_set_http_content_decoding(enable));
     }
 
 
     std::expected<void, error>
-    easy::try_set_http_get(bool use_get)
+    easy::try_set_http_content_decoding(bool enable)
         noexcept
     {
-        return try_setopt(CURLOPT_HTTPGET, long{use_get});
+        return try_setopt(CURLOPT_HTTP_CONTENT_DECODING, long{enable});
+    }
+
+
+    void
+    easy::set_http_transfer_decoding(bool enable)
+    {
+        return value_or_throw(try_set_http_transfer_decoding(enable));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_http_transfer_decoding(bool enable)
+        noexcept
+    {
+        return try_setopt(CURLOPT_HTTP_TRANSFER_DECODING, long{enable});
     }
 
 
@@ -1260,6 +1432,66 @@ namespace curl {
         noexcept
     {
         return try_setopt(CURLOPT_MAXFILESIZE_LARGE, size);
+    }
+
+
+    void
+    easy::set_max_lifetime_conn(std::chrono::seconds lifetime)
+    {
+        return value_or_throw(try_set_max_lifetime_conn(lifetime));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_max_lifetime_conn(std::chrono::seconds lifetime)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MAXLIFETIME_CONN, long(lifetime.count()));
+    }
+
+
+    void
+    easy::set_max_redirs(long limit)
+    {
+        return value_or_throw(try_set_max_redirs(limit));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_max_redirs(long limit)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MAXREDIRS, limit);
+    }
+
+
+    void
+    easy::set_max_recv_speed(curl_off_t speed)
+    {
+        return value_or_throw(try_set_max_recv_speed(speed));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_max_recv_speed(curl_off_t speed)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MAX_RECV_SPEED_LARGE, speed);
+    }
+
+
+    void
+    easy::set_max_send_speed(curl_off_t speed)
+    {
+        return value_or_throw(try_set_max_send_speed(speed));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_max_send_speed(curl_off_t speed)
+        noexcept
+    {
+        return try_setopt(CURLOPT_MAX_SEND_SPEED_LARGE, speed);
     }
 
 
@@ -1598,6 +1830,44 @@ namespace curl {
     {
         extra_state.read_func = {};
         try_setopt(CURLOPT_READFUNCTION, nullptr);
+    }
+
+
+    void
+    easy::set_referer(const std::string& where)
+    {
+        return value_or_throw(try_set_referer(where));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_referer(const std::string& where)
+        noexcept
+    {
+        return try_setopt(CURLOPT_REFERER, where.data());
+    }
+
+
+    void
+    easy::unset_referer()
+        noexcept
+    {
+        try_setopt(CURLOPT_REFERER, nullptr);
+    }
+
+
+    void
+    easy::set_resume_from(curl_off_t from)
+    {
+        return value_or_throw(try_set_resume_from(from));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_resume_from(curl_off_t from)
+        noexcept
+    {
+        return try_setopt(CURLOPT_RESUME_FROM_LARGE, from);
     }
 
 
@@ -2468,6 +2738,29 @@ namespace curl {
     }
 
 
+    int
+    easy::debug_function_helper(CURL* target,
+                                curl_infotype type,
+                                char *data,
+                                std::size_t size,
+                                CURL* handle)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return 0;
+
+        if (!ez->extra_state.debug_func)
+            return 0;
+
+        try {
+            ez->extra_state.debug_func(target, type, std::span(data, size));
+        }
+        catch (...) {
+        }
+        return 0;
+    }
+
 
     int
     easy::fnmatch_function_helper(CURL* handle,
@@ -2490,6 +2783,29 @@ namespace curl {
         }
         catch (...) {
             return CURL_FNMATCHFUNC_FAIL;
+        }
+    }
+
+
+    std::size_t
+    easy::header_function_helper(char* buffer,
+                                 std::size_t size,
+                                 std::size_t nitems,
+                                 CURL* handle)
+        noexcept
+    {
+        easy* ez = get_wrapper(handle);
+        if (!ez)
+            return CURL_WRITEFUNC_ERROR;
+
+        if (!ez->extra_state.header_func)
+            return CURL_WRITEFUNC_ERROR;
+
+        try {
+            return ez->extra_state.header_func(std::span<const char>(buffer, size * nitems));
+        }
+        catch (...) {
+            return CURL_WRITEFUNC_ERROR;
         }
     }
 

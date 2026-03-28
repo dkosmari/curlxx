@@ -41,34 +41,46 @@ namespace curl {
 
 
         using closesocket_function_sig = int (curl_socket_t fd);
-        using closesocket_function_t = std::move_only_function<closesocket_function_sig>;
+
+        using debug_function_sig = void (CURL* target,
+                                         curl_infotype type,
+                                         std::span<char> data);
 
         using fnmatch_function_sig = bool (const std::string& pattern,
                                            const std::string& text);
-        using fnmatch_function_t = std::move_only_function<fnmatch_function_sig>;
+
+        using header_function_sig = std::size_t (std::span<const char> data);
 
         using opensocket_function_sig = curl_socket_t (curlsocktype purpose,
                                                        curl_sockaddr* address);
-        using opensocket_function_t = std::move_only_function<opensocket_function_sig>;
 
         using progress_function_sig = int (curl_off_t dltotal,
                                            curl_off_t dlnow,
                                            curl_off_t ultotal,
                                            curl_off_t ulnow);
-        using progress_function_t = std::move_only_function<progress_function_sig>;
 
         using read_function_sig = std::size_t (std::span<char>);
-        using read_function_t = std::move_only_function<read_function_sig>;
 
         using write_function_sig = std::size_t (std::span<const char>);
-        using write_function_t = std::move_only_function<write_function_sig>;
+
+
+        using closesocket_function_t = std::move_only_function<closesocket_function_sig>;
+        using debug_function_t       = std::move_only_function<debug_function_sig>;
+        using header_function_t      = std::move_only_function<header_function_sig>;
+        using fnmatch_function_t     = std::move_only_function<fnmatch_function_sig>;
+        using opensocket_function_t  = std::move_only_function<opensocket_function_sig>;
+        using progress_function_t    = std::move_only_function<progress_function_sig>;
+        using read_function_t        = std::move_only_function<read_function_sig>;
+        using write_function_t       = std::move_only_function<write_function_sig>;
 
 
         struct extra_state_type {
             std::vector<char> error_buffer;
 
             closesocket_function_t closesocket_func;
+            debug_function_t       debug_func;
             fnmatch_function_t     fnmatch_func;
+            header_function_t      header_func;
             opensocket_function_t  opensocket_func;
             progress_function_t    progress_func;
             read_function_t        read_func;
@@ -669,10 +681,22 @@ namespace curl {
 
 
         // CURLOPT_DEBUGDATA
-        // Data pointer to pass to the debug callback. TODO
+        // Data pointer to pass to the debug callback.
+        // Note: not implemented, just use a lambda with a capture for the debug function.
 
         // CURLOPT_DEBUGFUNCTION
-        // Callback for debug information. TODO
+        // Callback for debug information.
+
+        void
+        set_debug_function(debug_function_t debug_func);
+
+        std::expected<void, error>
+        try_set_debug_function(debug_function_t debug_func)
+            noexcept;
+
+        void
+        unset_debug_function()
+            noexcept;
 
 
         // CURLOPT_DEFAULT_PROTOCOL
@@ -691,7 +715,14 @@ namespace curl {
 
 
         // CURLOPT_DIRLISTONLY
-        // List only. TODO
+        // List only.
+
+        void
+        set_dir_list_only(bool enable);
+
+        std::expected<void, error>
+        try_set_dir_list_only(bool enable)
+            noexcept;
 
 
         // CURLOPT_DISALLOW_USERNAME_IN_URL
@@ -729,11 +760,32 @@ namespace curl {
         // CURLOPT_DNS_LOCAL_IP6
         // Bind name resolves to this IP6 address. TODO
 
+
         // CURLOPT_DNS_SERVERS
-        // Preferred DNS servers. TODO
+        // Preferred DNS servers.
+
+        void
+        set_dns_servers(const std::string& servers);
+
+        std::expected<void, error>
+        try_set_dns_servers(const std::string& servers)
+            noexcept;
+
+        void
+        unset_dns_servers()
+            noexcept;
+
 
         // CURLOPT_DNS_SHUFFLE_ADDRESSES
-        // Shuffle addresses before use. TODO
+        // Shuffle addresses before use.
+
+        void
+        set_dns_shuffle_addresses(bool enable);
+
+        std::expected<void, error>
+        try_set_dns_shuffle_addresses(bool enable)
+            noexcept;
+
 
         // CURLOPT_DOH_SSL_VERIFYHOST
         // Verify the hostname in the DoH (DNS-over-HTTPS) SSL certificate. TODO
@@ -894,14 +946,35 @@ namespace curl {
         // CURLOPT_HAPROXY_CLIENT_IP
         // Spoof the client IP in an HAProxy PROXY protocol v1 header. TODO
 
+
         // CURLOPT_HEADER
-        // Include the header in the body output. TODO
+        // Include the header in the body output.
+
+        void
+        set_header(bool enable);
+
+        std::expected<void, error>
+        try_set_header(bool enable)
+            noexcept;
+
 
         // CURLOPT_HEADERDATA
-        // Data pointer to pass to the header callback. TODO
+        // Data pointer to pass to the header callback.
+        // Note: not implemented, use a lambda with capture for the header function.
 
         // CURLOPT_HEADERFUNCTION
-        // Callback for writing received headers. TODO
+        // Callback for writing received headers.
+
+        void
+        set_header_function(header_function_t header_func);
+
+        std::expected<void, error>
+        try_set_header_function(header_function_t header_func)
+            noexcept;
+
+        void
+        unset_header_function()
+            noexcept;
 
 
         // CURLOPT_HEADEROPT
@@ -983,11 +1056,27 @@ namespace curl {
         // CURLOPT_HTTPPROXYTUNNEL
         // Tunnel through the HTTP proxy. TODO
 
+
         // CURLOPT_HTTP_CONTENT_DECODING
-        // Disable Content decoding. TODO
+        // Disable Content decoding.
+
+        void
+        set_http_content_decoding(bool enable);
+
+        std::expected<void, error>
+        try_set_http_content_decoding(bool enable)
+            noexcept;
+
 
         // CURLOPT_HTTP_TRANSFER_DECODING
-        // Disable Transfer decoding. TODO
+        // Disable Transfer decoding.
+
+        void
+        set_http_transfer_decoding(bool enable);
+
+        std::expected<void, error>
+        try_set_http_transfer_decoding(bool enable)
+            noexcept;
 
 
         // CURLOPT_HTTP_VERSION
@@ -1146,16 +1235,47 @@ namespace curl {
 
 
         // CURLOPT_MAXLIFETIME_CONN
-        // Limit the age (since creation) of connections for reuse. TODO
+        // Limit the age (since creation) of connections for reuse.
+
+        void
+        set_max_lifetime_conn(std::chrono::seconds lifetime);
+
+        std::expected<void, error>
+        try_set_max_lifetime_conn(std::chrono::seconds lifetime)
+            noexcept;
+
 
         // CURLOPT_MAXREDIRS
-        // Maximum number of redirects to follow. TODO
+        // Maximum number of redirects to follow.
+
+        void
+        set_max_redirs(long limit);
+
+        std::expected<void, error>
+        try_set_max_redirs(long limit)
+            noexcept;
+
 
         // CURLOPT_MAX_RECV_SPEED_LARGE
-        // Cap the download speed to this. TODO
+        // Cap the download speed to this.
+
+        void
+        set_max_recv_speed(curl_off_t speed);
+
+        std::expected<void, error>
+        try_set_max_recv_speed(curl_off_t speed)
+            noexcept;
+
 
         // CURLOPT_MAX_SEND_SPEED_LARGE
-        // Cap the upload speed to this. TODO
+        // Cap the upload speed to this.
+
+        void
+        set_max_send_speed(curl_off_t speed);
+
+        std::expected<void, error>
+        try_set_max_send_speed(curl_off_t speed)
+            noexcept;
 
 
         // CURLOPT_MIMEPOST
@@ -1585,8 +1705,21 @@ namespace curl {
         // CURLOPT_REDIR_PROTOCOLS_STR
         // Protocols to allow redirects to. TODO
 
+
         // CURLOPT_REFERER
-        // Referer: header. TODO
+        // Referer: header.
+
+        void
+        set_referer(const std::string& where);
+
+        std::expected<void, error>
+        try_set_referer(const std::string& where)
+            noexcept;
+
+        void
+        unset_referer()
+            noexcept;
+
 
         // CURLOPT_REQUEST_TARGET
         // Set the request target. TODO
@@ -1600,11 +1733,18 @@ namespace curl {
         // CURLOPT_RESOLVER_START_FUNCTION
         // Callback to be called before a new resolve request is started. TODO
 
-        // CURLOPT_RESUME_FROM
-        // Resume a transfer. TODO
 
+        // CURLOPT_RESUME_FROM
         // CURLOPT_RESUME_FROM_LARGE
-        // Resume a transfer. TODO
+        // Resume a transfer.
+
+        void
+        set_resume_from(curl_off_t from);
+
+        std::expected<void, error>
+        try_set_resume_from(curl_off_t from)
+            noexcept;
+
 
         // CURLOPT_RTSP_CLIENT_CSEQ
         // Client CSEQ number. TODO
@@ -2140,18 +2280,14 @@ namespace curl {
             const noexcept;
 
 
-        /*
-          TODO
+        // CURLINFO_CAINFO
+        // Get the default value for CURLOPT_CAINFO. TODO
 
-          CURLINFO_CAINFO
-          Get the default value for CURLOPT_CAINFO. See CURLINFO_CAINFO
+        // CURLINFO_CAPATH
+        // Get the default value for CURLOPT_CAPATH. TODO
 
-          CURLINFO_CAPATH
-          Get the default value for CURLOPT_CAPATH. See CURLINFO_CAPATH
-
-          CURLINFO_CERTINFO
-          Certificate chain. See CURLINFO_CERTINFO
-        */
+        // CURLINFO_CERTINFO
+        // Certificate chain. TODO
 
 
         // CURLINFO_CONDITION_UNMET
@@ -2298,24 +2434,24 @@ namespace curl {
 
         /*
           CURLINFO_FTP_ENTRY_PATH
-          The entry path after logging in to an FTP server. See CURLINFO_FTP_ENTRY_PATH
+          The entry path after logging in to an FTP server. TODO
 
           CURLINFO_HEADER_SIZE
-          Number of bytes of all headers received. See CURLINFO_HEADER_SIZE
+          Number of bytes of all headers received. TODO
 
           CURLINFO_HTTPAUTH_AVAIL
-          Available HTTP authentication methods. See CURLINFO_HTTPAUTH_AVAIL
+          Available HTTP authentication methods. TODO
 
           CURLINFO_HTTPAUTH_USED
-          Used HTTP authentication method. See CURLINFO_HTTPAUTH_USED
+          Used HTTP authentication method. TODO
 
           CURLINFO_HTTP_CONNECTCODE
-          Last proxy CONNECT response code. See CURLINFO_HTTP_CONNECTCODE
+          Last proxy CONNECT response code. TODO
         */
 
 
         // CURLINFO_HTTP_VERSION
-        // The http version used in the connection. See CURLINFO_HTTP_VERSION
+        // The http version used in the connection.
 
         http_version
         get_http_version()
@@ -2328,42 +2464,42 @@ namespace curl {
 
         /*
           CURLINFO_LOCAL_IP
-          Source IP address of the last connection. See CURLINFO_LOCAL_IP
+          Source IP address of the last connection. TODO
 
           CURLINFO_LOCAL_PORT
-          Source port number of the last connection. See CURLINFO_LOCAL_PORT
+          Source port number of the last connection. TODO
 
           CURLINFO_NAMELOOKUP_TIME
-          Time from start until name resolving completed as a double. See CURLINFO_NAMELOOKUP_TIME
+          Time from start until name resolving completed as a double. TODO
 
           CURLINFO_NAMELOOKUP_TIME_T
-          Time from start until name resolving completed in number of microseconds. See CURLINFO_NAMELOOKUP_TIME_T
+          Time from start until name resolving completed in number of microseconds. TODO
 
           CURLINFO_NUM_CONNECTS
-          Number of new successful connections used for previous transfer. See CURLINFO_NUM_CONNECTS
+          Number of new successful connections used for previous transfer. TODO
 
           CURLINFO_OS_ERRNO
-          The errno from the last failure to connect. See CURLINFO_OS_ERRNO
+          The errno from the last failure to connect. TODO
 
           CURLINFO_POSTTRANSFER_TIME_T
-          The time it took from the start until the last byte is sent by libcurl. In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T
+          The time it took from the start until the last byte is sent by libcurl. In microseconds. (Added in 8.10.0) TODO
 
           CURLINFO_PRETRANSFER_TIME
-          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. See CURLINFO_PRETRANSFER_TIME
+          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. TODO
 
           CURLINFO_PRETRANSFER_TIME_T
-          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. In microseconds. See CURLINFO_PRETRANSFER_TIME_T
+          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. In microseconds. TODO
 
           CURLINFO_PRIMARY_IP
-          Destination IP address of the last connection. See CURLINFO_PRIMARY_IP
+          Destination IP address of the last connection. TODO
 
           CURLINFO_PRIMARY_PORT
-          Destination port of the last connection. See CURLINFO_PRIMARY_PORT
+          Destination port of the last connection. TODO
 
         */
 
         // CURLINFO_PRIVATE
-        // User's private data pointer. See CURLINFO_PRIVATE
+        // User's private data pointer.
 
         const std::any&
         get_private()
@@ -2376,37 +2512,37 @@ namespace curl {
 
         /*
           CURLINFO_PROXYAUTH_AVAIL
-          Available HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_AVAIL
+          Available HTTP proxy authentication methods. TODO
 
           CURLINFO_PROXYAUTH_USED
-          Used HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_USED
+          Used HTTP proxy authentication methods. TODO
 
           CURLINFO_PROXY_ERROR
           Detailed proxy error. See CURLINFO_PROXY_ERROR
 
           CURLINFO_PROXY_SSL_VERIFYRESULT
-          Proxy certificate verification result. See CURLINFO_PROXY_SSL_VERIFYRESULT
+          Proxy certificate verification result. TODO
 
           CURLINFO_QUEUE_TIME_T
-          The time during which the transfer was held in a waiting queue before it could start for real in number of microseconds. (Added in 8.6.0) See CURLINFO_QUEUE_TIME_T
+          The time during which the transfer was held in a waiting queue before it could start for real in number of microseconds. (Added in 8.6.0) TODO
 
           CURLINFO_REDIRECT_COUNT
-          Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT
+          Total number of redirects that were followed. TODO
 
           CURLINFO_REDIRECT_TIME
-          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. As a double. See CURLINFO_REDIRECT_TIME
+          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. As a double. TODO
 
           CURLINFO_REDIRECT_TIME_T
-          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. In number of microseconds. See CURLINFO_REDIRECT_TIME_T
+          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. In number of microseconds. TODO
 
           CURLINFO_REDIRECT_URL
-          URL a redirect would take you to, had you enabled redirects. See CURLINFO_REDIRECT_URL
+          URL a redirect would take you to, had you enabled redirects. TODO
 
           CURLINFO_REFERER
-          Referrer header. See CURLINFO_REFERER
+          Referrer header. TODO
 
           CURLINFO_REQUEST_SIZE
-          Number of bytes sent in the issued HTTP requests. See CURLINFO_REQUEST_SIZE
+          Number of bytes sent in the issued HTTP requests. TODO
         */
 
 
@@ -2450,6 +2586,7 @@ namespace curl {
         // The scheme used for the connection. TODO
 
 
+        // CURLINFO_SIZE_DOWNLOAD
         // CURLINFO_SIZE_DOWNLOAD_T
         // Number of bytes downloaded.
 
@@ -2462,6 +2599,7 @@ namespace curl {
             const noexcept;
 
 
+        // CURLINFO_SIZE_UPLOAD
         // CURLINFO_SIZE_UPLOAD_T
         // Number of bytes uploaded.
 
@@ -2474,6 +2612,7 @@ namespace curl {
             const noexcept;
 
 
+        // CURLINFO_SPEED_DOWNLOAD
         // CURLINFO_SPEED_DOWNLOAD_T
         // Average download speed.
 
@@ -2486,6 +2625,7 @@ namespace curl {
             const noexcept;
 
 
+        // CURLINFO_SPEED_UPLOAD
         // CURLINFO_SPEED_UPLOAD_T
         // Average upload speed in number of bytes per second.
 
@@ -2500,13 +2640,14 @@ namespace curl {
 
         /*
           CURLINFO_SSL_ENGINES
-          A list of OpenSSL crypto engines. See CURLINFO_SSL_ENGINES
+          A list of OpenSSL crypto engines. TODO
 
           CURLINFO_SSL_VERIFYRESULT
-          Certificate verification result. See CURLINFO_SSL_VERIFYRESULT
+          Certificate verification result. TODO
         */
 
 
+        // CURLINFO_STARTTRANSFER_TIME
         // CURLINFO_STARTTRANSFER_TIME_T
         // The time it took from the start until the first byte is received by libcurl.
 
@@ -2521,13 +2662,12 @@ namespace curl {
 
         /*
           CURLINFO_TLS_SESSION
-          (Deprecated) TLS session info that can be used for further processing. See CURLINFO_TLS_SESSION. Use CURLINFO_TLS_SSL_PTR instead.
-
           CURLINFO_TLS_SSL_PTR
-          TLS session info that can be used for further processing. See CURLINFO_TLS_SSL_PTR
+          TLS session info that can be used for further processing. TODO
         */
 
 
+        // CURLINFO_TOTAL_TIME
         // CURLINFO_TOTAL_TIME_T
         // Total time of previous transfer.
 
@@ -2542,10 +2682,10 @@ namespace curl {
 
         /*
           CURLINFO_USED_PROXY
-          Whether the proxy was used (Added in 8.7.0). See CURLINFO_USED_PROXY
+          Whether the proxy was used (Added in 8.7.0). TODO
 
           CURLINFO_XFER_ID
-          The ID of the transfer. (Added in 8.2.0) See CURLINFO_XFER_ID
+          The ID of the transfer. (Added in 8.2.0) TODO
         */
 
 
@@ -2593,10 +2733,28 @@ namespace curl {
 
         static
         int
+        debug_function_helper(CURL* target,
+                              curl_infotype type,
+                              char *data,
+                              std::size_t size,
+                              CURL* handle)
+            noexcept;
+
+        static
+        int
         fnmatch_function_helper(CURL* handle,
                                 const char* pattern,
                                 const char* text)
             noexcept;
+
+        static
+        std::size_t
+        header_function_helper(char* buffer,
+                               std::size_t size,
+                               std::size_t nitems,
+                               CURL* handle)
+            noexcept;
+
 
         static
         curl_socket_t
