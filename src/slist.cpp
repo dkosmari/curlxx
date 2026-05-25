@@ -31,7 +31,8 @@ namespace curl {
     }
 
 
-    slist::slist(const slist& other)
+    slist::slist(const slist& other) :
+        slist{}
     {
         for (auto& entry : other)
             append(entry);

@@ -5,6 +5,9 @@ EXTRA_DIST = \
 	README.md
 
 
+AM_CXXFLAGS = \
+	-Wall -Wextra -Werror
+
 AM_CPPFLAGS = \
 	$(CURL_CFLAGS) \
 	-I$(srcdir)/include

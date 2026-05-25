@@ -29,7 +29,8 @@ namespace curl {
     }
 
 
-    easy::easy(const easy& other)
+    easy::easy(const easy& other) :
+        basic_wrapper{}
     {
         create(other);
     }
