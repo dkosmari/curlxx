@@ -17,11 +17,13 @@
 #include <span>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <curl/curl.h>
 
 #include "basic_wrapper.hpp"
+#include "concepts.hpp"
 #include "error.hpp"
 #include "header.hpp"
 #include "mime.hpp"
@@ -1040,6 +1042,14 @@ namespace curl {
 
         void
         set_http_headers(slist headers);
+
+        template<concepts::string_like... Args>
+        void
+        set_http_headers(Args... args)
+        {
+            set_http_headers(slist{std::forward<Args>(args)...});
+        }
+
 
         std::expected<void, error>
         try_set_http_headers(slist headers)

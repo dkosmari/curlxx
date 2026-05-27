@@ -18,6 +18,7 @@ LIBS = $(CURL_LIBS)
 
 curlxx_HEADERS = \
 	include/curlxx/basic_wrapper.hpp \
+	include/curlxx/concepts.hpp \
 	include/curlxx/curl.hpp \
 	include/curlxx/easy.hpp \
 	include/curlxx/error.hpp \
