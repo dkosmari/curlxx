@@ -1255,26 +1255,26 @@ namespace curl {
     {
         auto result = try_setopt(CURLOPT_HTTPHEADER, headers.data());
         if (result)
-            extra_state.headers_list = std::move(headers);
+            extra_state.http_headers_list = std::move(headers);
         return result;
     }
 
 
     void
-    easy::append_header(const std::string& header)
+    easy::append_http_header(const std::string& header)
     {
-        return value_or_throw(try_append_header(header));
+        return value_or_throw(try_append_http_header(header));
     }
 
 
     std::expected<void, error>
-    easy::try_append_header(const std::string& header)
+    easy::try_append_http_header(const std::string& header)
         noexcept
     {
-        auto result = extra_state.headers_list.try_append(header);
+        auto result = extra_state.http_headers_list.try_append(header);
         if (!result)
             return result;
-        return try_setopt(CURLOPT_HTTPHEADER, extra_state.headers_list.data());
+        return try_setopt(CURLOPT_HTTPHEADER, extra_state.http_headers_list.data());
     }
 
 

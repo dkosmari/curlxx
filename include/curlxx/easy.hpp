@@ -86,7 +86,7 @@ namespace curl {
             read_function_t        read_func;
             write_function_t       write_func;
 
-            slist    headers_list;
+            slist    http_headers_list;
             slist    connect_to_list;
             std::any private_data;
         };
@@ -1046,10 +1046,10 @@ namespace curl {
             noexcept;
 
         void
-        append_header(const std::string& header);
+        append_http_header(const std::string& header);
 
         std::expected<void, error>
-        try_append_header(const std::string& header)
+        try_append_http_header(const std::string& header)
             noexcept;
 
 
