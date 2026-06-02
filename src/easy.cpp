@@ -271,7 +271,7 @@ namespace curl {
     easy::unset_abstract_unix_socket()
         noexcept
     {
-        try_setopt(CURLOPT_ABSTRACT_UNIX_SOCKET, nullptr);
+        std::ignore = try_setopt(CURLOPT_ABSTRACT_UNIX_SOCKET, nullptr);
     }
 
 
@@ -309,7 +309,7 @@ namespace curl {
     easy::unset_accept_encoding()
         noexcept
     {
-        try_setopt(CURLOPT_ACCEPT_ENCODING, nullptr);
+        std::ignore = try_setopt(CURLOPT_ACCEPT_ENCODING, nullptr);
     }
 
 
@@ -347,7 +347,7 @@ namespace curl {
     easy::unset_alt_svc()
         noexcept
     {
-        try_setopt(CURLOPT_ALTSVC, nullptr);
+        std::ignore = try_setopt(CURLOPT_ALTSVC, nullptr);
     }
 
 
@@ -415,7 +415,7 @@ namespace curl {
     easy::unset_aws_sig_v4()
         noexcept
     {
-        try_setopt(CURLOPT_AWS_SIGV4, nullptr);
+        std::ignore = try_setopt(CURLOPT_AWS_SIGV4, nullptr);
     }
 
 
@@ -453,7 +453,7 @@ namespace curl {
     easy::unset_ca_info()
         noexcept
     {
-        try_setopt(CURLOPT_CAINFO, nullptr);
+        std::ignore = try_setopt(CURLOPT_CAINFO, nullptr);
     }
 
 
@@ -491,7 +491,7 @@ namespace curl {
     easy::unset_ca_path()
         noexcept
     {
-        try_setopt(CURLOPT_CAPATH, nullptr);
+        std::ignore = try_setopt(CURLOPT_CAPATH, nullptr);
     }
 
 
@@ -514,7 +514,7 @@ namespace curl {
     easy::unset_cache_timeout()
         noexcept
     {
-        try_setopt(CURLOPT_CA_CACHE_TIMEOUT, long{-1});
+        std::ignore = try_setopt(CURLOPT_CA_CACHE_TIMEOUT, long{-1});
     }
 
 
@@ -565,8 +565,8 @@ namespace curl {
         noexcept
     {
         extra_state.closesocket_func = {};
-        try_setopt(CURLOPT_CLOSESOCKETDATA, nullptr);
-        try_setopt(CURLOPT_CLOSESOCKETFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_CLOSESOCKETDATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_CLOSESOCKETFUNCTION, nullptr);
     }
 
 
@@ -652,7 +652,7 @@ namespace curl {
     easy::unset_cookie()
         noexcept
     {
-        try_setopt(CURLOPT_COOKIE, nullptr);
+        std::ignore = try_setopt(CURLOPT_COOKIE, nullptr);
     }
 
 
@@ -675,7 +675,7 @@ namespace curl {
     easy::unset_cookie_file()
         noexcept
     {
-        try_setopt(CURLOPT_COOKIEFILE, nullptr);
+        std::ignore = try_setopt(CURLOPT_COOKIEFILE, nullptr);
     }
 
 
@@ -698,7 +698,7 @@ namespace curl {
     easy::unset_cookie_jar()
         noexcept
     {
-        try_setopt(CURLOPT_COOKIEJAR, nullptr);
+        std::ignore = try_setopt(CURLOPT_COOKIEJAR, nullptr);
     }
 
 
@@ -721,7 +721,7 @@ namespace curl {
     easy::unset_cookie_list()
         noexcept
     {
-        try_setopt(CURLOPT_COOKIELIST, nullptr);
+        std::ignore = try_setopt(CURLOPT_COOKIELIST, nullptr);
     }
 
 
@@ -779,7 +779,7 @@ namespace curl {
     easy::unset_copy_post_fields()
         noexcept
     {
-        try_setopt(CURLOPT_COPYPOSTFIELDS, nullptr);
+        std::ignore = try_setopt(CURLOPT_COPYPOSTFIELDS, nullptr);
     }
 
 
@@ -825,7 +825,7 @@ namespace curl {
     easy::unset_crl_file()
         noexcept
     {
-        try_setopt(CURLOPT_CRLFILE, nullptr);
+        std::ignore = try_setopt(CURLOPT_CRLFILE, nullptr);
     }
 
 
@@ -848,7 +848,7 @@ namespace curl {
     easy::unset_custom_request()
         noexcept
     {
-        try_setopt(CURLOPT_CUSTOMREQUEST, nullptr);
+        std::ignore = try_setopt(CURLOPT_CUSTOMREQUEST, nullptr);
     }
 
 
@@ -884,8 +884,8 @@ namespace curl {
         noexcept
     {
         extra_state.debug_func = {};
-        try_setopt(CURLOPT_DEBUGDATA, nullptr);
-        try_setopt(CURLOPT_DEBUGFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_DEBUGDATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_DEBUGFUNCTION, nullptr);
     }
 
 
@@ -908,7 +908,7 @@ namespace curl {
     easy::unset_default_protocol()
         noexcept
     {
-        try_setopt(CURLOPT_DEFAULT_PROTOCOL, nullptr);
+        std::ignore = try_setopt(CURLOPT_DEFAULT_PROTOCOL, nullptr);
     }
 
 
@@ -961,7 +961,7 @@ namespace curl {
     easy::unset_dns_cache_timeout()
         noexcept
     {
-        try_setopt(CURLOPT_DNS_CACHE_TIMEOUT, long(-1));
+        std::ignore = try_setopt(CURLOPT_DNS_CACHE_TIMEOUT, long(-1));
     }
 
 
@@ -984,7 +984,7 @@ namespace curl {
     easy::unset_dns_servers()
         noexcept
     {
-        try_setopt(CURLOPT_DNS_SERVERS, nullptr);
+        std::ignore = try_setopt(CURLOPT_DNS_SERVERS, nullptr);
     }
 
 
@@ -1080,8 +1080,8 @@ namespace curl {
         noexcept
     {
         extra_state.fnmatch_func = {};
-        try_setopt(CURLOPT_FNMATCH_DATA, nullptr);
-        try_setopt(CURLOPT_FNMATCH_FUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_FNMATCH_DATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_FNMATCH_FUNCTION, nullptr);
     }
 
 
@@ -1192,8 +1192,8 @@ namespace curl {
         noexcept
     {
         extra_state.header_func = {};
-        try_setopt(CURLOPT_HEADERDATA, nullptr);
-        try_setopt(CURLOPT_HEADERFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_HEADERDATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_HEADERFUNCTION, nullptr);
     }
 
 
@@ -1357,7 +1357,7 @@ namespace curl {
     easy::unset_input_file_size()
         noexcept
     {
-        try_setopt(CURLOPT_INFILESIZE_LARGE, curl_off_t(-1));
+        std::ignore = try_setopt(CURLOPT_INFILESIZE_LARGE, curl_off_t(-1));
     }
 
 
@@ -1515,7 +1515,7 @@ namespace curl {
     easy::unset_mime_post()
         noexcept
     {
-        try_setopt(CURLOPT_MIMEPOST, nullptr);
+        std::ignore = try_setopt(CURLOPT_MIMEPOST, nullptr);
     }
 
 
@@ -1568,7 +1568,7 @@ namespace curl {
     easy::unset_netrc_file()
         noexcept
     {
-        try_setopt(CURLOPT_NETRC_FILE, nullptr);
+        std::ignore = try_setopt(CURLOPT_NETRC_FILE, nullptr);
     }
 
 
@@ -1664,8 +1664,8 @@ namespace curl {
         noexcept
     {
         extra_state.opensocket_func = {};
-        try_setopt(CURLOPT_OPENSOCKETDATA, nullptr);
-        try_setopt(CURLOPT_OPENSOCKETFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_OPENSOCKETDATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_OPENSOCKETFUNCTION, nullptr);
     }
 
 
@@ -1688,7 +1688,7 @@ namespace curl {
     easy::unset_password()
         noexcept
     {
-        try_setopt(CURLOPT_PASSWORD, nullptr);
+        std::ignore = try_setopt(CURLOPT_PASSWORD, nullptr);
     }
 
 
@@ -1761,7 +1761,7 @@ namespace curl {
     easy::unset_post_field()
         noexcept
     {
-        try_setopt(CURLOPT_POSTFIELDS, nullptr);
+        std::ignore = try_setopt(CURLOPT_POSTFIELDS, nullptr);
     }
 
 
@@ -1830,7 +1830,7 @@ namespace curl {
         noexcept
     {
         extra_state.read_func = {};
-        try_setopt(CURLOPT_READFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_READFUNCTION, nullptr);
     }
 
 
@@ -1853,7 +1853,7 @@ namespace curl {
     easy::unset_referer()
         noexcept
     {
-        try_setopt(CURLOPT_REFERER, nullptr);
+        std::ignore = try_setopt(CURLOPT_REFERER, nullptr);
     }
 
 
@@ -2075,8 +2075,7 @@ namespace curl {
     easy::unset_url()
         noexcept
     {
-        try_setopt(CURLOPT_URL, nullptr);
-
+        std::ignore = try_setopt(CURLOPT_URL, nullptr);
     }
 
 
@@ -2099,7 +2098,7 @@ namespace curl {
     easy::unset_user_agent()
         noexcept
     {
-        try_setopt(CURLOPT_USERAGENT, nullptr);
+        std::ignore = try_setopt(CURLOPT_USERAGENT, nullptr);
     }
 
 
@@ -2122,7 +2121,7 @@ namespace curl {
     easy::unset_username()
     noexcept
     {
-        try_setopt(CURLOPT_USERNAME, nullptr);
+        std::ignore = try_setopt(CURLOPT_USERNAME, nullptr);
     }
 
 
@@ -2145,7 +2144,7 @@ namespace curl {
     easy::set_verbose(bool v)
         noexcept
     {
-        try_setopt(CURLOPT_VERBOSE, long{v});
+        std::ignore = try_setopt(CURLOPT_VERBOSE, long{v});
     }
 
 
@@ -2214,7 +2213,7 @@ namespace curl {
         noexcept
     {
         extra_state.write_func = {};
-        try_setopt(CURLOPT_WRITEFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_WRITEFUNCTION, nullptr);
     }
 
 
@@ -2265,8 +2264,8 @@ namespace curl {
         noexcept
     {
         extra_state.progress_func = {};
-        try_setopt(CURLOPT_XFERINFODATA, nullptr);
-        try_setopt(CURLOPT_XFERINFOFUNCTION, nullptr);
+        std::ignore = try_setopt(CURLOPT_XFERINFODATA, nullptr);
+        std::ignore = try_setopt(CURLOPT_XFERINFOFUNCTION, nullptr);
     }
 
 
