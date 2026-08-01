@@ -39,41 +39,46 @@ namespace curl {
 
     public:
 
+        /*--------------*/
+        /* Type aliases */
+        /*--------------*/
+
         using base_type = detail::basic_wrapper<CURL*>;
 
 
-        using closesocket_function_sig = int (curl_socket_t fd);
+        using closesocket_callback_signature = int (curl_socket_t fd);
 
-        using debug_function_sig = void (CURL* target,
-                                         curl_infotype type,
-                                         std::span<char> data);
+        // NOTE: target may be an internal handle, that's not known by the wrapper.
+        using debug_callback_signature = void (CURL* target,
+                                               curl_infotype type,
+                                               std::span<const char> data);
 
-        using fnmatch_function_sig = bool (const std::string& pattern,
-                                           const std::string& text);
+        using fnmatch_callback_signature = bool (const std::string& pattern,
+                                                 const std::string& text);
 
-        using header_function_sig = std::size_t (std::span<const char> data);
+        using header_callback_signature = std::size_t (std::span<const char> data);
 
-        using opensocket_function_sig = curl_socket_t (curlsocktype purpose,
-                                                       curl_sockaddr* address);
+        using opensocket_callback_signature = curl_socket_t (curlsocktype purpose,
+                                                             curl_sockaddr* address);
 
-        using progress_function_sig = int (curl_off_t dltotal,
-                                           curl_off_t dlnow,
-                                           curl_off_t ultotal,
-                                           curl_off_t ulnow);
+        using progress_callback_signature = int (curl_off_t dltotal,
+                                                 curl_off_t dlnow,
+                                                 curl_off_t ultotal,
+                                                 curl_off_t ulnow);
 
-        using read_function_sig = std::size_t (std::span<char>);
+        using read_callback_signature = std::size_t (std::span<char>);
 
-        using write_function_sig = std::size_t (std::span<const char>);
+        using write_callback_signature = std::size_t (std::span<const char>);
 
 
-        using closesocket_function_t = std::move_only_function<closesocket_function_sig>;
-        using debug_function_t       = std::move_only_function<debug_function_sig>;
-        using header_function_t      = std::move_only_function<header_function_sig>;
-        using fnmatch_function_t     = std::move_only_function<fnmatch_function_sig>;
-        using opensocket_function_t  = std::move_only_function<opensocket_function_sig>;
-        using progress_function_t    = std::move_only_function<progress_function_sig>;
-        using read_function_t        = std::move_only_function<read_function_sig>;
-        using write_function_t       = std::move_only_function<write_function_sig>;
+        using closesocket_function_t = std::move_only_function<closesocket_callback_signature>;
+        using debug_function_t       = std::move_only_function<debug_callback_signature>;
+        using header_function_t      = std::move_only_function<header_callback_signature>;
+        using fnmatch_function_t     = std::move_only_function<fnmatch_callback_signature>;
+        using opensocket_function_t  = std::move_only_function<opensocket_callback_signature>;
+        using progress_function_t    = std::move_only_function<progress_callback_signature>;
+        using read_function_t        = std::move_only_function<read_callback_signature>;
+        using write_function_t       = std::move_only_function<write_callback_signature>;
 
 
         struct extra_state_type {
@@ -243,9 +248,9 @@ namespace curl {
         }
 
 
-        /* ------------------------ */
+        /*--------------------------*/
         /* Start of option setters. */
-        /* ------------------------ */
+        /*--------------------------*/
 
 
         // CURLOPT_ABSTRACT_UNIX_SOCKET
@@ -2257,14 +2262,14 @@ namespace curl {
         // OAuth2 bearer token. TODO
 
 
-        /* ---------------------- */
+        /*------------------------*/
         /* End of option setters. */
-        /* ---------------------- */
+        /*------------------------*/
 
 
-        /* ---------------------- */
+        /*------------------------*/
         /* Start of info getters. */
-        /* ---------------------- */
+        /*------------------------*/
 
         // CURLINFO_ACTIVESOCKET
         // The session's active socket.
@@ -2699,9 +2704,9 @@ namespace curl {
         */
 
 
-        /* -------------------- */
+        /*----------------------*/
         /* End of info getters. */
-        /* -------------------- */
+        /*----------------------*/
 
 
         header
@@ -2728,22 +2733,24 @@ namespace curl {
 
 
     private:
-        // TODO move this to the end
-
-        extra_state_type extra_state;
 
         void
         setup_extra_state();
 
+
+        /*------------------*/
+        /* Callback helpers */
+        /*------------------*/
+
         static
         int
-        closesocket_function_helper(CURL* handle,
+        closesocket_callback_helper(CURL* handle,
                                     curl_socket_t fd)
             noexcept;
 
         static
         int
-        debug_function_helper(CURL* target,
+        debug_callback_helper(CURL* target,
                               curl_infotype type,
                               char *data,
                               std::size_t size,
@@ -2752,14 +2759,14 @@ namespace curl {
 
         static
         int
-        fnmatch_function_helper(CURL* handle,
+        fnmatch_callback_helper(CURL* handle,
                                 const char* pattern,
                                 const char* text)
             noexcept;
 
         static
         std::size_t
-        header_function_helper(char* buffer,
+        header_callback_helper(char* buffer,
                                std::size_t size,
                                std::size_t nitems,
                                CURL* handle)
@@ -2768,14 +2775,14 @@ namespace curl {
 
         static
         curl_socket_t
-        opensocket_function_helper(CURL* handle,
+        opensocket_callback_helper(CURL* handle,
                                   curlsocktype purpose,
                                   curl_sockaddr* address)
             noexcept;
 
         static
         int
-        progress_function_helper(CURL* handle,
+        progress_callback_helper(CURL* handle,
                                  curl_off_t dltotal,
                                  curl_off_t dlnow,
                                  curl_off_t ultotal,
@@ -2784,7 +2791,7 @@ namespace curl {
 
         static
         std::size_t
-        read_function_helper(char* buffer,
+        read_callback_helper(char* buffer,
                              std::size_t,
                              std::size_t size,
                              CURL* handle)
@@ -2792,32 +2799,20 @@ namespace curl {
 
         static
         std::size_t
-        write_function_helper(const char* buffer,
+        write_callback_helper(const char* buffer,
                               std::size_t,
                               std::size_t size,
                               CURL* handle)
             noexcept;
 
 
-        template<typename T>
-        std::expected<void, error>
-        try_setopt(CURLoption opt, T&& arg)
-            noexcept;
-
-
-        template<typename T,
-                 typename U = T>
-        std::expected<U, error>
-        try_getinfo(CURLINFO info)
-            const noexcept;
-
-
-        std::expected<std::string, error>
-        try_getinfo_str(CURLINFO info)
-            const noexcept;
-
-
         friend class multi;
+
+        /*--------------*/
+        /* Private data */
+        /*--------------*/
+
+        extra_state_type extra_state;
 
     }; // class easy
 
