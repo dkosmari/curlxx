@@ -1,6 +1,6 @@
 /*
  * curlxx - A C++ wrapper for libcurl.
- * Copyright 2025  Daniel K. O. (dkosmari)
+ * Copyright 2025-2026  Daniel K. O. (dkosmari)
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
@@ -72,6 +72,13 @@ namespace curl {
     }
 
 
+    string
+    to_string(CURLUcode code)
+    {
+        return curl_url_strerror(code);
+    }
+
+
     error::error(const char* msg) :
         runtime_error{msg}
     {}
@@ -98,6 +105,11 @@ namespace curl {
 
 
     error::error(CURLsslset code) :
+        runtime_error{to_string(code)}
+    {}
+
+
+    error::error(CURLUcode code) :
         runtime_error{to_string(code)}
     {}
 

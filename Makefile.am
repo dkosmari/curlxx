@@ -28,7 +28,8 @@ curlxx_HEADERS = \
 	include/curlxx/mime.hpp \
 	include/curlxx/multi.hpp \
 	include/curlxx/owner_wrapper.hpp \
-	include/curlxx/slist.hpp
+	include/curlxx/slist.hpp \
+	include/curlxx/url.hpp
 
 curlxxdir = $(includedir)/curlxx
 
@@ -46,6 +47,7 @@ lib_libcurlxx_la_SOURCES = \
 	src/mime.cpp \
 	src/multi.cpp \
 	src/slist.cpp \
+	src/url.cpp \
 	src/utils.hpp
 
 
