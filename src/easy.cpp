@@ -25,21 +25,33 @@ namespace curl {
 
         template<typename T>
         std::expected<void, error>
-        try_setopt(CURL* raw,
+        wrap_setopt(CURL* raw,
                    CURLoption opt,
                    T&& arg)
             noexcept;
 
+        std::expected<void, error>
+        wrap_setopt(CURL* raw,
+                   CURLoption opt,
+                    const std::string& arg)
+            noexcept;
+
+        void
+        wrap_unsetopt(CURL* raw,
+                      CURLoption opt)
+            noexcept;
+
+
         template<typename T,
                  typename U = T>
         std::expected<U, error>
-        try_getinfo(CURL* raw,
+        wrap_getinfo(CURL* raw,
                     CURLINFO info)
             noexcept;
 
 
         std::expected<std::string, error>
-        try_getinfo_str(CURL* raw,
+        wrap_getinfo_str(CURL* raw,
                         CURLINFO info)
             noexcept;
 
@@ -50,9 +62,9 @@ namespace curl {
 
         template<typename T>
         std::expected<void, error>
-        try_setopt(CURL* raw,
-                   CURLoption opt,
-                   T&& arg)
+        wrap_setopt(CURL* raw,
+                    CURLoption opt,
+                    T&& arg)
             noexcept
         {
             auto e = curl_easy_setopt(raw, opt, arg);
@@ -62,11 +74,30 @@ namespace curl {
         }
 
 
+        std::expected<void, error>
+        wrap_setopt(CURL* raw,
+                   CURLoption opt,
+                    const std::string& arg)
+            noexcept
+        {
+            return wrap_setopt(raw, opt, arg.data());
+        }
+
+
+        void
+        wrap_unsetopt(CURL* raw,
+                      CURLoption opt)
+            noexcept
+        {
+            curl_easy_setopt(raw, opt, static_cast<void*>(nullptr));
+        }
+
+
         template<typename T,
                  typename U>
         std::expected<U, error>
-        try_getinfo(CURL* raw,
-                    CURLINFO info)
+        wrap_getinfo(CURL* raw,
+                     CURLINFO info)
             noexcept
         {
             T result;
@@ -79,9 +110,9 @@ namespace curl {
 
         // Special version that handles null pointers.
         std::expected<std::string, error>
-        try_getinfo_str(CURL* raw,
-                        CURLINFO info)
-             noexcept
+        wrap_getinfo_str(CURL* raw,
+                         CURLINFO info)
+            noexcept
         {
             char* str;
             auto e = curl_easy_getinfo(raw, info, &str);
@@ -345,7 +376,7 @@ namespace curl {
     easy::try_set_abstract_unix_socket(const std::filesystem::path& socket_path)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ABSTRACT_UNIX_SOCKET, socket_path.c_str());
+        return wrap_setopt(raw, CURLOPT_ABSTRACT_UNIX_SOCKET, socket_path.c_str());
     }
 
 
@@ -353,7 +384,7 @@ namespace curl {
     easy::unset_abstract_unix_socket()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_ABSTRACT_UNIX_SOCKET, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_ABSTRACT_UNIX_SOCKET);
     }
 
 
@@ -368,7 +399,7 @@ namespace curl {
     easy::try_set_accept_timeout(std::chrono::milliseconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ACCEPTTIMEOUT_MS, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_ACCEPTTIMEOUT_MS, long(timeout.count()));
     }
 
 
@@ -383,7 +414,7 @@ namespace curl {
     easy::try_set_accept_encoding(const std::string& enc)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ACCEPT_ENCODING, enc.data());
+        return wrap_setopt(raw, CURLOPT_ACCEPT_ENCODING, enc);
     }
 
 
@@ -391,7 +422,7 @@ namespace curl {
     easy::unset_accept_encoding()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_ACCEPT_ENCODING, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_ACCEPT_ENCODING);
     }
 
 
@@ -406,7 +437,7 @@ namespace curl {
     easy::try_set_address_scope(long scope_id)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ADDRESS_SCOPE, scope_id);
+        return wrap_setopt(raw, CURLOPT_ADDRESS_SCOPE, scope_id);
     }
 
 
@@ -421,7 +452,7 @@ namespace curl {
     easy::try_set_alt_svc(const std::filesystem::path& cache_file)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ALTSVC, cache_file.c_str());
+        return wrap_setopt(raw, CURLOPT_ALTSVC, cache_file.c_str());
     }
 
 
@@ -429,7 +460,7 @@ namespace curl {
     easy::unset_alt_svc()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_ALTSVC, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_ALTSVC);
     }
 
 
@@ -444,7 +475,7 @@ namespace curl {
     easy::try_set_alt_svc_ctrl(long mask)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_ALTSVC_CTRL, mask);
+        return wrap_setopt(raw, CURLOPT_ALTSVC_CTRL, mask);
     }
 
 
@@ -459,7 +490,7 @@ namespace curl {
     easy::try_set_append(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_APPEND, long{enable});
+        return wrap_setopt(raw, CURLOPT_APPEND, long{enable});
     }
 
 
@@ -474,7 +505,7 @@ namespace curl {
     easy::try_set_auto_referer(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_AUTOREFERER, long{enable});
+        return wrap_setopt(raw, CURLOPT_AUTOREFERER, long{enable});
     }
 
 
@@ -489,7 +520,7 @@ namespace curl {
     easy::try_set_aws_sig_v4(const std::string& arg)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_AWS_SIGV4, arg.data());
+        return wrap_setopt(raw, CURLOPT_AWS_SIGV4, arg);
     }
 
 
@@ -497,7 +528,7 @@ namespace curl {
     easy::unset_aws_sig_v4()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_AWS_SIGV4, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_AWS_SIGV4);
     }
 
 
@@ -512,7 +543,7 @@ namespace curl {
     easy::try_set_buffer_size(long size)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_BUFFERSIZE, size);
+        return wrap_setopt(raw, CURLOPT_BUFFERSIZE, size);
     }
 
 
@@ -527,7 +558,7 @@ namespace curl {
     easy::try_set_ca_info(const std::filesystem::path& bundle_file)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CAINFO, bundle_file.c_str());
+        return wrap_setopt(raw, CURLOPT_CAINFO, bundle_file.c_str());
     }
 
 
@@ -535,7 +566,7 @@ namespace curl {
     easy::unset_ca_info()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_CAINFO, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_CAINFO);
     }
 
 
@@ -550,7 +581,7 @@ namespace curl {
     easy::try_set_ca_info_blob(curl_blob* bundle)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CAINFO_BLOB, bundle);
+        return wrap_setopt(raw, CURLOPT_CAINFO_BLOB, bundle);
     }
 
 
@@ -565,7 +596,7 @@ namespace curl {
     easy::try_set_ca_path(const std::filesystem::path& bundle_dir)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CAPATH, bundle_dir.c_str());
+        return wrap_setopt(raw, CURLOPT_CAPATH, bundle_dir.c_str());
     }
 
 
@@ -573,7 +604,7 @@ namespace curl {
     easy::unset_ca_path()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_CAPATH, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_CAPATH);
     }
 
 
@@ -588,7 +619,7 @@ namespace curl {
     easy::try_set_ca_cache_timeout(std::chrono::seconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CA_CACHE_TIMEOUT, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_CA_CACHE_TIMEOUT, long(timeout.count()));
     }
 
 
@@ -596,7 +627,7 @@ namespace curl {
     easy::unset_cache_timeout()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_CA_CACHE_TIMEOUT, long{-1});
+        std::ignore = wrap_setopt(raw, CURLOPT_CA_CACHE_TIMEOUT, long{-1});
     }
 
 
@@ -611,7 +642,7 @@ namespace curl {
     easy::try_set_cert_info(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CERTINFO, long{enable});
+        return wrap_setopt(raw, CURLOPT_CERTINFO, long{enable});
     }
 
 
@@ -631,10 +662,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_CLOSESOCKETDATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_CLOSESOCKETDATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_CLOSESOCKETFUNCTION, &closesocket_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_CLOSESOCKETFUNCTION, &closesocket_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.closesocket_func = std::move(closesocket_func);
@@ -647,8 +678,8 @@ namespace curl {
         noexcept
     {
         extra_state.closesocket_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_CLOSESOCKETDATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_CLOSESOCKETFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_CLOSESOCKETDATA);
+        wrap_unsetopt(raw, CURLOPT_CLOSESOCKETFUNCTION);
     }
 
 
@@ -663,7 +694,7 @@ namespace curl {
     easy::try_set_connect_timeout(std::chrono::seconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CONNECTTIMEOUT, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_CONNECTTIMEOUT, long(timeout.count()));
     }
 
 
@@ -678,7 +709,7 @@ namespace curl {
     easy::try_set_connect_timeout(std::chrono::milliseconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CONNECTTIMEOUT_MS, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_CONNECTTIMEOUT_MS, long(timeout.count()));
     }
 
 
@@ -693,7 +724,7 @@ namespace curl {
     easy::try_set_connect_only(connect_only opt)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CONNECT_ONLY, opt);
+        return wrap_setopt(raw, CURLOPT_CONNECT_ONLY, opt);
     }
 
 
@@ -708,7 +739,7 @@ namespace curl {
     easy::try_set_connect_to(slist hosts)
         noexcept
     {
-        auto result = try_setopt(raw, CURLOPT_CONNECT_TO, hosts.data());
+        auto result = wrap_setopt(raw, CURLOPT_CONNECT_TO, hosts.data());
         if (result)
             extra_state.connect_to_list = std::move(hosts);
         return result;
@@ -726,7 +757,7 @@ namespace curl {
     easy::try_set_cookie(const std::string& cookie)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_COOKIE, cookie.data());
+        return wrap_setopt(raw, CURLOPT_COOKIE, cookie);
     }
 
 
@@ -734,7 +765,7 @@ namespace curl {
     easy::unset_cookie()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_COOKIE, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_COOKIE);
     }
 
 
@@ -749,7 +780,7 @@ namespace curl {
     easy::try_set_cookie_file(const std::filesystem::path& cookie_file)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_COOKIEFILE, cookie_file.c_str());
+        return wrap_setopt(raw, CURLOPT_COOKIEFILE, cookie_file.c_str());
     }
 
 
@@ -757,7 +788,7 @@ namespace curl {
     easy::unset_cookie_file()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_COOKIEFILE, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_COOKIEFILE);
     }
 
 
@@ -772,7 +803,7 @@ namespace curl {
     easy::try_set_cookie_jar(const std::filesystem::path& jar_file)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_COOKIEJAR, jar_file.c_str());
+        return wrap_setopt(raw, CURLOPT_COOKIEJAR, jar_file.c_str());
     }
 
 
@@ -780,7 +811,7 @@ namespace curl {
     easy::unset_cookie_jar()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_COOKIEJAR, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_COOKIEJAR);
     }
 
 
@@ -795,7 +826,7 @@ namespace curl {
     easy::try_set_cookie_list(const std::string& cookies)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_COOKIELIST, cookies.data());
+        return wrap_setopt(raw, CURLOPT_COOKIELIST, cookies);
     }
 
 
@@ -803,7 +834,7 @@ namespace curl {
     easy::unset_cookie_list()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_COOKIELIST, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_COOKIELIST);
     }
 
 
@@ -818,7 +849,7 @@ namespace curl {
     easy::try_set_cookie_session(bool start_anew)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_COOKIESESSION, long{start_anew});
+        return wrap_setopt(raw, CURLOPT_COOKIESESSION, long{start_anew});
     }
 
 
@@ -853,7 +884,7 @@ namespace curl {
         auto res = try_set_post_field_size(size);
         if (!res)
             return res;
-        return try_setopt(raw, CURLOPT_COPYPOSTFIELDS, data);
+        return wrap_setopt(raw, CURLOPT_COPYPOSTFIELDS, data);
     }
 
 
@@ -861,7 +892,7 @@ namespace curl {
     easy::unset_copy_post_fields()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_COPYPOSTFIELDS, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_COPYPOSTFIELDS);
     }
 
 
@@ -884,7 +915,7 @@ namespace curl {
     easy::try_set_crlf(bool convert)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CRLF, long{convert});
+        return wrap_setopt(raw, CURLOPT_CRLF, long{convert});
     }
 
 
@@ -899,7 +930,7 @@ namespace curl {
     easy::try_set_crl_file(const std::filesystem::path& crl_file)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CRLFILE, crl_file.c_str());
+        return wrap_setopt(raw, CURLOPT_CRLFILE, crl_file.c_str());
     }
 
 
@@ -907,7 +938,24 @@ namespace curl {
     easy::unset_crl_file()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_CRLFILE, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_CRLFILE);
+    }
+
+
+
+    void
+    easy::set_url(url url_obj)
+    {
+        value_or_throw(try_set_url(std::move(url_obj)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_url(url url_obj)
+        noexcept
+    {
+        extra_state.url_obj = std::move(url_obj);
+        return wrap_setopt(raw, CURLOPT_CURLU, extra_state.url_obj);
     }
 
 
@@ -922,7 +970,7 @@ namespace curl {
     easy::try_set_custom_request(const std::string& method)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_CUSTOMREQUEST, method.data());
+        return wrap_setopt(raw, CURLOPT_CUSTOMREQUEST, method);
     }
 
 
@@ -930,7 +978,7 @@ namespace curl {
     easy::unset_custom_request()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_CUSTOMREQUEST, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_CUSTOMREQUEST);
     }
 
 
@@ -950,10 +998,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_DEBUGDATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_DEBUGDATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_DEBUGFUNCTION, &debug_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_DEBUGFUNCTION, &debug_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.debug_func = std::move(debug_func);
@@ -966,8 +1014,8 @@ namespace curl {
         noexcept
     {
         extra_state.debug_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_DEBUGDATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_DEBUGFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_DEBUGDATA);
+        wrap_unsetopt(raw, CURLOPT_DEBUGFUNCTION);
     }
 
 
@@ -982,7 +1030,7 @@ namespace curl {
     easy::try_set_default_protocol(const std::string& protocol)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DEFAULT_PROTOCOL, protocol.data());
+        return wrap_setopt(raw, CURLOPT_DEFAULT_PROTOCOL, protocol);
     }
 
 
@@ -990,7 +1038,7 @@ namespace curl {
     easy::unset_default_protocol()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_DEFAULT_PROTOCOL, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_DEFAULT_PROTOCOL);
     }
 
 
@@ -1005,7 +1053,7 @@ namespace curl {
     easy::try_set_dir_list_only(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DIRLISTONLY, long{enable});
+        return wrap_setopt(raw, CURLOPT_DIRLISTONLY, long{enable});
     }
 
 
@@ -1020,7 +1068,7 @@ namespace curl {
     easy::try_set_disallow_username_in_url(bool disallow)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, long{disallow});
+        return wrap_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, long{disallow});
     }
 
 
@@ -1035,7 +1083,7 @@ namespace curl {
     easy::try_set_dns_cache_timeout(std::chrono::seconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DNS_CACHE_TIMEOUT, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_DNS_CACHE_TIMEOUT, long(timeout.count()));
     }
 
 
@@ -1043,7 +1091,7 @@ namespace curl {
     easy::unset_dns_cache_timeout()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_DNS_CACHE_TIMEOUT, long(-1));
+        std::ignore = wrap_setopt(raw, CURLOPT_DNS_CACHE_TIMEOUT, long(-1));
     }
 
 
@@ -1058,7 +1106,7 @@ namespace curl {
     easy::try_set_dns_servers(const std::string& servers)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DNS_SERVERS, servers.data());
+        return wrap_setopt(raw, CURLOPT_DNS_SERVERS, servers);
     }
 
 
@@ -1066,7 +1114,7 @@ namespace curl {
     easy::unset_dns_servers()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_DNS_SERVERS, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_DNS_SERVERS);
     }
 
 
@@ -1081,7 +1129,7 @@ namespace curl {
     easy::try_set_dns_shuffle_addresses(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, long{enable});
+        return wrap_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, long{enable});
     }
 
 
@@ -1096,7 +1144,7 @@ namespace curl {
     easy::try_set_expect_100_timeout(std::chrono::milliseconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_EXPECT_100_TIMEOUT_MS, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_EXPECT_100_TIMEOUT_MS, long(timeout.count()));
     }
 
 
@@ -1111,7 +1159,7 @@ namespace curl {
     easy::try_set_fail_on_error(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_FAILONERROR, long{enable});
+        return wrap_setopt(raw, CURLOPT_FAILONERROR, long{enable});
     }
 
 
@@ -1126,7 +1174,7 @@ namespace curl {
     easy::try_set_file_time(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_FILETIME, long{enable});
+        return wrap_setopt(raw, CURLOPT_FILETIME, long{enable});
     }
 
 
@@ -1146,10 +1194,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_FNMATCH_DATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_FNMATCH_DATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_FNMATCH_FUNCTION, &fnmatch_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_FNMATCH_FUNCTION, &fnmatch_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.fnmatch_func = std::move(fnmatch_func);
@@ -1162,8 +1210,8 @@ namespace curl {
         noexcept
     {
         extra_state.fnmatch_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_FNMATCH_DATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_FNMATCH_FUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_FNMATCH_DATA);
+        wrap_unsetopt(raw, CURLOPT_FNMATCH_FUNCTION);
     }
 
 
@@ -1178,7 +1226,7 @@ namespace curl {
     easy::try_set_follow_location(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_FOLLOWLOCATION, long{enable});
+        return wrap_setopt(raw, CURLOPT_FOLLOWLOCATION, long{enable});
     }
 
 
@@ -1193,7 +1241,7 @@ namespace curl {
     easy::try_set_forbid_reuse(bool forbid)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_FORBID_REUSE, long{forbid});
+        return wrap_setopt(raw, CURLOPT_FORBID_REUSE, long{forbid});
     }
 
 
@@ -1208,7 +1256,7 @@ namespace curl {
     easy::try_set_fresh_connect(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_FRESH_CONNECT, long{enable});
+        return wrap_setopt(raw, CURLOPT_FRESH_CONNECT, long{enable});
     }
 
 
@@ -1223,7 +1271,7 @@ namespace curl {
     easy::try_set_happy_eyeballs_timeout(std::chrono::milliseconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long(timeout.count()));
     }
 
 
@@ -1238,7 +1286,7 @@ namespace curl {
     easy::try_set_header(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HEADER, long{enable});
+        return wrap_setopt(raw, CURLOPT_HEADER, long{enable});
     }
 
 
@@ -1258,10 +1306,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_HEADERDATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_HEADERDATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_HEADERFUNCTION, &header_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_HEADERFUNCTION, &header_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.header_func = std::move(header_func);
@@ -1274,8 +1322,8 @@ namespace curl {
         noexcept
     {
         extra_state.header_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_HEADERDATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_HEADERFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_HEADERDATA);
+        wrap_unsetopt(raw, CURLOPT_HEADERFUNCTION);
     }
 
 
@@ -1290,7 +1338,7 @@ namespace curl {
     easy::try_set_header_opt(long mask)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HEADEROPT, mask);
+        return wrap_setopt(raw, CURLOPT_HEADEROPT, mask);
     }
 
 
@@ -1305,7 +1353,7 @@ namespace curl {
     easy::try_set_http_auth(long mask)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HTTPAUTH, mask);
+        return wrap_setopt(raw, CURLOPT_HTTPAUTH, mask);
     }
 
 
@@ -1320,7 +1368,7 @@ namespace curl {
     easy::try_set_http_get(bool use_get)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HTTPGET, long{use_get});
+        return wrap_setopt(raw, CURLOPT_HTTPGET, long{use_get});
     }
 
 
@@ -1335,7 +1383,7 @@ namespace curl {
     easy::try_set_http_headers(slist headers)
         noexcept
     {
-        auto result = try_setopt(raw, CURLOPT_HTTPHEADER, headers.data());
+        auto result = wrap_setopt(raw, CURLOPT_HTTPHEADER, headers.data());
         if (result)
             extra_state.http_headers_list = std::move(headers);
         return result;
@@ -1356,7 +1404,7 @@ namespace curl {
         auto result = extra_state.http_headers_list.try_append(header);
         if (!result)
             return result;
-        return try_setopt(raw, CURLOPT_HTTPHEADER, extra_state.http_headers_list.data());
+        return wrap_setopt(raw, CURLOPT_HTTPHEADER, extra_state.http_headers_list.data());
     }
 
 
@@ -1371,7 +1419,7 @@ namespace curl {
     easy::try_set_http_content_decoding(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, long{enable});
     }
 
 
@@ -1386,7 +1434,7 @@ namespace curl {
     easy::try_set_http_transfer_decoding(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, long{enable});
     }
 
 
@@ -1401,7 +1449,7 @@ namespace curl {
     easy::try_set_http_version(http_version ver)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_HTTP_VERSION, ver);
+        return wrap_setopt(raw, CURLOPT_HTTP_VERSION, ver);
     }
 
 
@@ -1416,7 +1464,7 @@ namespace curl {
     easy::try_set_ignore_content_length(bool ignore)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, long{ignore});
+        return wrap_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, long{ignore});
     }
 
 
@@ -1431,7 +1479,7 @@ namespace curl {
     easy::try_set_input_file_size(curl_off_t size)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_INFILESIZE_LARGE, size);
+        return wrap_setopt(raw, CURLOPT_INFILESIZE_LARGE, size);
     }
 
 
@@ -1439,7 +1487,7 @@ namespace curl {
     easy::unset_input_file_size()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_INFILESIZE_LARGE, curl_off_t(-1));
+        std::ignore = wrap_setopt(raw, CURLOPT_INFILESIZE_LARGE, curl_off_t(-1));
     }
 
 
@@ -1454,7 +1502,7 @@ namespace curl {
     easy::try_set_low_speed_limit(long limit)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_LOW_SPEED_LIMIT, limit);
+        return wrap_setopt(raw, CURLOPT_LOW_SPEED_LIMIT, limit);
     }
 
 
@@ -1469,7 +1517,7 @@ namespace curl {
     easy::try_set_low_speed_time(std::chrono::seconds time)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_LOW_SPEED_TIME, long(time.count()));
+        return wrap_setopt(raw, CURLOPT_LOW_SPEED_TIME, long(time.count()));
     }
 
 
@@ -1484,7 +1532,7 @@ namespace curl {
     easy::try_set_max_age_conn(std::chrono::seconds age)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAXAGE_CONN, long(age.count()));
+        return wrap_setopt(raw, CURLOPT_MAXAGE_CONN, long(age.count()));
     }
 
 
@@ -1499,7 +1547,7 @@ namespace curl {
     easy::try_set_max_connects(long amount)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAXCONNECTS, amount);
+        return wrap_setopt(raw, CURLOPT_MAXCONNECTS, amount);
     }
 
 
@@ -1514,7 +1562,7 @@ namespace curl {
     easy::try_set_max_file_size(curl_off_t size)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAXFILESIZE_LARGE, size);
+        return wrap_setopt(raw, CURLOPT_MAXFILESIZE_LARGE, size);
     }
 
 
@@ -1529,7 +1577,7 @@ namespace curl {
     easy::try_set_max_lifetime_conn(std::chrono::seconds lifetime)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAXLIFETIME_CONN, long(lifetime.count()));
+        return wrap_setopt(raw, CURLOPT_MAXLIFETIME_CONN, long(lifetime.count()));
     }
 
 
@@ -1544,7 +1592,7 @@ namespace curl {
     easy::try_set_max_redirs(long limit)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAXREDIRS, limit);
+        return wrap_setopt(raw, CURLOPT_MAXREDIRS, limit);
     }
 
 
@@ -1559,7 +1607,7 @@ namespace curl {
     easy::try_set_max_recv_speed(curl_off_t speed)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAX_RECV_SPEED_LARGE, speed);
+        return wrap_setopt(raw, CURLOPT_MAX_RECV_SPEED_LARGE, speed);
     }
 
 
@@ -1574,7 +1622,7 @@ namespace curl {
     easy::try_set_max_send_speed(curl_off_t speed)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MAX_SEND_SPEED_LARGE, speed);
+        return wrap_setopt(raw, CURLOPT_MAX_SEND_SPEED_LARGE, speed);
     }
 
 
@@ -1589,7 +1637,7 @@ namespace curl {
     easy::try_set_mime_post(mime& data)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MIMEPOST, data.data());
+        return wrap_setopt(raw, CURLOPT_MIMEPOST, data.data());
     }
 
 
@@ -1597,7 +1645,7 @@ namespace curl {
     easy::unset_mime_post()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_MIMEPOST, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_MIMEPOST);
     }
 
 
@@ -1612,7 +1660,7 @@ namespace curl {
     easy::try_set_mime_options(long options)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_MIME_OPTIONS, options);
+        return wrap_setopt(raw, CURLOPT_MIME_OPTIONS, options);
     }
 
 
@@ -1627,7 +1675,7 @@ namespace curl {
     easy::try_set_netrc(CURL_NETRC_OPTION level)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NETRC, long{level});
+        return wrap_setopt(raw, CURLOPT_NETRC, long{level});
     }
 
 
@@ -1642,7 +1690,7 @@ namespace curl {
     easy::try_set_netrc_file(const std::filesystem::path& filename)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NETRC_FILE, filename.c_str());
+        return wrap_setopt(raw, CURLOPT_NETRC_FILE, filename.c_str());
     }
 
 
@@ -1650,7 +1698,7 @@ namespace curl {
     easy::unset_netrc_file()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_NETRC_FILE, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_NETRC_FILE);
     }
 
 
@@ -1665,7 +1713,7 @@ namespace curl {
     easy::try_set_new_directory_perms(long mode)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NEW_DIRECTORY_PERMS, mode);
+        return wrap_setopt(raw, CURLOPT_NEW_DIRECTORY_PERMS, mode);
     }
 
 
@@ -1680,7 +1728,7 @@ namespace curl {
     easy::try_set_new_file_perms(long mode)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NEW_FILE_PERMS, mode);
+        return wrap_setopt(raw, CURLOPT_NEW_FILE_PERMS, mode);
     }
 
 
@@ -1695,7 +1743,7 @@ namespace curl {
     easy::try_set_no_body(bool no_body)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NOBODY, long{no_body});
+        return wrap_setopt(raw, CURLOPT_NOBODY, long{no_body});
     }
 
 
@@ -1710,7 +1758,7 @@ namespace curl {
     easy::try_set_no_progress(bool no_progress)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_NOPROGRESS, long{no_progress});
+        return wrap_setopt(raw, CURLOPT_NOPROGRESS, long{no_progress});
     }
 
 
@@ -1730,10 +1778,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_OPENSOCKETDATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_OPENSOCKETDATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_OPENSOCKETFUNCTION, &opensocket_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_OPENSOCKETFUNCTION, &opensocket_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.opensocket_func = std::move(opensocket_func);
@@ -1746,8 +1794,8 @@ namespace curl {
         noexcept
     {
         extra_state.opensocket_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_OPENSOCKETDATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_OPENSOCKETFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_OPENSOCKETDATA);
+        wrap_unsetopt(raw, CURLOPT_OPENSOCKETFUNCTION);
     }
 
 
@@ -1762,7 +1810,7 @@ namespace curl {
     easy::try_set_password(const std::string& password)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_PASSWORD, password.data());
+        return wrap_setopt(raw, CURLOPT_PASSWORD, password);
     }
 
 
@@ -1770,7 +1818,7 @@ namespace curl {
     easy::unset_password()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_PASSWORD, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_PASSWORD);
     }
 
 
@@ -1785,7 +1833,7 @@ namespace curl {
     easy::try_set_port(std::uint16_t port)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_PORT, long{port});
+        return wrap_setopt(raw, CURLOPT_PORT, long{port});
     }
 
 
@@ -1800,7 +1848,7 @@ namespace curl {
     easy::try_set_post(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_POST, long{enable});
+        return wrap_setopt(raw, CURLOPT_POST, long{enable});
     }
 
 
@@ -1820,7 +1868,7 @@ namespace curl {
 
 
     std::expected<void, error>
-    easy::try_set_post_field(const std::string& data)
+    easy::try_set_post_field(std::string_view data)
         noexcept
     {
         return try_set_post_field(data.data(), data.size());
@@ -1829,13 +1877,13 @@ namespace curl {
 
     std::expected<void, error>
     easy::try_set_post_field(const void* data,
-                              std::size_t size)
+                             std::size_t size)
         noexcept
     {
         auto res = try_set_post_field_size(size);
         if (!res)
             return res;
-        return try_setopt(raw, CURLOPT_POSTFIELDS, data);
+        return wrap_setopt(raw, CURLOPT_POSTFIELDS, data);
     }
 
 
@@ -1843,7 +1891,7 @@ namespace curl {
     easy::unset_post_field()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_POSTFIELDS, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_POSTFIELDS);
     }
 
 
@@ -1858,7 +1906,7 @@ namespace curl {
     easy::try_set_post_field_size(curl_off_t size)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_POSTFIELDSIZE_LARGE, size);
+        return wrap_setopt(raw, CURLOPT_POSTFIELDSIZE_LARGE, size);
     }
 
 
@@ -1874,7 +1922,7 @@ namespace curl {
         noexcept
     {
         unset_read_function();
-        return try_setopt(raw, CURLOPT_READDATA, data_ptr);
+        return wrap_setopt(raw, CURLOPT_READDATA, data_ptr);
     }
 
 
@@ -1894,11 +1942,11 @@ namespace curl {
             return {};
         }
 
-        auto data_res = try_setopt(raw, CURLOPT_READDATA, raw);
+        auto data_res = wrap_setopt(raw, CURLOPT_READDATA, raw);
         if (!data_res)
             return data_res;
 
-        auto func_res = try_setopt(raw, CURLOPT_READFUNCTION, &read_callback_helper);
+        auto func_res = wrap_setopt(raw, CURLOPT_READFUNCTION, &read_callback_helper);
         if (!func_res)
             return func_res;
 
@@ -1912,7 +1960,8 @@ namespace curl {
         noexcept
     {
         extra_state.read_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_READFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_READDATA);
+        wrap_unsetopt(raw, CURLOPT_READFUNCTION);
     }
 
 
@@ -1927,7 +1976,7 @@ namespace curl {
     easy::try_set_referer(const std::string& where)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_REFERER, where.data());
+        return wrap_setopt(raw, CURLOPT_REFERER, where);
     }
 
 
@@ -1935,7 +1984,7 @@ namespace curl {
     easy::unset_referer()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_REFERER, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_REFERER);
     }
 
 
@@ -1950,7 +1999,7 @@ namespace curl {
     easy::try_set_resume_from(curl_off_t from)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_RESUME_FROM_LARGE, from);
+        return wrap_setopt(raw, CURLOPT_RESUME_FROM_LARGE, from);
     }
 
 
@@ -1965,7 +2014,7 @@ namespace curl {
     easy::try_set_ssl_verify_host(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_SSL_VERIFYHOST, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, long{enable});
     }
 
 
@@ -1980,7 +2029,7 @@ namespace curl {
     easy::try_set_ssl_verify_peer(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_SSL_VERIFYPEER, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYPEER, long{enable});
     }
 
 
@@ -1995,7 +2044,30 @@ namespace curl {
     easy::try_set_ssl_verify_status(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_SSL_VERIFYSTATUS, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYSTATUS, long{enable});
+    }
+
+
+    void
+    easy::set_stderr(FILE* stream)
+    {
+        return value_or_throw(try_set_stderr(stream));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_stderr(FILE* stream)
+        noexcept
+    {
+        return wrap_setopt(raw, CURLOPT_STDERR, stream);
+    }
+
+
+    void
+    easy::unset_stderr()
+        noexcept
+    {
+        return wrap_unsetopt(raw, CURLOPT_STDERR);
     }
 
 
@@ -2010,7 +2082,7 @@ namespace curl {
     easy::try_set_tcp_keep_alive(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TCP_KEEPALIVE, long{enable});
+        return wrap_setopt(raw, CURLOPT_TCP_KEEPALIVE, long{enable});
     }
 
 
@@ -2027,7 +2099,7 @@ namespace curl {
     easy::try_set_tcp_keep_cnt(long count)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TCP_KEEPCNT, count);
+        return wrap_setopt(raw, CURLOPT_TCP_KEEPCNT, count);
     }
 
 #endif
@@ -2044,7 +2116,7 @@ namespace curl {
     easy::try_set_tcp_keep_idle(std::chrono::seconds delay)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TCP_KEEPIDLE, long(delay.count()));
+        return wrap_setopt(raw, CURLOPT_TCP_KEEPIDLE, long(delay.count()));
     }
 
 
@@ -2059,7 +2131,7 @@ namespace curl {
     easy::try_set_tcp_keep_intvl(std::chrono::seconds interval)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TCP_KEEPINTVL, long(interval.count()));
+        return wrap_setopt(raw, CURLOPT_TCP_KEEPINTVL, long(interval.count()));
     }
 
 
@@ -2074,7 +2146,7 @@ namespace curl {
     easy::try_set_tcp_no_delay(bool no_delay)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TCP_NODELAY, long{no_delay});
+        return wrap_setopt(raw, CURLOPT_TCP_NODELAY, long{no_delay});
     }
 
 
@@ -2089,7 +2161,7 @@ namespace curl {
     easy::try_set_timeout(std::chrono::seconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TIMEOUT, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_TIMEOUT, long(timeout.count()));
     }
 
 
@@ -2104,7 +2176,7 @@ namespace curl {
     easy::try_set_timeout(std::chrono::milliseconds timeout)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TIMEOUT_MS, long(timeout.count()));
+        return wrap_setopt(raw, CURLOPT_TIMEOUT_MS, long(timeout.count()));
     }
 
 
@@ -2119,7 +2191,7 @@ namespace curl {
     easy::try_set_transfer_text(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TRANSFERTEXT, long{enable});
+        return wrap_setopt(raw, CURLOPT_TRANSFERTEXT, long{enable});
     }
 
 
@@ -2134,22 +2206,22 @@ namespace curl {
     easy::try_set_transfer_encoding(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_TRANSFER_ENCODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_TRANSFER_ENCODING, long{enable});
     }
 
 
     void
-    easy::set_url(const std::string& url)
+    easy::set_url(const std::string& url_str)
     {
-        return value_or_throw(try_set_url(url));
+        return value_or_throw(try_set_url(url_str));
     }
 
 
     std::expected<void, error>
-    easy::try_set_url(const std::string& url)
+    easy::try_set_url(const std::string& url_str)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_URL, url.data());
+        return wrap_setopt(raw, CURLOPT_URL, url_str);
     }
 
 
@@ -2157,7 +2229,9 @@ namespace curl {
     easy::unset_url()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_URL, nullptr);
+        extra_state.url_obj.destroy();
+        wrap_unsetopt(raw, CURLOPT_URL);
+        wrap_unsetopt(raw, CURLOPT_CURLU);
     }
 
 
@@ -2172,7 +2246,7 @@ namespace curl {
     easy::try_set_user_agent(const std::string& user_agent)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_USERAGENT, user_agent.data());
+        return wrap_setopt(raw, CURLOPT_USERAGENT, user_agent);
     }
 
 
@@ -2180,7 +2254,7 @@ namespace curl {
     easy::unset_user_agent()
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_USERAGENT, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_USERAGENT);
     }
 
 
@@ -2195,7 +2269,7 @@ namespace curl {
     easy::try_set_username(const std::string& username)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_USERNAME, username.data());
+        return wrap_setopt(raw, CURLOPT_USERNAME, username);
     }
 
 
@@ -2203,7 +2277,7 @@ namespace curl {
     easy::unset_username()
     noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_USERNAME, nullptr);
+        return wrap_unsetopt(raw, CURLOPT_USERNAME);
     }
 
 
@@ -2218,7 +2292,7 @@ namespace curl {
     easy::try_set_use_ssl(ssl_level level)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_USE_SSL, level);
+        return wrap_setopt(raw, CURLOPT_USE_SSL, level);
     }
 
 
@@ -2226,7 +2300,7 @@ namespace curl {
     easy::set_verbose(bool v)
         noexcept
     {
-        std::ignore = try_setopt(raw, CURLOPT_VERBOSE, long{v});
+        std::ignore = wrap_setopt(raw, CURLOPT_VERBOSE, long{v});
     }
 
 
@@ -2241,7 +2315,7 @@ namespace curl {
     easy::try_set_wildcard_match(bool enable)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_WILDCARDMATCH, long{enable});
+        return wrap_setopt(raw, CURLOPT_WILDCARDMATCH, long{enable});
     }
 
 
@@ -2257,7 +2331,7 @@ namespace curl {
         noexcept
     {
         unset_write_function();
-        return try_setopt(raw, CURLOPT_WRITEDATA, data_ptr);
+        return wrap_setopt(raw, CURLOPT_WRITEDATA, data_ptr);
     }
 
 
@@ -2277,11 +2351,11 @@ namespace curl {
             return {};
         }
 
-        auto data_res = try_setopt(raw, CURLOPT_WRITEDATA, raw);
+        auto data_res = wrap_setopt(raw, CURLOPT_WRITEDATA, raw);
         if (!data_res)
             return data_res;
 
-        auto func_res = try_setopt(raw, CURLOPT_WRITEFUNCTION, &write_callback_helper);
+        auto func_res = wrap_setopt(raw, CURLOPT_WRITEFUNCTION, &write_callback_helper);
         if (!func_res)
             return func_res;
 
@@ -2295,7 +2369,8 @@ namespace curl {
         noexcept
     {
         extra_state.write_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_WRITEFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_WRITEDATA);
+        wrap_unsetopt(raw, CURLOPT_WRITEFUNCTION);
     }
 
 
@@ -2310,7 +2385,7 @@ namespace curl {
     easy::try_set_ws_options(long mask)
         noexcept
     {
-        return try_setopt(raw, CURLOPT_WS_OPTIONS, mask);
+        return wrap_setopt(raw, CURLOPT_WS_OPTIONS, mask);
     }
 
 
@@ -2330,10 +2405,10 @@ namespace curl {
             return {};
         }
 
-        auto data_status = try_setopt(raw, CURLOPT_XFERINFODATA, raw);
+        auto data_status = wrap_setopt(raw, CURLOPT_XFERINFODATA, raw);
         if (!data_status)
             return data_status;
-        auto func_status = try_setopt(raw, CURLOPT_XFERINFOFUNCTION, &progress_callback_helper);
+        auto func_status = wrap_setopt(raw, CURLOPT_XFERINFOFUNCTION, &progress_callback_helper);
         if (!func_status)
             return func_status;
         extra_state.progress_func = std::move(progress_func);
@@ -2346,8 +2421,8 @@ namespace curl {
         noexcept
     {
         extra_state.progress_func = {};
-        std::ignore = try_setopt(raw, CURLOPT_XFERINFODATA, nullptr);
-        std::ignore = try_setopt(raw, CURLOPT_XFERINFOFUNCTION, nullptr);
+        wrap_unsetopt(raw, CURLOPT_XFERINFODATA);
+        wrap_unsetopt(raw, CURLOPT_XFERINFOFUNCTION);
     }
 
 
@@ -2363,7 +2438,7 @@ namespace curl {
     easy::try_get_active_socket()
         const noexcept
     {
-        return try_getinfo<curl_socket_t>(raw, CURLINFO_ACTIVESOCKET);
+        return wrap_getinfo<curl_socket_t>(raw, CURLINFO_ACTIVESOCKET);
     }
 
 
@@ -2379,8 +2454,8 @@ namespace curl {
     easy::try_get_app_connect_time()
         const noexcept
     {
-        return try_getinfo<curl_off_t, std::chrono::microseconds>(raw,
-                                                                  CURLINFO_APPCONNECT_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw,
+                                                                   CURLINFO_APPCONNECT_TIME_T);
     }
 
 
@@ -2396,7 +2471,7 @@ namespace curl {
     easy::try_get_condition_unmet()
         const noexcept
     {
-        return try_getinfo<long, bool>(raw, CURLINFO_CONDITION_UNMET);
+        return wrap_getinfo<long, bool>(raw, CURLINFO_CONDITION_UNMET);
     }
 
 
@@ -2412,7 +2487,8 @@ namespace curl {
     easy::try_get_connect_time()
         const noexcept
     {
-        return try_getinfo<curl_off_t, std::chrono::microseconds>(raw, CURLINFO_CONNECT_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw,
+                                                                   CURLINFO_CONNECT_TIME_T);
     }
 
 
@@ -2430,7 +2506,7 @@ namespace curl {
     easy::try_get_conn_id()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_CONN_ID);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONN_ID);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 2, 0)
@@ -2448,7 +2524,7 @@ namespace curl {
     easy::try_get_content_length_download()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T);
     }
 
 
@@ -2464,7 +2540,7 @@ namespace curl {
     easy::try_get_content_length_upload()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_UPLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_UPLOAD_T);
     }
 
 
@@ -2480,7 +2556,7 @@ namespace curl {
     easy::try_get_content_type()
         const noexcept
     {
-        return try_getinfo_str(raw, CURLINFO_CONTENT_TYPE);
+        return wrap_getinfo_str(raw, CURLINFO_CONTENT_TYPE);
     }
 
 
@@ -2496,7 +2572,7 @@ namespace curl {
     easy::try_get_cookie_list()
         const noexcept
     {
-        return try_getinfo<curl_slist*, slist>(raw, CURLINFO_COOKIELIST);
+        return wrap_getinfo<curl_slist*, slist>(raw, CURLINFO_COOKIELIST);
     }
 
 
@@ -2514,7 +2590,7 @@ namespace curl {
     easy::try_get_early_data_sent()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_EARLYDATA_SENT_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_EARLYDATA_SENT_T);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 11, 0)
@@ -2532,7 +2608,7 @@ namespace curl {
     easy::try_get_effective_method()
         const noexcept
     {
-        return try_getinfo_str(raw, CURLINFO_EFFECTIVE_METHOD);
+        return wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_METHOD);
     }
 
 
@@ -2548,7 +2624,7 @@ namespace curl {
     easy::try_get_effective_url()
         const noexcept
     {
-        return try_getinfo_str(raw, CURLINFO_EFFECTIVE_URL);
+        return wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_URL);
     }
 
 
@@ -2564,7 +2640,7 @@ namespace curl {
     easy::try_get_file_time()
         const noexcept
     {
-        auto value = try_getinfo<curl_off_t>(raw, CURLINFO_FILETIME_T);
+        auto value = wrap_getinfo<curl_off_t>(raw, CURLINFO_FILETIME_T);
         if (!value)
             return std::unexpected{std::move(value.error())};
         return std::chrono::utc_seconds{std::chrono::seconds(*value)};
@@ -2583,7 +2659,7 @@ namespace curl {
     easy::try_get_http_version()
         const noexcept
     {
-        return try_getinfo<long, http_version>(raw, CURLINFO_HTTP_VERSION);
+        return wrap_getinfo<long, http_version>(raw, CURLINFO_HTTP_VERSION);
     }
 
 
@@ -2614,7 +2690,7 @@ namespace curl {
     easy::try_get_response_code()
         const noexcept
     {
-        return try_getinfo<long>(raw, CURLINFO_RESPONSE_CODE);
+        return wrap_getinfo<long>(raw, CURLINFO_RESPONSE_CODE);
     }
 
 
@@ -2630,7 +2706,7 @@ namespace curl {
     easy::try_get_retry_after()
         const noexcept
     {
-        return try_getinfo<long, std::chrono::seconds>(raw, CURLINFO_RETRY_AFTER);
+        return wrap_getinfo<long, std::chrono::seconds>(raw, CURLINFO_RETRY_AFTER);
     }
 
 
@@ -2646,7 +2722,7 @@ namespace curl {
     easy::try_get_size_download()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DOWNLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DOWNLOAD_T);
     }
 
 
@@ -2662,7 +2738,7 @@ namespace curl {
     easy::try_get_size_upload()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_SIZE_UPLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_UPLOAD_T);
     }
 
 
@@ -2678,7 +2754,7 @@ namespace curl {
     easy::try_get_speed_download()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_SPEED_DOWNLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_DOWNLOAD_T);
     }
 
 
@@ -2694,7 +2770,7 @@ namespace curl {
     easy::try_get_speed_upload()
         const noexcept
     {
-        return try_getinfo<curl_off_t>(raw, CURLINFO_SPEED_UPLOAD_T);
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_UPLOAD_T);
     }
 
 
@@ -2710,7 +2786,7 @@ namespace curl {
     easy::try_get_start_transfer_time()
         const noexcept
     {
-        return try_getinfo<curl_off_t, std::chrono::microseconds>(
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_STARTTRANSFER_TIME_T
         );
@@ -2729,7 +2805,7 @@ namespace curl {
     easy::try_get_total_time()
         const noexcept
     {
-        return try_getinfo<curl_off_t, std::chrono::microseconds>(raw, CURLINFO_TOTAL_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw, CURLINFO_TOTAL_TIME_T);
     }
 
 

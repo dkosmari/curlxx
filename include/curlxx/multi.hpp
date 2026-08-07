@@ -205,14 +205,6 @@ namespace curl {
         /* End of option setters. */
         /* ---------------------- */
 
-
-    private:
-
-        template<typename T>
-        std::expected<void, error>
-        try_setopt(CURLMoption opt, T&& arg)
-            noexcept;
-
     };
 
 } // namespace curl

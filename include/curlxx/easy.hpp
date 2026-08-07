@@ -11,11 +11,13 @@
 #include <any>
 #include <chrono>
 #include <cstddef>
+#include <cstdio>
 #include <expected>
 #include <filesystem>
 #include <functional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -28,12 +30,10 @@
 #include "header.hpp"
 #include "mime.hpp"
 #include "slist.hpp"
+#include "url.hpp"
 
 
 namespace curl {
-
-    class multi;
-
 
     class easy : public detail::basic_wrapper<CURL*> {
 
@@ -95,6 +95,7 @@ namespace curl {
 
             slist    http_headers_list;
             slist    connect_to_list;
+            url      url_obj{nullptr};
             std::any private_data;
         };
 
@@ -669,7 +670,14 @@ namespace curl {
 
 
         // CURLOPT_CURLU
-        // Set URL to work on with a URL handle. TODO
+        // Set URL to work on with a URL handle.
+
+        void
+        set_url(url url_obj);
+
+        std::expected<void, error>
+        try_set_url(url url_obj)
+            noexcept;
 
 
         // CURLOPT_CUSTOMREQUEST
@@ -1492,7 +1500,7 @@ namespace curl {
 
 
         std::expected<void, error>
-        try_set_post_field(const std::string& data)
+        try_set_post_field(std::string_view data)
             noexcept;
 
         std::expected<void, error>
@@ -1934,7 +1942,18 @@ namespace curl {
 
 
         // CURLOPT_STDERR
-        // Redirect stderr to another stream. TODO
+        // Redirect stderr to another stream.
+        void
+        set_stderr(FILE* stream);
+
+        std::expected<void, error>
+        try_set_stderr(FILE* stream)
+            noexcept;
+
+        void
+        unset_stderr()
+            noexcept;
+
 
         // CURLOPT_STREAM_DEPENDS
         // This HTTP/2 stream depends on another. TODO
@@ -2116,10 +2135,10 @@ namespace curl {
         // URL to work on.
 
         void
-        set_url(const std::string& url);
+        set_url(const std::string& url_str);
 
         std::expected<void, error>
-        try_set_url(const std::string& url)
+        try_set_url(const std::string& url_str)
             noexcept;
 
         void
@@ -2805,8 +2824,6 @@ namespace curl {
                               CURL* handle)
             noexcept;
 
-
-        friend class multi;
 
         /*--------------*/
         /* Private data */

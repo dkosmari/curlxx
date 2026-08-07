@@ -39,7 +39,7 @@ namespace curl {
                      unsigned flags)
             noexcept;
 
-        std::expected<void, error>
+        void
         wrap_url_unset(CURLU* raw,
                        CURLUPart part,
                        unsigned flags)
@@ -110,16 +110,13 @@ namespace curl {
         }
 
 
-        std::expected<void, error>
+        void
         wrap_url_unset(CURLU* raw,
                        CURLUPart part,
                        unsigned flags)
             noexcept
         {
-            auto e = curl_url_set(raw, part, nullptr, flags);
-            if (e)
-                return std::unexpected{error{e}};
-            return {};
+            curl_url_set(raw, part, nullptr, flags);
         }
 
     } // namespace
@@ -386,7 +383,7 @@ namespace curl {
     url::set_url(const std::string& url_arg,
                  unsigned flags)
     {
-        value_or_throw(try_set_url(url_arg, flags));
+        return value_or_throw(try_set_url(url_arg, flags));
     }
 
 
@@ -401,12 +398,6 @@ namespace curl {
 
     void
     url::unset_url(unsigned flags)
-    {
-        value_or_throw(try_unset_url(flags));
-    }
-
-    std::expected<void, error>
-    url::try_unset_url(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_URL, flags);
@@ -417,7 +408,7 @@ namespace curl {
     url::set_scheme(const std::string& scheme,
                     unsigned flags)
     {
-        value_or_throw(try_set_scheme(scheme, flags));
+        return value_or_throw(try_set_scheme(scheme, flags));
     }
 
 
@@ -432,13 +423,6 @@ namespace curl {
 
     void
     url::unset_scheme(unsigned flags)
-    {
-        value_or_throw(try_unset_scheme(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_scheme(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_SCHEME, flags);
@@ -449,7 +433,7 @@ namespace curl {
     url::set_user(const std::string& user,
                   unsigned flags)
     {
-        value_or_throw(try_set_user(user, flags));
+        return value_or_throw(try_set_user(user, flags));
     }
 
 
@@ -464,13 +448,6 @@ namespace curl {
 
     void
     url::unset_user(unsigned flags)
-    {
-        value_or_throw(try_unset_user(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_user(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_USER, flags);
@@ -481,7 +458,7 @@ namespace curl {
     url::set_password(const std::string& password,
                       unsigned flags)
     {
-        value_or_throw(try_set_password(password, flags));
+        return value_or_throw(try_set_password(password, flags));
     }
 
 
@@ -496,13 +473,6 @@ namespace curl {
 
     void
     url::unset_password(unsigned flags)
-    {
-        value_or_throw(try_unset_password(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_password(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_PASSWORD, flags);
@@ -513,7 +483,7 @@ namespace curl {
     url::set_options(const std::string& options,
                      unsigned flags)
     {
-        value_or_throw(try_set_options(options, flags));
+        return value_or_throw(try_set_options(options, flags));
     }
 
 
@@ -528,13 +498,6 @@ namespace curl {
 
     void
     url::unset_options(unsigned flags)
-    {
-        value_or_throw(try_unset_options(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_options(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_OPTIONS, flags);
@@ -545,7 +508,7 @@ namespace curl {
     url::set_host(const std::string& host,
                   unsigned flags)
     {
-        value_or_throw(try_set_host(host, flags));
+        return value_or_throw(try_set_host(host, flags));
     }
 
 
@@ -560,13 +523,6 @@ namespace curl {
 
     void
     url::unset_host(unsigned flags)
-    {
-        value_or_throw(try_unset_host(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_host(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_HOST, flags);
@@ -577,7 +533,7 @@ namespace curl {
     url::set_zone_id(const std::string& zone_id,
                      unsigned flags)
     {
-        value_or_throw(try_set_zone_id(zone_id, flags));
+        return value_or_throw(try_set_zone_id(zone_id, flags));
     }
 
 
@@ -592,13 +548,6 @@ namespace curl {
 
     void
     url::unset_zone_id(unsigned flags)
-    {
-        value_or_throw(try_unset_zone_id(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_zone_id(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_ZONEID, flags);
@@ -609,7 +558,7 @@ namespace curl {
     url::set_port(const std::string& port,
                   unsigned flags)
     {
-        value_or_throw(try_set_port(port, flags));
+        return value_or_throw(try_set_port(port, flags));
     }
 
 
@@ -626,7 +575,7 @@ namespace curl {
     url::set_port(std::uint16_t port,
                   unsigned flags)
     {
-        value_or_throw(try_set_port(port, flags));
+        return value_or_throw(try_set_port(port, flags));
     }
 
 
@@ -646,13 +595,6 @@ namespace curl {
 
     void
     url::unset_port(unsigned flags)
-    {
-        value_or_throw(try_unset_port(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_port(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_PORT, flags);
@@ -663,7 +605,7 @@ namespace curl {
     url::set_path(const std::string& path,
                   unsigned flags)
     {
-        value_or_throw(try_set_path(path, flags));
+        return value_or_throw(try_set_path(path, flags));
     }
 
 
@@ -678,13 +620,6 @@ namespace curl {
 
     void
     url::unset_path(unsigned flags)
-    {
-        value_or_throw(try_unset_path(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_path(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_PATH, flags);
@@ -695,7 +630,7 @@ namespace curl {
     url::set_query(const std::string& query,
                    unsigned flags)
     {
-        value_or_throw(try_set_query(query, flags));
+        return value_or_throw(try_set_query(query, flags));
     }
 
 
@@ -710,14 +645,7 @@ namespace curl {
 
     void
     url::unset_query(unsigned flags)
-    {
-        value_or_throw(try_unset_query(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_query(unsigned flags)
-            noexcept
+        noexcept
     {
         return wrap_url_unset(raw, CURLUPART_QUERY, flags);
     }
@@ -727,7 +655,7 @@ namespace curl {
     url::set_fragment(const std::string& fragment,
                       unsigned flags)
     {
-        value_or_throw(try_set_fragment(fragment, flags));
+        return value_or_throw(try_set_fragment(fragment, flags));
     }
 
 
@@ -742,13 +670,6 @@ namespace curl {
 
     void
     url::unset_fragment(unsigned flags)
-    {
-        value_or_throw(try_unset_fragment(flags));
-    }
-
-
-    std::expected<void, error>
-    url::try_unset_fragment(unsigned flags)
         noexcept
     {
         return wrap_url_unset(raw, CURLUPART_FRAGMENT, flags);

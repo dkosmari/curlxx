@@ -205,12 +205,8 @@ namespace curl {
                     unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_url(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_url(unsigned flags = 0)
+        unset_url(unsigned flags = 0)
             noexcept;
 
 
@@ -225,12 +221,8 @@ namespace curl {
                        unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_scheme(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_scheme(unsigned flags = 0)
+        unset_scheme(unsigned flags = 0)
             noexcept;
 
 
@@ -245,12 +237,8 @@ namespace curl {
                      unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_user(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_user(unsigned flags = 0)
+        unset_user(unsigned flags = 0)
             noexcept;
 
 
@@ -265,12 +253,8 @@ namespace curl {
                          unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_password(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_password(unsigned flags = 0)
+        unset_password(unsigned flags = 0)
             noexcept;
 
 
@@ -285,12 +269,8 @@ namespace curl {
                         unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_options(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_options(unsigned flags = 0)
+        unset_options(unsigned flags = 0)
             noexcept;
 
 
@@ -305,12 +285,8 @@ namespace curl {
                      unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_host(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_host(unsigned flags = 0)
+        unset_host(unsigned flags = 0)
             noexcept;
 
 
@@ -325,12 +301,8 @@ namespace curl {
                         unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_zone_id(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_zone_id(unsigned flags = 0)
+        unset_zone_id(unsigned flags = 0)
             noexcept;
 
 
@@ -354,12 +326,8 @@ namespace curl {
                      unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_port(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_port(unsigned flags = 0)
+        unset_port(unsigned flags = 0)
             noexcept;
 
 
@@ -374,12 +342,8 @@ namespace curl {
                      unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_path(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_path(unsigned flags = 0)
+        unset_path(unsigned flags = 0)
             noexcept;
 
 
@@ -394,13 +358,10 @@ namespace curl {
                       unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_query(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_query(unsigned flags = 0)
+        unset_query(unsigned flags = 0)
             noexcept;
+
 
         // CURLUPART_FRAGMENT
 
@@ -413,12 +374,8 @@ namespace curl {
                          unsigned flags = 0)
             noexcept;
 
-
         void
-        unset_fragment(unsigned flags = 0);
-
-        std::expected<void, error>
-        try_unset_fragment(unsigned flags = 0)
+        unset_fragment(unsigned flags = 0)
             noexcept;
 
     }; // class url

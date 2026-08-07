@@ -16,5 +16,6 @@
 #include "mime.hpp"
 #include "multi.hpp"
 #include "slist.hpp"
+#include "url.hpp"
 
 #endif

@@ -19,6 +19,44 @@ using curl::utils::value_or_throw;
 
 namespace curl {
 
+    namespace {
+
+        /*-----------------------*/
+        /* Function declarations */
+        /*-----------------------*/
+
+        template<typename T>
+        std::expected<void, error>
+        wrap_setopt(CURLM* raw,
+                    CURLMoption opt,
+                    T arg)
+            noexcept;
+
+        /*----------------------*/
+        /* Function definitions */
+        /*----------------------*/
+
+
+        template<typename T>
+        std::expected<void, error>
+        wrap_setopt(CURLM* raw,
+                    CURLMoption opt,
+                    T arg)
+            noexcept
+        {
+            auto e = curl_multi_setopt(raw, opt, arg);
+            if (e)
+                return std::unexpected{error{e}};
+            return {};
+        }
+
+    } // namespace
+
+
+    /*------------------*/
+    /* Public functions */
+    /*------------------*/
+
     multi::multi()
     {
         create();
@@ -148,7 +186,7 @@ namespace curl {
     multi::try_set_max_connections(long n)
         noexcept
     {
-        return try_setopt(CURLMOPT_MAXCONNECTS, n);
+        return wrap_setopt(raw, CURLMOPT_MAXCONNECTS, n);
     }
 
 
@@ -163,7 +201,7 @@ namespace curl {
     multi::try_set_max_concurrent_streams(long n)
         noexcept
     {
-        return try_setopt(CURLMOPT_MAX_CONCURRENT_STREAMS, n);
+        return wrap_setopt(raw, CURLMOPT_MAX_CONCURRENT_STREAMS, n);
     }
 
 
@@ -178,7 +216,7 @@ namespace curl {
     multi::try_set_max_host_connections(long n)
         noexcept
     {
-        return try_setopt(CURLMOPT_MAX_HOST_CONNECTIONS, n);
+        return wrap_setopt(raw, CURLMOPT_MAX_HOST_CONNECTIONS, n);
     }
 
 
@@ -193,7 +231,7 @@ namespace curl {
     multi::try_set_max_total_connections(long n)
         noexcept
     {
-        return try_setopt(CURLMOPT_MAX_TOTAL_CONNECTIONS, n);
+        return wrap_setopt(raw, CURLMOPT_MAX_TOTAL_CONNECTIONS, n);
     }
 
 
@@ -210,7 +248,7 @@ namespace curl {
     multi::try_set_network_changed(long mask)
         noexcept
     {
-        return try_setopt(CURLMOPT_NETWORK_CHANGED, mask);
+        return wrap_setopt(raw, CURLMOPT_NETWORK_CHANGED, mask);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 16, 0)
@@ -227,19 +265,7 @@ namespace curl {
     multi::try_set_pipelining(long mask)
         noexcept
     {
-        return try_setopt(CURLMOPT_PIPELINING, mask);
-    }
-
-
-    template<typename T>
-    std::expected<void, error>
-    multi::try_setopt(CURLMoption opt, T&& arg)
-        noexcept
-    {
-        auto e = curl_multi_setopt(raw, opt, arg);
-        if (e != CURLM_OK)
-            return std::unexpected{error{e}};
-        return {};
+        return wrap_setopt(raw, CURLMOPT_PIPELINING, mask);
     }
 
 } // namespace curl
