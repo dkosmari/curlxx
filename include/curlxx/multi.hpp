@@ -33,6 +33,7 @@ namespace curl {
 
         /// Empty constructor.
         constexpr
+        inline
         multi(std::nullptr_t)
             noexcept
         {}

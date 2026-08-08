@@ -36,10 +36,15 @@ namespace curl {
         url();
 
         /// Empty constructor.
+        constexpr
         inline
         url(std::nullptr_t)
             noexcept
         {}
+
+        /// Convenience constructor: call set_url()
+        explicit
+        url(const std::string& url_arg);
 
         /// Copy constructor.
         url(const url& other);
@@ -67,6 +72,9 @@ namespace curl {
 
         void
         create(CURLU* handle);
+
+        void
+        create(const std::string& url_arg);
 
         void
         create(const url& other);

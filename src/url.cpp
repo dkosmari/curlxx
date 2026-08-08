@@ -130,6 +130,12 @@ namespace curl {
     }
 
 
+    url::url(const std::string& url_arg)
+    {
+        create(url_arg);
+    }
+
+
     url::url(const url& other) :
         base_type{}
     {
@@ -188,6 +194,14 @@ namespace curl {
     {
         destroy();
         acquire(handle);
+    }
+
+
+    void
+    url::create(const std::string& url_arg)
+    {
+        create();
+        set_url(url_arg);
     }
 
 

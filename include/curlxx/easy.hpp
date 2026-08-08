@@ -107,6 +107,7 @@ namespace curl {
         easy();
 
         /// Empty constructor.
+        constexpr
         inline
         easy(std::nullptr_t)
             noexcept
