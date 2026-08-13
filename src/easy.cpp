@@ -26,8 +26,14 @@ namespace curl {
         template<typename T>
         std::expected<void, error>
         wrap_setopt(CURL* raw,
-                   CURLoption opt,
-                   T&& arg)
+                    CURLoption opt,
+                    T&& arg)
+            noexcept;
+
+        std::expected<void, error>
+        wrap_setopt(CURL* raw,
+                    CURLoption opt,
+                    bool arg)
             noexcept;
 
         std::expected<void, error>
@@ -71,6 +77,16 @@ namespace curl {
             if (e != CURLE_OK)
                 return std::unexpected{error{e}};
             return {};
+        }
+
+
+        std::expected<void, error>
+        wrap_setopt(CURL* raw,
+                    CURLoption opt,
+                    bool arg)
+            noexcept
+        {
+            return wrap_setopt(raw, opt, long{arg});
         }
 
 
@@ -505,7 +521,7 @@ namespace curl {
     easy::try_set_auto_referer(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_AUTOREFERER, long{enable});
+        return wrap_setopt(raw, CURLOPT_AUTOREFERER, enable);
     }
 
 
@@ -642,7 +658,7 @@ namespace curl {
     easy::try_set_cert_info(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_CERTINFO, long{enable});
+        return wrap_setopt(raw, CURLOPT_CERTINFO, enable);
     }
 
 
@@ -741,8 +757,37 @@ namespace curl {
     {
         auto result = wrap_setopt(raw, CURLOPT_CONNECT_TO, hosts.data());
         if (result)
-            extra_state.connect_to_list = std::move(hosts);
+            extra_state.connect_to = std::move(hosts);
         return result;
+    }
+
+
+    void
+    easy::unset_connect_to()
+        noexcept
+    {
+        extra_state.connect_to.destroy();
+        wrap_unsetopt(raw, CURLOPT_CONNECT_TO);
+    }
+
+
+    void
+    easy::append_connect_to(const std::string& host)
+    {
+        return value_or_throw(try_append_connect_to(host));
+    }
+
+
+    std::expected<void, error>
+    easy::try_append_connect_to(const std::string& host)
+        noexcept
+    {
+        auto result = extra_state.connect_to.try_append(host);
+        if (result)
+            return result;
+        return wrap_setopt(raw,
+                           CURLOPT_CONNECT_TO,
+                           extra_state.connect_to.data());
     }
 
 
@@ -849,7 +894,7 @@ namespace curl {
     easy::try_set_cookie_session(bool start_anew)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_COOKIESESSION, long{start_anew});
+        return wrap_setopt(raw, CURLOPT_COOKIESESSION, start_anew);
     }
 
 
@@ -915,7 +960,7 @@ namespace curl {
     easy::try_set_crlf(bool convert)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_CRLF, long{convert});
+        return wrap_setopt(raw, CURLOPT_CRLF, convert);
     }
 
 
@@ -1053,7 +1098,7 @@ namespace curl {
     easy::try_set_dir_list_only(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DIRLISTONLY, long{enable});
+        return wrap_setopt(raw, CURLOPT_DIRLISTONLY, enable);
     }
 
 
@@ -1068,7 +1113,7 @@ namespace curl {
     easy::try_set_disallow_username_in_url(bool disallow)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, long{disallow});
+        return wrap_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, disallow);
     }
 
 
@@ -1129,7 +1174,7 @@ namespace curl {
     easy::try_set_dns_shuffle_addresses(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, long{enable});
+        return wrap_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, enable);
     }
 
 
@@ -1159,7 +1204,7 @@ namespace curl {
     easy::try_set_fail_on_error(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FAILONERROR, long{enable});
+        return wrap_setopt(raw, CURLOPT_FAILONERROR, enable);
     }
 
 
@@ -1174,7 +1219,7 @@ namespace curl {
     easy::try_set_file_time(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FILETIME, long{enable});
+        return wrap_setopt(raw, CURLOPT_FILETIME, enable);
     }
 
 
@@ -1226,7 +1271,7 @@ namespace curl {
     easy::try_set_follow_location(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FOLLOWLOCATION, long{enable});
+        return wrap_setopt(raw, CURLOPT_FOLLOWLOCATION, enable);
     }
 
 
@@ -1241,7 +1286,7 @@ namespace curl {
     easy::try_set_forbid_reuse(bool forbid)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FORBID_REUSE, long{forbid});
+        return wrap_setopt(raw, CURLOPT_FORBID_REUSE, forbid);
     }
 
 
@@ -1256,7 +1301,7 @@ namespace curl {
     easy::try_set_fresh_connect(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FRESH_CONNECT, long{enable});
+        return wrap_setopt(raw, CURLOPT_FRESH_CONNECT, enable);
     }
 
 
@@ -1286,7 +1331,7 @@ namespace curl {
     easy::try_set_header(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HEADER, long{enable});
+        return wrap_setopt(raw, CURLOPT_HEADER, enable);
     }
 
 
@@ -1343,6 +1388,68 @@ namespace curl {
 
 
     void
+    easy::set_http_09_allowed(bool allowed)
+    {
+        return value_or_throw(try_set_http_09_allowed(allowed));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_http_09_allowed(bool allowed)
+        noexcept
+    {
+        return wrap_setopt(raw, CURLOPT_HTTP09_ALLOWED, allowed);
+    }
+
+
+    void
+    easy::set_http_200_aliases(slist aliases)
+    {
+        return value_or_throw(try_set_http_200_aliases(std::move(aliases)));
+    }
+
+
+    std::expected<void, error>
+    easy::try_set_http_200_aliases(slist aliases)
+        noexcept
+    {
+        auto result = wrap_setopt(raw, CURLOPT_HTTP200ALIASES, aliases.data());
+        if (result)
+            extra_state.http_200_aliases = std::move(aliases);
+        return result;
+    }
+
+
+    void
+    easy::unset_http_200_aliases()
+        noexcept
+    {
+        extra_state.http_200_aliases.destroy();
+        wrap_unsetopt(raw, CURLOPT_HTTP200ALIASES);
+    }
+
+
+    void
+    easy::append_http_200_aliases(const std::string& alias)
+    {
+        return value_or_throw(try_append_http_200_aliases(alias));
+    }
+
+
+    std::expected<void, error>
+    easy::try_append_http_200_aliases(const std::string& alias)
+        noexcept
+    {
+        auto result = extra_state.http_200_aliases.try_append(alias);
+        if (!result)
+            return result;
+        return wrap_setopt(raw,
+                           CURLOPT_HTTP200ALIASES,
+                           extra_state.http_200_aliases.data());
+    }
+
+
+    void
     easy::set_http_auth(long mask)
     {
         return value_or_throw(try_set_http_auth(mask));
@@ -1368,7 +1475,7 @@ namespace curl {
     easy::try_set_http_get(bool use_get)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTPGET, long{use_get});
+        return wrap_setopt(raw, CURLOPT_HTTPGET, use_get);
     }
 
 
@@ -1385,7 +1492,7 @@ namespace curl {
     {
         auto result = wrap_setopt(raw, CURLOPT_HTTPHEADER, headers.data());
         if (result)
-            extra_state.http_headers_list = std::move(headers);
+            extra_state.http_headers = std::move(headers);
         return result;
     }
 
@@ -1401,10 +1508,12 @@ namespace curl {
     easy::try_append_http_header(const std::string& header)
         noexcept
     {
-        auto result = extra_state.http_headers_list.try_append(header);
+        auto result = extra_state.http_headers.try_append(header);
         if (!result)
             return result;
-        return wrap_setopt(raw, CURLOPT_HTTPHEADER, extra_state.http_headers_list.data());
+        return wrap_setopt(raw,
+                           CURLOPT_HTTPHEADER,
+                           extra_state.http_headers.data());
     }
 
 
@@ -1419,7 +1528,7 @@ namespace curl {
     easy::try_set_http_content_decoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, enable);
     }
 
 
@@ -1434,7 +1543,7 @@ namespace curl {
     easy::try_set_http_transfer_decoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, enable);
     }
 
 
@@ -1464,7 +1573,7 @@ namespace curl {
     easy::try_set_ignore_content_length(bool ignore)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, long{ignore});
+        return wrap_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, ignore);
     }
 
 
@@ -1743,7 +1852,7 @@ namespace curl {
     easy::try_set_no_body(bool no_body)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_NOBODY, long{no_body});
+        return wrap_setopt(raw, CURLOPT_NOBODY, no_body);
     }
 
 
@@ -1758,7 +1867,7 @@ namespace curl {
     easy::try_set_no_progress(bool no_progress)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_NOPROGRESS, long{no_progress});
+        return wrap_setopt(raw, CURLOPT_NOPROGRESS, no_progress);
     }
 
 
@@ -1848,7 +1957,7 @@ namespace curl {
     easy::try_set_post(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_POST, long{enable});
+        return wrap_setopt(raw, CURLOPT_POST, enable);
     }
 
 
@@ -2014,7 +2123,7 @@ namespace curl {
     easy::try_set_ssl_verify_host(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, enable);
     }
 
 
@@ -2029,7 +2138,7 @@ namespace curl {
     easy::try_set_ssl_verify_peer(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_SSL_VERIFYPEER, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYPEER, enable);
     }
 
 
@@ -2044,7 +2153,7 @@ namespace curl {
     easy::try_set_ssl_verify_status(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_SSL_VERIFYSTATUS, long{enable});
+        return wrap_setopt(raw, CURLOPT_SSL_VERIFYSTATUS, enable);
     }
 
 
@@ -2082,7 +2191,7 @@ namespace curl {
     easy::try_set_tcp_keep_alive(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TCP_KEEPALIVE, long{enable});
+        return wrap_setopt(raw, CURLOPT_TCP_KEEPALIVE, enable);
     }
 
 
@@ -2146,7 +2255,7 @@ namespace curl {
     easy::try_set_tcp_no_delay(bool no_delay)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TCP_NODELAY, long{no_delay});
+        return wrap_setopt(raw, CURLOPT_TCP_NODELAY, no_delay);
     }
 
 
@@ -2191,7 +2300,7 @@ namespace curl {
     easy::try_set_transfer_text(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TRANSFERTEXT, long{enable});
+        return wrap_setopt(raw, CURLOPT_TRANSFERTEXT, enable);
     }
 
 
@@ -2206,7 +2315,7 @@ namespace curl {
     easy::try_set_transfer_encoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TRANSFER_ENCODING, long{enable});
+        return wrap_setopt(raw, CURLOPT_TRANSFER_ENCODING, enable);
     }
 
 
@@ -2300,7 +2409,7 @@ namespace curl {
     easy::set_verbose(bool v)
         noexcept
     {
-        std::ignore = wrap_setopt(raw, CURLOPT_VERBOSE, long{v});
+        std::ignore = wrap_setopt(raw, CURLOPT_VERBOSE, v);
     }
 
 
@@ -2315,7 +2424,7 @@ namespace curl {
     easy::try_set_wildcard_match(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_WILDCARDMATCH, long{enable});
+        return wrap_setopt(raw, CURLOPT_WILDCARDMATCH, enable);
     }
 
 

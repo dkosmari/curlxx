@@ -93,8 +93,9 @@ namespace curl {
             read_function_t        read_func;
             write_function_t       write_func;
 
-            slist    http_headers_list;
-            slist    connect_to_list;
+            slist    http_headers;
+            slist    http_200_aliases;
+            slist    connect_to;
             url      url_obj{nullptr};
             std::any private_data;
         };
@@ -525,6 +526,17 @@ namespace curl {
 
         std::expected<void, error>
         try_set_connect_to(slist hosts)
+            noexcept;
+
+        void
+        unset_connect_to()
+            noexcept;
+
+        void
+        append_connect_to(const std::string& host);
+
+        std::expected<void, error>
+        try_append_connect_to(const std::string& host)
             noexcept;
 
 
@@ -1022,11 +1034,38 @@ namespace curl {
         // CURLOPT_HSTS_CTRL
         // Enable HSTS. TODO
 
+
         // CURLOPT_HTTP09_ALLOWED
-        // Allow HTTP/0.9 responses. CURLOPT_HTTP09_ALLOWED
+        // Allow HTTP/0.9 responses.
+
+        void
+        set_http_09_allowed(bool allowed);
+
+        std::expected<void, error>
+        try_set_http_09_allowed(bool allowed)
+            noexcept;
+
 
         // CURLOPT_HTTP200ALIASES
-        // Alternative versions of 200 OK. TODO
+        // Alternative versions of 200 OK.
+
+        void
+        set_http_200_aliases(slist aliases);
+
+        std::expected<void, error>
+        try_set_http_200_aliases(slist aliases)
+            noexcept;
+
+        void
+        unset_http_200_aliases()
+            noexcept;
+
+        void
+        append_http_200_aliases(const std::string& alias);
+
+        std::expected<void, error>
+        try_append_http_200_aliases(const std::string& alias)
+            noexcept;
 
 
         // CURLOPT_HTTPAUTH
