@@ -2988,7 +2988,7 @@ namespace curl {
 #if CURL_AT_LEAST_VERSION(8, 10, 0)
 
     std::chrono::microseconds
-    get_post_transfer_time()
+    easy::get_post_transfer_time()
         const
     {
         return value_or_throw(try_get_post_transfer_time());
