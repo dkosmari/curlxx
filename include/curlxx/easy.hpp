@@ -2673,7 +2673,7 @@ namespace curl {
         get_post_transfer_time()
             const;
 
-        std::error<std::chrono::microseconds, error>
+        std::expected<std::chrono::microseconds, error>
         try_get_post_transfer_time()
             const noexcept;
 
