@@ -2355,10 +2355,28 @@ namespace curl {
 
 
         // CURLINFO_CAINFO
-        // Get the default value for CURLOPT_CAINFO. TODO
+        // Get the default value for CURLOPT_CAINFO.
+
+        std::filesystem::path
+        get_ca_info()
+            const;
+
+        std::expected<std::filesystem::path, error>
+        try_get_ca_info()
+            const noexcept;
+
 
         // CURLINFO_CAPATH
-        // Get the default value for CURLOPT_CAPATH. TODO
+        // Get the default value for CURLOPT_CAPATH.
+
+        std::filesystem::path
+        get_ca_path()
+            const;
+
+        std::expected<std::filesystem::path, error>
+        try_get_ca_path()
+            const noexcept;
+
 
         // CURLINFO_CERTINFO
         // Certificate chain. TODO
@@ -2506,22 +2524,68 @@ namespace curl {
             const noexcept;
 
 
-        /*
-          CURLINFO_FTP_ENTRY_PATH
-          The entry path after logging in to an FTP server. TODO
+        // CURLINFO_FTP_ENTRY_PATH
+        // The entry path after logging in to an FTP server.
 
-          CURLINFO_HEADER_SIZE
-          Number of bytes of all headers received. TODO
+        std::filesystem::path
+        get_ftp_entry_path()
+            const;
 
-          CURLINFO_HTTPAUTH_AVAIL
-          Available HTTP authentication methods. TODO
+        std::expected<std::filesystem::path, error>
+        try_get_ftp_entry_path()
+            const noexcept;
 
-          CURLINFO_HTTPAUTH_USED
-          Used HTTP authentication method. TODO
 
-          CURLINFO_HTTP_CONNECTCODE
-          Last proxy CONNECT response code. TODO
-        */
+        // CURLINFO_HEADER_SIZE
+        // Number of bytes of all headers received.
+
+        long
+        get_header_size()
+            const;
+
+        std::expected<long, error>
+        try_get_header_size()
+            const noexcept;
+
+
+        // CURLINFO_HTTPAUTH_AVAIL
+        // Available HTTP authentication methods.
+
+        long
+        get_http_auth_avail()
+            const;
+
+        std::expected<long, error>
+        try_get_http_auth_avail()
+            const noexcept;
+
+
+#if CURL_AT_LEAST_VERSION(8, 12, 0)
+
+        // CURLINFO_HTTPAUTH_USED
+        // Used HTTP authentication method.
+
+        long
+        get_http_auth_used()
+            const;
+
+        std::expected<long, error>
+        try_get_http_auth_used()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 12, 0)
+
+
+        // CURLINFO_HTTP_CONNECTCODE
+        // Last proxy CONNECT response code.
+
+        long
+        get_http_connect_code()
+            const;
+
+        std::expected<long, error>
+        try_get_http_connect_code()
+            const noexcept;
 
 
         // CURLINFO_HTTP_VERSION
@@ -2536,41 +2600,124 @@ namespace curl {
             const noexcept;
 
 
+        // CURLINFO_LOCAL_IP
+        // Source IP address of the last connection.
+
+        std::string
+        get_local_ip()
+            const;
+
+        std::expected<std::string, error>
+        try_get_local_ip()
+            const noexcept;
+
+
+        // CURLINFO_LOCAL_PORT
+        // Source port number of the last connection.
+
+        long
+        get_local_port()
+            const;
+
+        std::expected<long, error>
+        try_get_local_port()
+            const noexcept;
+
+
         /*
-          CURLINFO_LOCAL_IP
-          Source IP address of the last connection. TODO
-
-          CURLINFO_LOCAL_PORT
-          Source port number of the last connection. TODO
-
           CURLINFO_NAMELOOKUP_TIME
-          Time from start until name resolving completed as a double. TODO
-
           CURLINFO_NAMELOOKUP_TIME_T
-          Time from start until name resolving completed in number of microseconds. TODO
-
-          CURLINFO_NUM_CONNECTS
-          Number of new successful connections used for previous transfer. TODO
-
-          CURLINFO_OS_ERRNO
-          The errno from the last failure to connect. TODO
-
-          CURLINFO_POSTTRANSFER_TIME_T
-          The time it took from the start until the last byte is sent by libcurl. In microseconds. (Added in 8.10.0) TODO
-
-          CURLINFO_PRETRANSFER_TIME
-          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. TODO
-
-          CURLINFO_PRETRANSFER_TIME_T
-          The time it took from the start until the file transfer is just about to begin. This includes all pre-transfer commands and negotiations that are specific to the particular protocol(s) involved. In microseconds. TODO
-
-          CURLINFO_PRIMARY_IP
-          Destination IP address of the last connection. TODO
-
-          CURLINFO_PRIMARY_PORT
-          Destination port of the last connection. TODO
-
+          Time from start until name resolving completed in number of microseconds.
         */
+
+        std::chrono::microseconds
+        get_name_lookup_time()
+            const;
+
+        std::expected<std::chrono::microseconds, error>
+        try_get_name_lookup_time()
+            const noexcept;
+
+
+        // CURLINFO_NUM_CONNECTS
+        // Number of new successful connections used for previous transfer.
+
+        long
+        get_num_connects()
+            const;
+
+        std::expected<long, error>
+        try_get_num_connects()
+            const noexcept;
+
+
+        // CURLINFO_OS_ERRNO
+        // The errno from the last failure to connect.
+
+        long
+        get_os_errno()
+            const;
+
+        std::expected<long, error>
+        try_get_os_errno()
+            const noexcept;
+
+
+#if CURL_AT_LEAST_VERSION(8, 10, 0)
+
+        // CURLINFO_POSTTRANSFER_TIME_T
+        // The time it took from the start until the last byte is sent by libcurl. In
+        // microseconds.
+
+        std::chrono::microseconds
+        get_post_transfer_time()
+            const;
+
+        std::error<std::chrono::microseconds, error>
+        try_get_post_transfer_time()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 10, 0)
+
+
+        // CURLINFO_PRETRANSFER_TIME
+        // CURLINFO_PRETRANSFER_TIME_T
+        // The time it took from the start until the file transfer is just about to begin. This
+        // includes all pre-transfer commands and negotiations that are specific to the
+        // particular protocol(s) involved. In microseconds.
+
+        std::chrono::microseconds
+        get_pre_transfer_time()
+            const;
+
+        std::expected<std::chrono::microseconds, error>
+        try_get_pre_transfer_time()
+            const noexcept;
+
+
+        // CURLINFO_PRIMARY_IP
+        // Destination IP address of the last connection.
+
+        std::string
+        get_primary_ip()
+            const;
+
+        std::expected<std::string, error>
+        try_get_primary_ip()
+            const noexcept;
+
+
+        // CURLINFO_PRIMARY_PORT
+        // Destination port of the last connection.
+
+        long
+        get_primary_port()
+            const;
+
+        std::expected<long, error>
+        try_get_primary_port()
+            const noexcept;
+
 
         // CURLINFO_PRIVATE
         // User's private data pointer.
@@ -2583,41 +2730,136 @@ namespace curl {
         get_private();
 
 
+        // CURLINFO_PROXYAUTH_AVAIL
+        // Available HTTP proxy authentication methods.
 
-        /*
-          CURLINFO_PROXYAUTH_AVAIL
-          Available HTTP proxy authentication methods. TODO
+        long
+        get_proxy_auth_avail()
+            const;
 
-          CURLINFO_PROXYAUTH_USED
-          Used HTTP proxy authentication methods. TODO
+        std::expected<long, error>
+        try_get_proxy_auth_avail()
+            const noexcept;
 
-          CURLINFO_PROXY_ERROR
-          Detailed proxy error. See CURLINFO_PROXY_ERROR
 
-          CURLINFO_PROXY_SSL_VERIFYRESULT
-          Proxy certificate verification result. TODO
+#if CURL_AT_LEAST_VERSION(8, 12, 0)
 
-          CURLINFO_QUEUE_TIME_T
-          The time during which the transfer was held in a waiting queue before it could start for real in number of microseconds. (Added in 8.6.0) TODO
+        // CURLINFO_PROXYAUTH_USED
+        // Used HTTP proxy authentication methods.
 
-          CURLINFO_REDIRECT_COUNT
-          Total number of redirects that were followed. TODO
+        long
+        get_proxy_auth_used()
+            const;
 
-          CURLINFO_REDIRECT_TIME
-          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. As a double. TODO
+        std::expected<long, error>
+        try_get_proxy_auth_used()
+            const noexcept;
 
-          CURLINFO_REDIRECT_TIME_T
-          The time it took for all redirection steps include name lookup, connect, pretransfer and transfer before final transaction was started. So, this is zero if no redirection took place. In number of microseconds. TODO
+#endif // CURL_AT_LEAST_VERSION(8, 12, 0)
 
-          CURLINFO_REDIRECT_URL
-          URL a redirect would take you to, had you enabled redirects. TODO
 
-          CURLINFO_REFERER
-          Referrer header. TODO
+        // CURLINFO_PROXY_ERROR
+        // Detailed proxy error. See CURLINFO_PROXY_ERROR
 
-          CURLINFO_REQUEST_SIZE
-          Number of bytes sent in the issued HTTP requests. TODO
-        */
+        CURLproxycode
+        get_proxy_error()
+            const;
+
+        std::expected<CURLproxycode, error>
+        try_get_proxy_error()
+            const noexcept;
+
+
+        // CURLINFO_PROXY_SSL_VERIFYRESULT
+        // Proxy certificate verification result.
+
+        bool
+        get_proxy_ssl_verify_result()
+            const;
+
+        std::expected<bool, error>
+        try_get_proxy_ssl_verify_result()
+            const noexcept;
+
+
+#if CURL_AT_LEAST_VERSION(8, 6, 0)
+
+        // CURLINFO_QUEUE_TIME_T
+        // The time during which the transfer was held in a waiting queue before it could start
+        // for real in number of microseconds. (Added in 8.6.0)
+
+        std::chrono::microseconds
+        get_queue_time()
+            const;
+
+        std::expected<std::chrono::microseconds, error>
+        try_get_queue_time()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 6, 0)
+
+
+        // CURLINFO_REDIRECT_COUNT
+        // Total number of redirects that were followed.
+
+        long
+        get_redirect_count()
+            const;
+
+        std::expected<long, error>
+        try_get_redirect_count()
+            const noexcept;
+
+
+        // CURLINFO_REDIRECT_TIME
+        // CURLINFO_REDIRECT_TIME_T
+        // The time it took for all redirection steps include name lookup, connect, pretransfer
+        // and transfer before final transaction was started. So, this is zero if no redirection
+        // took place. In number of microseconds.
+
+        std::chrono::microseconds
+        get_redirect_time()
+            const;
+
+        std::expected<std::chrono::microseconds, error>
+        try_get_redirect_time()
+            const noexcept;
+
+
+        // CURLINFO_REDIRECT_URL
+        // URL a redirect would take you to, had you enabled redirects.
+
+        std::string
+        get_redirect_url()
+            const;
+
+        std::expected<std::string, error>
+        try_get_redirect_url()
+            const noexcept;
+
+
+        // CURLINFO_REFERER
+        // Referrer header.
+
+        std::string
+        get_referer()
+            const;
+
+        std::expected<std::string, error>
+        try_get_referer()
+            const noexcept;
+
+
+        // CURLINFO_REQUEST_SIZE
+        // Number of bytes sent in the issued HTTP requests.
+
+        long
+        get_request_size()
+            const;
+
+        std::expected<long, error>
+        try_get_request_size()
+            const noexcept;
 
 
         // CURLINFO_RESPONSE_CODE
@@ -2645,19 +2887,79 @@ namespace curl {
 
 
         // CURLINFO_RTSP_CLIENT_CSEQ
-        // The RTSP client CSeq that is expected next. TODO
+        // The RTSP client CSeq that is expected next.
+
+        long
+        get_rtsp_client_cseq()
+            const;
+
+        std::expected<long, error>
+        try_get_rtsp_client_cseq()
+            const noexcept;
+
 
         // CURLINFO_RTSP_CSEQ_RECV
-        // RTSP CSeq last received. TODO
+        // RTSP CSeq last received.
+
+        long
+        get_rtsp_cseq_recv()
+            const;
+
+        std::expected<long, error>
+        try_get_rtsp_cseq_recv()
+            const noexcept;
+
 
         // CURLINFO_RTSP_SERVER_CSEQ
-        // The RTSP server CSeq that is expected next. TODO
+        // The RTSP server CSeq that is expected next.
+
+        long
+        get_rtsp_server_cseq()
+            const;
+
+        std::expected<long, error>
+        try_get_rtsp_server_cseq()
+            const noexcept;
+
 
         // CURLINFO_RTSP_SESSION_ID
-        // RTSP session ID. TODO
+        // RTSP session ID.
+
+        std::string
+        get_rtsp_session_id()
+            const;
+
+        std::expected<std::string, error>
+        try_get_rtsp_session_id()
+            const noexcept;
+
 
         // CURLINFO_SCHEME
-        // The scheme used for the connection. TODO
+        // The scheme used for the connection.
+
+        std::string
+        get_scheme()
+            const;
+
+        std::expected<std::string, error>
+        try_get_scheme()
+            const noexcept;
+
+
+#if CURL_AT_LEAST_VERSION(8, 20, 0)
+
+        // CURLINFO_SIZE_DELIVERED
+        // Number of bytes passed to the write callback.
+
+        curl_off_t
+        get_size_delivered()
+            const;
+
+        std::expected<curl_off_t, error>
+        try_get_size_delivered()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 20, 0)
 
 
         // CURLINFO_SIZE_DOWNLOAD
@@ -2712,13 +3014,28 @@ namespace curl {
             const noexcept;
 
 
-        /*
-          CURLINFO_SSL_ENGINES
-          A list of OpenSSL crypto engines. TODO
+        // CURLINFO_SSL_ENGINES
+        // A list of OpenSSL crypto engines.
 
-          CURLINFO_SSL_VERIFYRESULT
-          Certificate verification result. TODO
-        */
+        slist
+        get_ssl_engines()
+            const;
+
+        std::expected<slist, error>
+        try_get_ssl_engines()
+            const noexcept;
+
+
+        // CURLINFO_SSL_VERIFYRESULT
+        // Certificate verification result.
+
+        bool
+        get_ssl_verify_result()
+            const;
+
+        std::expected<bool, error>
+        try_get_ssl_verify_result()
+            const noexcept;
 
 
         // CURLINFO_STARTTRANSFER_TIME
@@ -2754,13 +3071,36 @@ namespace curl {
             const noexcept;
 
 
-        /*
-          CURLINFO_USED_PROXY
-          Whether the proxy was used (Added in 8.7.0). TODO
+#if CURL_AT_LEAST_VERSION(8, 7, 0)
 
-          CURLINFO_XFER_ID
-          The ID of the transfer. (Added in 8.2.0) TODO
-        */
+        // CURLINFO_USED_PROXY
+        // Whether the proxy was used.
+
+        bool
+        get_used_proxy()
+            const;
+
+        std::expected<bool, error>
+        try_get_used_proxy()
+            const noexcept;
+
+#endif // CURL_AT_LEAST_VERSION(8, 7, 0)
+
+
+#if CURL_AT_LEAST_VERSION(8, 2, 0)
+
+        // CURLINFO_XFER_ID
+        // The ID of the transfer.
+
+        curl_off_t
+        get_xfer_id()
+            const;
+
+        std::expected<curl_off_t, error>
+        try_get_xfer_id()
+            const noexcept;
+
+#endif //CURL_AT_LEAST_VERSION(8, 2, 0)
 
 
         /*----------------------*/

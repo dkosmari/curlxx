@@ -2563,8 +2563,48 @@ namespace curl {
     easy::try_get_app_connect_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw,
-                                                                   CURLINFO_APPCONNECT_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_APPCONNECT_TIME_T
+        );
+    }
+
+
+    std::filesystem::path
+    easy::get_ca_info()
+        const
+    {
+        return value_or_throw(try_get_ca_info());
+    }
+
+
+    std::expected<std::filesystem::path, error>
+    easy::try_get_ca_info()
+        const noexcept
+    {
+        auto result = wrap_getinfo_str(raw, CURLINFO_CAINFO);
+        if (!result)
+            return std::unexpected{result.error()};
+        return std::filesystem::path{std::move(*result)};
+    }
+
+
+    std::filesystem::path
+    easy::get_ca_path()
+        const
+    {
+        return value_or_throw(try_get_ca_path());
+    }
+
+
+    std::expected<std::filesystem::path, error>
+    easy::try_get_ca_path()
+        const noexcept
+    {
+        auto result = wrap_getinfo_str(raw, CURLINFO_CAPATH);
+        if (!result)
+            return std::unexpected{result.error()};
+        return std::filesystem::path{std::move(*result)};
     }
 
 
@@ -2596,8 +2636,10 @@ namespace curl {
     easy::try_get_connect_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw,
-                                                                   CURLINFO_CONNECT_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_CONNECT_TIME_T
+        );
     }
 
 
@@ -2756,6 +2798,93 @@ namespace curl {
     }
 
 
+    std::filesystem::path
+    easy::get_ftp_entry_path()
+        const
+    {
+        return value_or_throw(try_get_ftp_entry_path());
+    }
+
+
+    std::expected<std::filesystem::path, error>
+    easy::try_get_ftp_entry_path()
+        const noexcept
+    {
+        auto result = wrap_getinfo_str(raw, CURLINFO_FTP_ENTRY_PATH);
+        if (!result)
+            return std::unexpected{result.error()};
+        return std::filesystem::path{std::move(*result)};
+    }
+
+
+    long
+    easy::get_header_size()
+        const
+    {
+        return value_or_throw(try_get_header_size());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_header_size()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_HEADER_SIZE);
+    }
+
+
+    long
+    easy::get_http_auth_avail()
+        const
+    {
+        return value_or_throw(try_get_http_auth_avail());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_http_auth_avail()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_AVAIL);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 12, 0)
+
+    long
+    easy::get_http_auth_used()
+        const
+    {
+        return value_or_throw(try_get_http_auth_used());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_http_auth_used()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_USED);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 12, 0)
+
+
+    long
+    easy::get_http_connect_code()
+        const
+    {
+        return value_or_throw(try_get_http_connect_code());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_http_connect_code()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_HTTP_CONNECTCODE);
+    }
+
+
     easy::http_version
     easy::get_http_version()
         const
@@ -2772,6 +2901,164 @@ namespace curl {
     }
 
 
+    std::string
+    easy::get_local_ip()
+        const
+    {
+        return value_or_throw(try_get_local_ip());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_local_ip()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_LOCAL_IP);
+    }
+
+
+    long
+    easy::get_local_port()
+        const
+    {
+        return value_or_throw(try_get_local_port());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_local_port()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_LOCAL_PORT);
+    }
+
+
+    std::chrono::microseconds
+    easy::get_name_lookup_time()
+        const
+    {
+        return value_or_throw(try_get_name_lookup_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_name_lookup_time()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_NAMELOOKUP_TIME_T
+        );
+    }
+
+
+    long
+    easy::get_num_connects()
+        const
+    {
+        return value_or_throw(try_get_num_connects());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_num_connects()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_NUM_CONNECTS);
+    }
+
+
+    long
+    easy::get_os_errno()
+        const
+    {
+        return value_or_throw(try_get_os_errno());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_os_errno()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_OS_ERRNO);
+    }
+
+
+
+#if CURL_AT_LEAST_VERSION(8, 10, 0)
+
+    std::chrono::microseconds
+    get_post_transfer_time()
+        const
+    {
+        return value_or_throw(try_get_post_transfer_time());
+    }
+
+
+    std::error<std::chrono::microseconds, error>
+    easy::try_get_post_transfer_time()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_POSTTRANSFER_TIME_T
+        );
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 10, 0)
+
+
+    std::chrono::microseconds
+    easy::get_pre_transfer_time()
+        const
+    {
+        return value_or_throw(try_get_pre_transfer_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_pre_transfer_time()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_PRETRANSFER_TIME_T
+        );
+    }
+
+
+    std::string
+    easy::get_primary_ip()
+        const
+    {
+        return value_or_throw(try_get_primary_ip());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_primary_ip()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_PRIMARY_IP);
+    }
+
+
+    long
+    easy::get_primary_port()
+        const
+    {
+        return value_or_throw(try_get_primary_port());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_primary_port()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_PRIMARY_PORT);
+    }
+
+
     const std::any&
     easy::get_private()
         const
@@ -2784,6 +3071,180 @@ namespace curl {
     easy::get_private()
     {
         return extra_state.private_data;
+    }
+
+
+    long
+    easy::get_proxy_auth_avail()
+        const
+    {
+        return value_or_throw(try_get_proxy_auth_avail());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_proxy_auth_avail()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_AVAIL);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 12, 0)
+
+    long
+    easy::get_proxy_auth_used()
+        const
+    {
+        return value_or_throw(try_get_proxy_auth_used());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_proxy_auth_used()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_USED);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 12, 0)
+
+
+    CURLproxycode
+    easy::get_proxy_error()
+        const
+    {
+        return value_or_throw(try_get_proxy_error());
+    }
+
+
+    std::expected<CURLproxycode, error>
+    easy::try_get_proxy_error()
+        const noexcept
+    {
+        return wrap_getinfo<long, CURLproxycode>(raw, CURLINFO_PROXY_ERROR);
+    }
+
+
+    bool
+    easy::get_proxy_ssl_verify_result()
+        const
+    {
+        return value_or_throw(try_get_proxy_ssl_verify_result());
+    }
+
+
+    std::expected<bool, error>
+    easy::try_get_proxy_ssl_verify_result()
+        const noexcept
+    {
+        return wrap_getinfo<long, bool>(raw, CURLINFO_PROXY_SSL_VERIFYRESULT);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 6, 0)
+
+    std::chrono::microseconds
+    easy::get_queue_time()
+        const
+    {
+        return value_or_throw(try_get_queue_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_queue_time()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_QUEUE_TIME_T
+        );
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 6, 0)
+
+
+    long
+    easy::get_redirect_count()
+        const
+    {
+        return value_or_throw(try_get_redirect_count());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_redirect_count()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_REDIRECT_COUNT);
+    }
+
+
+    std::chrono::microseconds
+    easy::get_redirect_time()
+        const
+    {
+        return value_or_throw(try_get_redirect_time());
+    }
+
+
+    std::expected<std::chrono::microseconds, error>
+    easy::try_get_redirect_time()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_REDIRECT_TIME_T
+        );
+    }
+
+
+    std::string
+    easy::get_redirect_url()
+        const
+    {
+        return value_or_throw(try_get_redirect_url());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_redirect_url()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_REDIRECT_URL);
+    }
+
+
+    std::string
+    easy::get_referer()
+        const
+    {
+        return value_or_throw(try_get_referer());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_referer()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_REFERER);
+    }
+
+
+    long
+    easy::get_request_size()
+        const
+    {
+        return value_or_throw(try_get_request_size());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_request_size()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_REQUEST_SIZE);
     }
 
 
@@ -2817,6 +3278,106 @@ namespace curl {
     {
         return wrap_getinfo<long, std::chrono::seconds>(raw, CURLINFO_RETRY_AFTER);
     }
+
+
+    long
+    easy::get_rtsp_client_cseq()
+        const
+    {
+        return value_or_throw(try_get_rtsp_client_cseq());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_rtsp_client_cseq()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_RTSP_CLIENT_CSEQ);
+    }
+
+
+    long
+    easy::get_rtsp_cseq_recv()
+        const
+    {
+        return value_or_throw(try_get_rtsp_cseq_recv());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_rtsp_cseq_recv()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_RTSP_CSEQ_RECV);
+    }
+
+
+    long
+    easy::get_rtsp_server_cseq()
+        const
+    {
+        return value_or_throw(try_get_rtsp_server_cseq());
+    }
+
+
+    std::expected<long, error>
+    easy::try_get_rtsp_server_cseq()
+        const noexcept
+    {
+        return wrap_getinfo<long>(raw, CURLINFO_RTSP_SERVER_CSEQ);
+    }
+
+
+    std::string
+    easy::get_rtsp_session_id()
+        const
+    {
+        return value_or_throw(try_get_rtsp_session_id());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_rtsp_session_id()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_RTSP_SESSION_ID);
+    }
+
+
+    std::string
+    easy::get_scheme()
+        const
+    {
+        return value_or_throw(try_get_scheme());
+    }
+
+
+    std::expected<std::string, error>
+    easy::try_get_scheme()
+        const noexcept
+    {
+        return wrap_getinfo_str(raw, CURLINFO_SCHEME);
+    }
+
+
+#if CURL_AT_LEAST_VERSION(8, 20, 0)
+
+    curl_off_t
+    easy::get_size_delivered()
+        const
+    {
+        return value_or_throw(try_get_size_delivered());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_size_delivered()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DELIVERED);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 20, 0)
 
 
     curl_off_t
@@ -2883,6 +3444,41 @@ namespace curl {
     }
 
 
+    slist
+    easy::get_ssl_engines()
+        const
+    {
+        return value_or_throw(try_get_ssl_engines());
+    }
+
+
+    std::expected<slist, error>
+    easy::try_get_ssl_engines()
+        const noexcept
+    {
+        auto raw_result = wrap_getinfo<curl_slist*>(raw, CURLINFO_SSL_ENGINES);
+        if (!raw_result)
+            return std::unexpected{raw_result.error()};
+        return slist{*raw_result};
+    }
+
+
+    bool
+    easy::get_ssl_verify_result()
+        const
+    {
+        return value_or_throw(try_get_ssl_verify_result());
+    }
+
+
+    std::expected<bool, error>
+    easy::try_get_ssl_verify_result()
+        const noexcept
+    {
+        return wrap_getinfo<long, bool>(raw, CURLINFO_SSL_VERIFYRESULT);
+    }
+
+
     std::chrono::microseconds
     easy::get_start_transfer_time()
         const
@@ -2914,8 +3510,51 @@ namespace curl {
     easy::try_get_total_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(raw, CURLINFO_TOTAL_TIME_T);
+        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+            raw,
+            CURLINFO_TOTAL_TIME_T
+        );
     }
+
+
+#if CURL_AT_LEAST_VERSION(8, 7, 0)
+
+    bool
+    easy::get_used_proxy()
+        const
+    {
+        return value_or_throw(try_get_used_proxy());
+    }
+
+
+    std::expected<bool, error>
+    easy::try_get_used_proxy()
+        const noexcept
+    {
+        return wrap_getinfo<long, bool>(raw, CURLINFO_USED_PROXY);
+    }
+
+#endif // CURL_AT_LEAST_VERSION(8, 7, 0)
+
+
+#if CURL_AT_LEAST_VERSION(8, 2, 0)
+
+    curl_off_t
+    easy::get_xfer_id()
+        const
+    {
+        return value_or_throw(try_get_xfer_id());
+    }
+
+
+    std::expected<curl_off_t, error>
+    easy::try_get_xfer_id()
+        const noexcept
+    {
+        return wrap_getinfo<curl_off_t>(raw, CURLINFO_XFER_ID);
+    }
+
+#endif //CURL_AT_LEAST_VERSION(8, 2, 0)
 
 
     header
