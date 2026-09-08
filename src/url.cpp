@@ -666,6 +666,23 @@ namespace curl {
 
 
     void
+    url::append_query(const std::string& query,
+                      unsigned flags)
+    {
+        return set_query(query, flags | CURLU_APPENDQUERY);
+    }
+
+
+    std::expected<void, error>
+    url::try_append_query(const std::string& query,
+                         unsigned flags)
+        noexcept
+    {
+        return try_set_query(query, flags | CURLU_APPENDQUERY);
+    }
+
+
+    void
     url::set_fragment(const std::string& fragment,
                       unsigned flags)
     {

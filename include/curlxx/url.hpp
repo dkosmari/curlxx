@@ -370,6 +370,16 @@ namespace curl {
         unset_query(unsigned flags = 0)
             noexcept;
 
+        // Convenience: set with CURLU_APPENDQUERY
+        void
+        append_query(const std::string& query,
+                     unsigned flags = 0);
+
+        std::expected<void, error>
+        try_append_query(const std::string& query,
+                         unsigned flags = 0)
+            noexcept;
+
 
         // CURLUPART_FRAGMENT
 
