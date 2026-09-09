@@ -1962,6 +1962,13 @@ namespace curl {
 
 
     void
+    easy::set_post_fields(std::string_view data)
+    {
+        return value_or_throw(try_set_post_fields(data));
+    }
+
+
+    void
     easy::set_post_fields(const void* data,
                           std::size_t size)
     {

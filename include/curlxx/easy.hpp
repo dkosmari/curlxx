@@ -1514,6 +1514,9 @@ namespace curl {
         // Send a POST with this data - does not copy it.
 
         void
+        set_post_fields(std::string_view data);
+
+        void
         set_post_fields(const void* data,
                         std::size_t size);
 
