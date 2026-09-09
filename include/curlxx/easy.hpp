@@ -1514,73 +1514,42 @@ namespace curl {
         // Send a POST with this data - does not copy it.
 
         void
-        set_post_field(const std::string& data);
-
-        void
-        set_post_field(const void* data,
-                       std::size_t size);
+        set_post_fields(const void* data,
+                        std::size_t size);
 
         template<typename T,
                  std::size_t E>
         inline
         void
-        set_post_field(std::span<T, E> data)
+        set_post_fields(std::span<T, E> data)
         {
-            set_post_field(data.data(), data.size_bytes());
-        }
-
-        // alias: _fields -> _field
-        template<typename... T>
-        inline
-        void
-        set_post_fields(T... args)
-        {
-            set_post_field(args...);
+            set_post_fields(data.data(), data.size_bytes());
         }
 
 
         std::expected<void, error>
-        try_set_post_field(std::string_view data)
+        try_set_post_fields(std::string_view data)
             noexcept;
 
         std::expected<void, error>
-        try_set_post_field(const void* data,
-                           std::size_t size)
+        try_set_post_fields(const void* data,
+                            std::size_t size)
             noexcept;
 
         template<typename T,
                  std::size_t E>
         inline
         std::expected<void, error>
-        try_set_post_field(std::span<T, E> data)
+        try_set_post_fields(std::span<T, E> data)
             noexcept
         {
-            return try_set_post_field(data.data(), data.size_bytes());
-        }
-
-        // alias: _fields -> _field
-        template<typename... T>
-        inline
-        std::expected<void, error>
-        try_set_post_fields(T... args)
-            noexcept
-        {
-            return try_set_post_field(args...);
+            return try_set_post_fields(data.data(), data.size_bytes());
         }
 
 
-        void
-        unset_post_field()
-            noexcept;
-
-        // alias: _fields -> _field
-        inline
         void
         unset_post_fields()
-            noexcept
-        {
-            unset_post_field();
-        }
+            noexcept;
 
 
         // CURLOPT_POSTFIELDSIZE

@@ -1962,30 +1962,23 @@ namespace curl {
 
 
     void
-    easy::set_post_field(const std::string& data)
+    easy::set_post_fields(const void* data,
+                          std::size_t size)
     {
-        set_post_field(data.data(), data.size());
-    }
-
-
-    void
-    easy::set_post_field(const void* data,
-                         std::size_t size)
-    {
-        return value_or_throw(try_set_post_field(data, size));
+        return value_or_throw(try_set_post_fields(data, size));
     }
 
 
     std::expected<void, error>
-    easy::try_set_post_field(std::string_view data)
+    easy::try_set_post_fields(std::string_view data)
         noexcept
     {
-        return try_set_post_field(data.data(), data.size());
+        return try_set_post_fields(data.data(), data.size());
     }
 
 
     std::expected<void, error>
-    easy::try_set_post_field(const void* data,
+    easy::try_set_post_fields(const void* data,
                              std::size_t size)
         noexcept
     {
@@ -1997,7 +1990,7 @@ namespace curl {
 
 
     void
-    easy::unset_post_field()
+    easy::unset_post_fields()
         noexcept
     {
         return wrap_unsetopt(raw, CURLOPT_POSTFIELDS);
