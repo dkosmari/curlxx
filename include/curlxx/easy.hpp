@@ -615,7 +615,7 @@ namespace curl {
         // Send a POST with this data - and copy it.
 
         void
-        set_copy_post_fields(const std::string& data);
+        set_copy_post_fields(std::string_view data);
 
         void
         set_copy_post_fields(const void* data,
@@ -632,7 +632,7 @@ namespace curl {
 
 
         std::expected<void, error>
-        try_set_copy_post_fields(const std::string& data)
+        try_set_copy_post_fields(std::string_view data)
             noexcept;
 
         std::expected<void, error>

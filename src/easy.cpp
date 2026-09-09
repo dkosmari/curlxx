@@ -899,9 +899,9 @@ namespace curl {
 
 
     void
-    easy::set_copy_post_fields(const std::string& data)
+    easy::set_copy_post_fields(std::string_view data)
     {
-        set_copy_post_fields(data.data(), data.size());
+        return value_or_throw(try_set_copy_post_fields(data));
     }
 
 
@@ -914,7 +914,7 @@ namespace curl {
 
 
     std::expected<void, error>
-    easy::try_set_copy_post_fields(const std::string& data)
+    easy::try_set_copy_post_fields(std::string_view data)
         noexcept
     {
         return try_set_copy_post_fields(data.data(), data.size());
