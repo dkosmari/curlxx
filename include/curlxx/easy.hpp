@@ -94,8 +94,8 @@ namespace curl {
             write_function_t       write_func;
             xferinfo_function_t    xferinfo_func;
 
-            slist    http_headers;
             slist    http_200_aliases;
+            slist    http_headers;
             slist    connect_to;
             url      url_obj{nullptr};
             std::any private_data;
@@ -339,10 +339,7 @@ namespace curl {
         // Append to remote file.
 
         void
-        set_append(bool enable);
-
-        std::expected<void, error>
-        try_set_append(bool enable)
+        set_append(bool enable)
             noexcept;
 
 
@@ -350,10 +347,7 @@ namespace curl {
         // Automatically set Referer: header.
 
         void
-        set_auto_referer(bool enable);
-
-        std::expected<void, error>
-        try_set_auto_referer(bool enable)
+        set_auto_referer(bool enable)
             noexcept;
 
 
@@ -517,10 +511,7 @@ namespace curl {
         // Connect to a specific host and port.
 
         void
-        set_connect_to(slist hosts);
-
-        std::expected<void, error>
-        try_set_connect_to(slist hosts)
+        set_connect_to(slist hosts)
             noexcept;
 
         void
@@ -599,10 +590,7 @@ namespace curl {
         // Start a new cookie session.
 
         void
-        set_cookie_session(bool start_anew);
-
-        std::expected<void, error>
-        try_set_cookie_session(bool start_anew)
+        set_cookie_session(bool start_anew)
             noexcept;
 
 
@@ -655,10 +643,7 @@ namespace curl {
         // Convert newlines.
 
         void
-        set_crlf(bool convert);
-
-        std::expected<void, error>
-        try_set_crlf(bool convert)
+        set_crlf(bool convert)
             noexcept;
 
 
@@ -681,10 +666,7 @@ namespace curl {
         // Set URL to work on with a URL handle.
 
         void
-        set_url(url url_obj);
-
-        std::expected<void, error>
-        try_set_url(url url_obj)
+        set_url(url url_obj)
             noexcept;
 
 
@@ -735,10 +717,7 @@ namespace curl {
         // List only.
 
         void
-        set_dir_list_only(bool enable);
-
-        std::expected<void, error>
-        try_set_dir_list_only(bool enable)
+        set_dir_list_only(bool enable)
             noexcept;
 
 
@@ -746,10 +725,7 @@ namespace curl {
         // Do not allow username in URL.
 
         void
-        set_disallow_username_in_url(bool disallow);
-
-        std::expected<void, error>
-        try_set_disallow_username_in_url(bool disallow)
+        set_disallow_username_in_url(bool disallow)
             noexcept;
 
 
@@ -797,10 +773,7 @@ namespace curl {
         // Shuffle addresses before use.
 
         void
-        set_dns_shuffle_addresses(bool enable);
-
-        std::expected<void, error>
-        try_set_dns_shuffle_addresses(bool enable)
+        set_dns_shuffle_addresses(bool enable)
             noexcept;
 
 
@@ -838,10 +811,7 @@ namespace curl {
         // Fail on HTTP 4xx errors.
 
         void
-        set_fail_on_error(bool enable);
-
-        std::expected<void, error>
-        try_set_fail_on_error(bool enable)
+        set_fail_on_error(bool enable)
             noexcept;
 
 
@@ -849,10 +819,7 @@ namespace curl {
         // Request file modification date and time.
 
         void
-        set_file_time(bool enable);
-
-        std::expected<void, error>
-        try_set_file_time(bool enable)
+        set_file_time(bool enable)
             noexcept;
 
 
@@ -873,10 +840,10 @@ namespace curl {
         // Follow HTTP redirects.
 
         void
-        set_follow_location(bool enable);
+        set_follow_location(long mode);
 
         std::expected<void, error>
-        try_set_follow_location(bool enable)
+        try_set_follow_location(long mode)
             noexcept;
 
 
@@ -884,22 +851,15 @@ namespace curl {
         // Prevent subsequent connections from reusing this.
 
         void
-        set_forbid_reuse(bool forbid);
-
-        std::expected<void, error>
-        try_set_forbid_reuse(bool forbid)
+        set_forbid_reuse(bool forbid)
             noexcept;
 
 
-
         // CURLOPT_FRESH_CONNECT
-        // Use a new connection. CURLOPT_FRESH_CONNECT
+        // Use a new connection.
 
         void
-        set_fresh_connect(bool enable);
-
-        std::expected<void, error>
-        try_set_fresh_connect(bool enable)
+        set_fresh_connect(bool enable)
             noexcept;
 
 
@@ -962,10 +922,7 @@ namespace curl {
         // Include the header in the body output.
 
         void
-        set_header(bool enable);
-
-        std::expected<void, error>
-        try_set_header(bool enable)
+        set_header(bool enable)
             noexcept;
 
 
@@ -986,10 +943,7 @@ namespace curl {
         // Control custom headers.
 
         void
-        set_header_opt(long mask);
-
-        std::expected<void, error>
-        try_set_header_opt(long mask)
+        set_header_opt(long mask)
             noexcept;
 
 
@@ -1016,10 +970,7 @@ namespace curl {
         // Allow HTTP/0.9 responses.
 
         void
-        set_http_09_allowed(bool allowed);
-
-        std::expected<void, error>
-        try_set_http_09_allowed(bool allowed)
+        set_http_09_allowed(bool allowed)
             noexcept;
 
 
@@ -1027,10 +978,7 @@ namespace curl {
         // Alternative versions of 200 OK.
 
         void
-        set_http_200_aliases(slist aliases);
-
-        std::expected<void, error>
-        try_set_http_200_aliases(slist aliases)
+        set_http_200_aliases(slist aliases)
             noexcept;
 
         void
@@ -1060,10 +1008,7 @@ namespace curl {
         // Do an HTTP GET request.
 
         void
-        set_http_get(bool use_get);
-
-        std::expected<void, error>
-        try_set_http_get(bool use_get)
+        set_http_get(bool use_get)
             noexcept;
 
 
@@ -1071,7 +1016,8 @@ namespace curl {
         // Custom HTTP headers.
 
         void
-        set_http_headers(slist headers);
+        set_http_headers(slist headers)
+            noexcept;
 
         template<concepts::string_like... Args>
         void
@@ -1079,11 +1025,6 @@ namespace curl {
         {
             set_http_headers(slist{std::forward<Args>(args)...});
         }
-
-
-        std::expected<void, error>
-        try_set_http_headers(slist headers)
-            noexcept;
 
         void
         append_http_header(const std::string& header);
@@ -1101,10 +1042,7 @@ namespace curl {
         // Disable Content decoding.
 
         void
-        set_http_content_decoding(bool enable);
-
-        std::expected<void, error>
-        try_set_http_content_decoding(bool enable)
+        set_http_content_decoding(bool enable)
             noexcept;
 
 
@@ -1112,10 +1050,7 @@ namespace curl {
         // Disable Transfer decoding.
 
         void
-        set_http_transfer_decoding(bool enable);
-
-        std::expected<void, error>
-        try_set_http_transfer_decoding(bool enable)
+        set_http_transfer_decoding(bool enable)
             noexcept;
 
 
@@ -1145,10 +1080,7 @@ namespace curl {
         // Ignore Content-Length.
 
         void
-        set_ignore_content_length(bool ignore);
-
-        std::expected<void, error>
-        try_set_ignore_content_length(bool ignore)
+        set_ignore_content_length(bool ignore)
             noexcept;
 
 
@@ -1337,10 +1269,7 @@ namespace curl {
         // Set MIME option flags.
 
         void
-        set_mime_options(long options);
-
-        std::expected<void, error>
-        try_set_mime_options(long options)
+        set_mime_options(long options)
             noexcept;
 
 
@@ -1396,10 +1325,7 @@ namespace curl {
         // Do not get the body contents.
 
         void
-        set_no_body(bool no_body);
-
-        std::expected<void, error>
-        try_set_no_body(bool no_body)
+        set_no_body(bool no_body)
             noexcept;
 
 
@@ -1407,10 +1333,7 @@ namespace curl {
         // Shut off the progress meter.
 
         void
-        set_no_progress(bool no_progress);
-
-        std::expected<void, error>
-        try_set_no_progress(bool no_progress)
+        set_no_progress(bool no_progress)
             noexcept;
 
 
@@ -1450,7 +1373,12 @@ namespace curl {
 
 
         // CURLOPT_PATH_AS_IS
-        // Disable squashing /../ and /./ sequences in the path. TODO
+        // Disable squashing /../ and /./ sequences in the path.
+
+        void
+        set_path_as_is(bool preserve_path)
+            noexcept;
+
 
         // CURLOPT_PINNEDPUBLICKEY
         // Set pinned SSL public key . TODO
@@ -1474,10 +1402,7 @@ namespace curl {
         // Make an HTTP POST.
 
         void
-        set_post(bool enable);
-
-        std::expected<void, error>
-        try_set_post(bool enable)
+        set_post(bool enable)
             noexcept;
 
 
@@ -1485,41 +1410,23 @@ namespace curl {
         // Send a POST with this data - does not copy it.
 
         void
-        set_post_fields(std::string_view data);
+        set_post_fields(std::string_view data)
+            noexcept;
 
         void
         set_post_fields(const void* data,
-                        std::size_t size);
+                        std::size_t size)
+            noexcept;
 
         template<typename T,
                  std::size_t E>
         inline
         void
         set_post_fields(std::span<T, E> data)
+            noexcept
         {
             set_post_fields(data.data(), data.size_bytes());
         }
-
-
-        std::expected<void, error>
-        try_set_post_fields(std::string_view data)
-            noexcept;
-
-        std::expected<void, error>
-        try_set_post_fields(const void* data,
-                            std::size_t size)
-            noexcept;
-
-        template<typename T,
-                 std::size_t E>
-        inline
-        std::expected<void, error>
-        try_set_post_fields(std::span<T, E> data)
-            noexcept
-        {
-            return try_set_post_fields(data.data(), data.size_bytes());
-        }
-
 
         void
         unset_post_fields()
@@ -1536,7 +1443,6 @@ namespace curl {
         std::expected<void, error>
         try_set_post_field_size(curl_off_t size)
             noexcept;
-
 
 
         // CURLOPT_POSTQUOTE
@@ -1880,10 +1786,7 @@ namespace curl {
         // Verify the hostname in the SSL certificate.
 
         void
-        set_ssl_verify_host(bool enable);
-
-        std::expected<void, error>
-        try_set_ssl_verify_host(bool enable)
+        set_ssl_verify_host(bool enable)
             noexcept;
 
 
@@ -1891,10 +1794,7 @@ namespace curl {
         // Verify the SSL certificate.
 
         void
-        set_ssl_verify_peer(bool enable);
-
-        std::expected<void, error>
-        try_set_ssl_verify_peer(bool enable)
+        set_ssl_verify_peer(bool enable)
             noexcept;
 
 
@@ -1912,10 +1812,7 @@ namespace curl {
         // CURLOPT_STDERR
         // Redirect stderr to another stream.
         void
-        set_stderr(FILE* stream);
-
-        std::expected<void, error>
-        try_set_stderr(FILE* stream)
+        set_stderr(FILE* stream)
             noexcept;
 
         void
@@ -1943,10 +1840,7 @@ namespace curl {
         // Enable TCP keep-alive.
 
         void
-        set_tcp_keep_alive(bool enable);
-
-        std::expected<void, error>
-        try_set_tcp_keep_alive(bool enable)
+        set_tcp_keep_alive(bool enable)
             noexcept;
 
 
@@ -1991,10 +1885,7 @@ namespace curl {
         // Disable the Nagle algorithm.
 
         void
-        set_tcp_no_delay(bool no_delay);
-
-        std::expected<void, error>
-        try_set_tcp_no_delay(bool no_delay)
+        set_tcp_no_delay(bool no_delay)
             noexcept;
 
 
@@ -2062,10 +1953,7 @@ namespace curl {
         // Use text transfer.
 
         void
-        set_transfer_text(bool enable);
-
-        std::expected<void, error>
-        try_set_transfer_text(bool enable)
+        set_transfer_text(bool enable)
             noexcept;
 
 
@@ -2073,10 +1961,7 @@ namespace curl {
         // Request Transfer-Encoding.
 
         void
-        set_transfer_encoding(bool enable);
-
-        std::expected<void, error>
-        try_set_transfer_encoding(bool enable)
+        set_transfer_encoding(bool enable)
             noexcept;
 
 
@@ -2178,10 +2063,7 @@ namespace curl {
         // Transfer multiple files according to a filename pattern.
 
         void
-        set_wildcard_match(bool enable);
-
-        std::expected<void, error>
-        try_set_wildcard_match(bool enable)
+        set_wildcard_match(bool enable)
             noexcept;
 
 
@@ -2202,10 +2084,7 @@ namespace curl {
         // Set WebSocket options.
 
         void
-        set_ws_options(long mask);
-
-        std::expected<void, error>
-        try_set_ws_options(long mask)
+        set_ws_options(long mask)
             noexcept;
 
 
@@ -2240,11 +2119,8 @@ namespace curl {
 
         curl_socket_t
         get_active_socket()
-            const;
-
-        std::expected<curl_socket_t, error>
-        try_get_active_socket()
             const noexcept;
+
 
         // CURLINFO_APPCONNECT_TIME_T
         // The time it took from the start until the SSL connect/handshake with the remote
@@ -2252,10 +2128,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_app_connect_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_app_connect_time()
             const noexcept;
 
 
@@ -2266,10 +2138,6 @@ namespace curl {
         get_ca_info()
             const;
 
-        std::expected<std::filesystem::path, error>
-        try_get_ca_info()
-            const noexcept;
-
 
         // CURLINFO_CAPATH
         // Get the default value for CURLOPT_CAPATH.
@@ -2277,10 +2145,6 @@ namespace curl {
         std::filesystem::path
         get_ca_path()
             const;
-
-        std::expected<std::filesystem::path, error>
-        try_get_ca_path()
-            const noexcept;
 
 
         // CURLINFO_CERTINFO
@@ -2292,23 +2156,16 @@ namespace curl {
 
         bool
         get_condition_unmet()
-            const;
-
-        std::expected<bool, error>
-        try_get_condition_unmet()
             const noexcept;
 
 
+        // CURLINFO_CONNECT_TIME
         // CURLINFO_CONNECT_TIME_T
         // The time it took from the start until the connect to the remote host (or proxy)
         // was completed.
 
         std::chrono::microseconds
         get_connect_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_connect_time()
             const noexcept;
 
 
@@ -2319,10 +2176,6 @@ namespace curl {
 
         curl_off_t
         get_conn_id()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_conn_id()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 2, 0)
@@ -2333,10 +2186,6 @@ namespace curl {
 
         curl_off_t
         get_content_length_download()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_content_length_download()
             const noexcept;
 
 
@@ -2345,10 +2194,6 @@ namespace curl {
 
         curl_off_t
         get_content_length_upload()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_content_length_upload()
             const noexcept;
 
 
@@ -2359,20 +2204,12 @@ namespace curl {
         get_content_type()
             const;
 
-        std::expected<std::string, error>
-        try_get_content_type()
-            const noexcept;
-
 
         // CURLINFO_COOKIELIST
         // List of all known cookies.
 
         slist
         get_cookie_list()
-            const;
-
-        std::expected<slist, error>
-        try_get_cookie_list()
             const noexcept;
 
 
@@ -2384,10 +2221,6 @@ namespace curl {
 
         curl_off_t
         get_early_data_sent()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_early_data_sent()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 11, 0)
@@ -2400,10 +2233,6 @@ namespace curl {
         get_effective_method()
             const;
 
-        std::expected<std::string, error>
-        try_get_effective_method()
-            const noexcept;
-
 
         // CURLINFO_EFFECTIVE_URL
         // Last used URL. See CURLINFO_EFFECTIVE_URL
@@ -2412,20 +2241,12 @@ namespace curl {
         get_effective_url()
             const;
 
-        std::expected<std::string, error>
-        try_get_effective_url()
-            const noexcept;
-
 
         // CURLINFO_FILETIME_T
         // Remote time of the retrieved document.
 
         std::chrono::utc_seconds
         get_file_time()
-            const;
-
-        std::expected<std::chrono::utc_seconds, error>
-        try_get_file_time()
             const noexcept;
 
 
@@ -2436,20 +2257,12 @@ namespace curl {
         get_ftp_entry_path()
             const;
 
-        std::expected<std::filesystem::path, error>
-        try_get_ftp_entry_path()
-            const noexcept;
-
 
         // CURLINFO_HEADER_SIZE
         // Number of bytes of all headers received.
 
         long
         get_header_size()
-            const;
-
-        std::expected<long, error>
-        try_get_header_size()
             const noexcept;
 
 
@@ -2458,10 +2271,6 @@ namespace curl {
 
         long
         get_http_auth_avail()
-            const;
-
-        std::expected<long, error>
-        try_get_http_auth_avail()
             const noexcept;
 
 
@@ -2472,10 +2281,6 @@ namespace curl {
 
         long
         get_http_auth_used()
-            const;
-
-        std::expected<long, error>
-        try_get_http_auth_used()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 12, 0)
@@ -2486,10 +2291,6 @@ namespace curl {
 
         long
         get_http_connect_code()
-            const;
-
-        std::expected<long, error>
-        try_get_http_connect_code()
             const noexcept;
 
 
@@ -2498,10 +2299,6 @@ namespace curl {
 
         http_version
         get_http_version()
-            const;
-
-        std::expected<http_version, error>
-        try_get_http_version()
             const noexcept;
 
 
@@ -2512,20 +2309,12 @@ namespace curl {
         get_local_ip()
             const;
 
-        std::expected<std::string, error>
-        try_get_local_ip()
-            const noexcept;
-
 
         // CURLINFO_LOCAL_PORT
         // Source port number of the last connection.
 
         long
         get_local_port()
-            const;
-
-        std::expected<long, error>
-        try_get_local_port()
             const noexcept;
 
 
@@ -2537,10 +2326,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_name_lookup_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_name_lookup_time()
             const noexcept;
 
 
@@ -2549,10 +2334,6 @@ namespace curl {
 
         long
         get_num_connects()
-            const;
-
-        std::expected<long, error>
-        try_get_num_connects()
             const noexcept;
 
 
@@ -2561,10 +2342,6 @@ namespace curl {
 
         long
         get_os_errno()
-            const;
-
-        std::expected<long, error>
-        try_get_os_errno()
             const noexcept;
 
 
@@ -2576,10 +2353,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_post_transfer_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_post_transfer_time()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 10, 0)
@@ -2593,10 +2366,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_pre_transfer_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_pre_transfer_time()
             const noexcept;
 
 
@@ -2607,20 +2376,12 @@ namespace curl {
         get_primary_ip()
             const;
 
-        std::expected<std::string, error>
-        try_get_primary_ip()
-            const noexcept;
-
 
         // CURLINFO_PRIMARY_PORT
         // Destination port of the last connection.
 
         long
         get_primary_port()
-            const;
-
-        std::expected<long, error>
-        try_get_primary_port()
             const noexcept;
 
 
@@ -2629,10 +2390,11 @@ namespace curl {
 
         const std::any&
         get_private()
-            const;
+            const noexcept;
 
         std::any&
-        get_private();
+        get_private()
+            noexcept;
 
 
         // CURLINFO_PROXYAUTH_AVAIL
@@ -2640,10 +2402,6 @@ namespace curl {
 
         long
         get_proxy_auth_avail()
-            const;
-
-        std::expected<long, error>
-        try_get_proxy_auth_avail()
             const noexcept;
 
 
@@ -2654,10 +2412,6 @@ namespace curl {
 
         long
         get_proxy_auth_used()
-            const;
-
-        std::expected<long, error>
-        try_get_proxy_auth_used()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 12, 0)
@@ -2668,10 +2422,6 @@ namespace curl {
 
         CURLproxycode
         get_proxy_error()
-            const;
-
-        std::expected<CURLproxycode, error>
-        try_get_proxy_error()
             const noexcept;
 
 
@@ -2680,10 +2430,6 @@ namespace curl {
 
         bool
         get_proxy_ssl_verify_result()
-            const;
-
-        std::expected<bool, error>
-        try_get_proxy_ssl_verify_result()
             const noexcept;
 
 
@@ -2695,10 +2441,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_queue_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_queue_time()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 6, 0)
@@ -2709,10 +2451,6 @@ namespace curl {
 
         long
         get_redirect_count()
-            const;
-
-        std::expected<long, error>
-        try_get_redirect_count()
             const noexcept;
 
 
@@ -2724,10 +2462,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_redirect_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_redirect_time()
             const noexcept;
 
 
@@ -2738,10 +2472,6 @@ namespace curl {
         get_redirect_url()
             const;
 
-        std::expected<std::string, error>
-        try_get_redirect_url()
-            const noexcept;
-
 
         // CURLINFO_REFERER
         // Referrer header.
@@ -2750,20 +2480,12 @@ namespace curl {
         get_referer()
             const;
 
-        std::expected<std::string, error>
-        try_get_referer()
-            const noexcept;
-
 
         // CURLINFO_REQUEST_SIZE
         // Number of bytes sent in the issued HTTP requests.
 
         long
         get_request_size()
-            const;
-
-        std::expected<long, error>
-        try_get_request_size()
             const noexcept;
 
 
@@ -2772,10 +2494,6 @@ namespace curl {
 
         long
         get_response_code()
-            const;
-
-        std::expected<long, error>
-        try_get_response_code()
             const noexcept;
 
 
@@ -2784,10 +2502,6 @@ namespace curl {
 
         std::chrono::seconds
         get_retry_after()
-            const;
-
-        std::expected<std::chrono::seconds, error>
-        try_get_retry_after()
             const noexcept;
 
 
@@ -2796,10 +2510,6 @@ namespace curl {
 
         long
         get_rtsp_client_cseq()
-            const;
-
-        std::expected<long, error>
-        try_get_rtsp_client_cseq()
             const noexcept;
 
 
@@ -2808,10 +2518,6 @@ namespace curl {
 
         long
         get_rtsp_cseq_recv()
-            const;
-
-        std::expected<long, error>
-        try_get_rtsp_cseq_recv()
             const noexcept;
 
 
@@ -2820,10 +2526,6 @@ namespace curl {
 
         long
         get_rtsp_server_cseq()
-            const;
-
-        std::expected<long, error>
-        try_get_rtsp_server_cseq()
             const noexcept;
 
 
@@ -2834,10 +2536,6 @@ namespace curl {
         get_rtsp_session_id()
             const;
 
-        std::expected<std::string, error>
-        try_get_rtsp_session_id()
-            const noexcept;
-
 
         // CURLINFO_SCHEME
         // The scheme used for the connection.
@@ -2845,10 +2543,6 @@ namespace curl {
         std::string
         get_scheme()
             const;
-
-        std::expected<std::string, error>
-        try_get_scheme()
-            const noexcept;
 
 
 #if CURL_AT_LEAST_VERSION(8, 20, 0)
@@ -2858,10 +2552,6 @@ namespace curl {
 
         curl_off_t
         get_size_delivered()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_size_delivered()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 20, 0)
@@ -2873,10 +2563,6 @@ namespace curl {
 
         curl_off_t
         get_size_download()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_size_download()
             const noexcept;
 
 
@@ -2886,10 +2572,6 @@ namespace curl {
 
         curl_off_t
         get_size_upload()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_size_upload()
             const noexcept;
 
 
@@ -2899,10 +2581,6 @@ namespace curl {
 
         curl_off_t
         get_speed_download()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_speed_download()
             const noexcept;
 
 
@@ -2912,10 +2590,6 @@ namespace curl {
 
         curl_off_t
         get_speed_upload()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_speed_upload()
             const noexcept;
 
 
@@ -2924,10 +2598,6 @@ namespace curl {
 
         slist
         get_ssl_engines()
-            const;
-
-        std::expected<slist, error>
-        try_get_ssl_engines()
             const noexcept;
 
 
@@ -2936,10 +2606,6 @@ namespace curl {
 
         bool
         get_ssl_verify_result()
-            const;
-
-        std::expected<bool, error>
-        try_get_ssl_verify_result()
             const noexcept;
 
 
@@ -2949,10 +2615,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_start_transfer_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_start_transfer_time()
             const noexcept;
 
 
@@ -2969,10 +2631,6 @@ namespace curl {
 
         std::chrono::microseconds
         get_total_time()
-            const;
-
-        std::expected<std::chrono::microseconds, error>
-        try_get_total_time()
             const noexcept;
 
 
@@ -2983,10 +2641,6 @@ namespace curl {
 
         bool
         get_used_proxy()
-            const;
-
-        std::expected<bool, error>
-        try_get_used_proxy()
             const noexcept;
 
 #endif // CURL_AT_LEAST_VERSION(8, 7, 0)
@@ -2999,10 +2653,6 @@ namespace curl {
 
         curl_off_t
         get_xfer_id()
-            const;
-
-        std::expected<curl_off_t, error>
-        try_get_xfer_id()
             const noexcept;
 
 #endif //CURL_AT_LEAST_VERSION(8, 2, 0)

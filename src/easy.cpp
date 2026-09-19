@@ -498,31 +498,17 @@ namespace curl {
 
     void
     easy::set_append(bool enable)
-    {
-        return value_or_throw(try_set_append(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_append(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_APPEND, long{enable});
+        std::ignore = wrap_setopt(raw, CURLOPT_APPEND, enable);
     }
 
 
     void
     easy::set_auto_referer(bool enable)
-    {
-        return value_or_throw(try_set_auto_referer(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_auto_referer(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_AUTOREFERER, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_AUTOREFERER, enable);
     }
 
 
@@ -728,19 +714,10 @@ namespace curl {
 
     void
     easy::set_connect_to(slist hosts)
-    {
-        return value_or_throw(try_set_connect_to(std::move(hosts)));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_connect_to(slist hosts)
         noexcept
     {
-        auto result = wrap_setopt(raw, CURLOPT_CONNECT_TO, hosts.data());
-        if (result)
-            extra_state.connect_to = std::move(hosts);
-        return result;
+        extra_state.connect_to = std::move(hosts);
+        setup_extra_state();
     }
 
 
@@ -748,8 +725,8 @@ namespace curl {
     easy::unset_connect_to()
         noexcept
     {
-        extra_state.connect_to.destroy();
-        wrap_unsetopt(raw, CURLOPT_CONNECT_TO);
+        extra_state.connect_to = {};
+        setup_extra_state();
     }
 
 
@@ -767,9 +744,8 @@ namespace curl {
         auto result = extra_state.connect_to.try_append(host);
         if (result)
             return result;
-        return wrap_setopt(raw,
-                           CURLOPT_CONNECT_TO,
-                           extra_state.connect_to.data());
+        setup_extra_state();
+        return {};
     }
 
 
@@ -867,16 +843,9 @@ namespace curl {
 
     void
     easy::set_cookie_session(bool start_anew)
-    {
-        return value_or_throw(try_set_cookie_session(start_anew));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_cookie_session(bool start_anew)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_COOKIESESSION, start_anew);
+        std::ignore = wrap_setopt(raw, CURLOPT_COOKIESESSION, start_anew);
     }
 
 
@@ -933,16 +902,9 @@ namespace curl {
 
     void
     easy::set_crlf(bool convert)
-    {
-        return value_or_throw(try_set_crlf(convert));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_crlf(bool convert)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_CRLF, convert);
+        std::ignore = wrap_setopt(raw, CURLOPT_CRLF, convert);
     }
 
 
@@ -969,20 +931,12 @@ namespace curl {
     }
 
 
-
     void
     easy::set_url(url url_obj)
-    {
-        value_or_throw(try_set_url(std::move(url_obj)));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_url(url url_obj)
         noexcept
     {
         extra_state.url_obj = std::move(url_obj);
-        return wrap_setopt(raw, CURLOPT_CURLU, extra_state.url_obj);
+        setup_extra_state();
     }
 
 
@@ -1052,31 +1006,17 @@ namespace curl {
 
     void
     easy::set_dir_list_only(bool enable)
-    {
-        return value_or_throw(try_set_dir_list_only(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_dir_list_only(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DIRLISTONLY, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_DIRLISTONLY, enable);
     }
 
 
     void
     easy::set_disallow_username_in_url(bool disallow)
-    {
-        return value_or_throw(try_set_disallow_username_in_url(disallow));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_disallow_username_in_url(bool disallow)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, disallow);
+        std::ignore = wrap_setopt(raw, CURLOPT_DISALLOW_USERNAME_IN_URL, disallow);
     }
 
 
@@ -1128,16 +1068,9 @@ namespace curl {
 
     void
     easy::set_dns_shuffle_addresses(bool enable)
-    {
-        return value_or_throw(try_set_dns_shuffle_addresses(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_dns_shuffle_addresses(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_DNS_SHUFFLE_ADDRESSES, enable);
     }
 
 
@@ -1158,31 +1091,17 @@ namespace curl {
 
     void
     easy::set_fail_on_error(bool enable)
-    {
-        return value_or_throw(try_set_fail_on_error(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_fail_on_error(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FAILONERROR, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_FAILONERROR, enable);
     }
 
 
     void
     easy::set_file_time(bool enable)
-    {
-        return value_or_throw(try_set_file_time(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_file_time(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FILETIME, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_FILETIME, enable);
     }
 
 
@@ -1205,47 +1124,33 @@ namespace curl {
 
 
     void
-    easy::set_follow_location(bool enable)
+    easy::set_follow_location(long mode)
     {
-        return value_or_throw(try_set_follow_location(enable));
+        return value_or_throw(try_set_follow_location(mode));
     }
 
 
     std::expected<void, error>
-    easy::try_set_follow_location(bool enable)
+    easy::try_set_follow_location(long mode)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FOLLOWLOCATION, enable);
+        return wrap_setopt(raw, CURLOPT_FOLLOWLOCATION, mode);
     }
 
 
     void
     easy::set_forbid_reuse(bool forbid)
-    {
-        return value_or_throw(try_set_forbid_reuse(forbid));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_forbid_reuse(bool forbid)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FORBID_REUSE, forbid);
+        std::ignore = wrap_setopt(raw, CURLOPT_FORBID_REUSE, forbid);
     }
 
 
     void
     easy::set_fresh_connect(bool enable)
-    {
-        return value_or_throw(try_set_fresh_connect(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_fresh_connect(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_FRESH_CONNECT, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_FRESH_CONNECT, enable);
     }
 
 
@@ -1266,16 +1171,9 @@ namespace curl {
 
     void
     easy::set_header(bool enable)
-    {
-        return value_or_throw(try_set_header(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_header(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HEADER, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_HEADER, enable);
     }
 
 
@@ -1299,49 +1197,26 @@ namespace curl {
 
     void
     easy::set_header_opt(long mask)
-    {
-        return value_or_throw(try_set_header_opt(mask));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_header_opt(long mask)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HEADEROPT, mask);
+        std::ignore = wrap_setopt(raw, CURLOPT_HEADEROPT, mask);
     }
 
 
     void
     easy::set_http_09_allowed(bool allowed)
-    {
-        return value_or_throw(try_set_http_09_allowed(allowed));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_09_allowed(bool allowed)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTP09_ALLOWED, allowed);
+        std::ignore = wrap_setopt(raw, CURLOPT_HTTP09_ALLOWED, allowed);
     }
 
 
     void
     easy::set_http_200_aliases(slist aliases)
-    {
-        return value_or_throw(try_set_http_200_aliases(std::move(aliases)));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_200_aliases(slist aliases)
         noexcept
     {
-        auto result = wrap_setopt(raw, CURLOPT_HTTP200ALIASES, aliases.data());
-        if (result)
-            extra_state.http_200_aliases = std::move(aliases);
-        return result;
+        extra_state.http_200_aliases = std::move(aliases);
+        setup_extra_state();
     }
 
 
@@ -1350,7 +1225,7 @@ namespace curl {
         noexcept
     {
         extra_state.http_200_aliases.destroy();
-        wrap_unsetopt(raw, CURLOPT_HTTP200ALIASES);
+        setup_extra_state();
     }
 
 
@@ -1368,9 +1243,8 @@ namespace curl {
         auto result = extra_state.http_200_aliases.try_append(alias);
         if (!result)
             return result;
-        return wrap_setopt(raw,
-                           CURLOPT_HTTP200ALIASES,
-                           extra_state.http_200_aliases.data());
+        setup_extra_state();
+        return {};
     }
 
 
@@ -1391,34 +1265,18 @@ namespace curl {
 
     void
     easy::set_http_get(bool use_get)
-    {
-        return value_or_throw(try_set_http_get(use_get));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_get(bool use_get)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTPGET, use_get);
+        std::ignore = wrap_setopt(raw, CURLOPT_HTTPGET, use_get);
     }
 
 
     void
     easy::set_http_headers(slist headers)
-    {
-        return value_or_throw(try_set_http_headers(std::move(headers)));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_headers(slist headers)
         noexcept
     {
-        auto result = wrap_setopt(raw, CURLOPT_HTTPHEADER, headers.data());
-        if (result)
-            extra_state.http_headers = std::move(headers);
-        return result;
+        extra_state.http_headers = std::move(headers);
+        setup_extra_state();
     }
 
 
@@ -1436,39 +1294,24 @@ namespace curl {
         auto result = extra_state.http_headers.try_append(header);
         if (!result)
             return result;
-        return wrap_setopt(raw,
-                           CURLOPT_HTTPHEADER,
-                           extra_state.http_headers.data());
+        setup_extra_state();
+        return {};
     }
 
 
     void
     easy::set_http_content_decoding(bool enable)
-    {
-        return value_or_throw(try_set_http_content_decoding(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_content_decoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_HTTP_CONTENT_DECODING, enable);
     }
 
 
     void
     easy::set_http_transfer_decoding(bool enable)
-    {
-        return value_or_throw(try_set_http_transfer_decoding(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_http_transfer_decoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_HTTP_TRANSFER_DECODING, enable);
     }
 
 
@@ -1489,16 +1332,9 @@ namespace curl {
 
     void
     easy::set_ignore_content_length(bool ignore)
-    {
-        return value_or_throw(try_set_ignore_content_length(ignore));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_ignore_content_length(bool ignore)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, ignore);
+        std::ignore = wrap_setopt(raw, CURLOPT_IGNORE_CONTENT_LENGTH, ignore);
     }
 
 
@@ -1685,16 +1521,9 @@ namespace curl {
 
     void
     easy::set_mime_options(long options)
-    {
-        return value_or_throw(try_set_mime_options(options));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_mime_options(long options)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_MIME_OPTIONS, options);
+        std::ignore = wrap_setopt(raw, CURLOPT_MIME_OPTIONS, options);
     }
 
 
@@ -1768,31 +1597,17 @@ namespace curl {
 
     void
     easy::set_no_body(bool no_body)
-    {
-        return value_or_throw(try_set_no_body(no_body));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_no_body(bool no_body)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_NOBODY, no_body);
+        std::ignore = wrap_setopt(raw, CURLOPT_NOBODY, no_body);
     }
 
 
     void
     easy::set_no_progress(bool no_progress)
-    {
-        return value_or_throw(try_set_no_progress(no_progress));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_no_progress(bool no_progress)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_NOPROGRESS, no_progress);
+        std::ignore = wrap_setopt(raw, CURLOPT_NOPROGRESS, no_progress);
     }
 
 
@@ -1838,6 +1653,14 @@ namespace curl {
 
 
     void
+    easy::set_path_as_is(bool preserve_path)
+        noexcept
+    {
+        std::ignore = wrap_setopt(raw, CURLOPT_PATH_AS_IS, preserve_path);
+    }
+
+
+    void
     easy::set_port(std::uint16_t port)
     {
         return value_or_throw(try_set_port(port));
@@ -1854,51 +1677,29 @@ namespace curl {
 
     void
     easy::set_post(bool enable)
-    {
-        return value_or_throw(try_set_post(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_post(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_POST, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_POST, enable);
     }
 
 
     void
     easy::set_post_fields(std::string_view data)
+        noexcept
     {
-        return value_or_throw(try_set_post_fields(data));
+        return set_post_fields(data.data(), data.size());
     }
 
 
     void
     easy::set_post_fields(const void* data,
                           std::size_t size)
-    {
-        return value_or_throw(try_set_post_fields(data, size));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_post_fields(std::string_view data)
         noexcept
     {
-        return try_set_post_fields(data.data(), data.size());
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_post_fields(const void* data,
-                             std::size_t size)
-        noexcept
-    {
-        auto res = try_set_post_field_size(size);
-        if (!res)
-            return res;
-        return wrap_setopt(raw, CURLOPT_POSTFIELDS, data);
+        std::ignore = wrap_setopt(raw,
+                                  CURLOPT_POSTFIELDSIZE_LARGE,
+                                  static_cast<curl_off_t>(size));
+        std::ignore = wrap_setopt(raw, CURLOPT_POSTFIELDS, data);
     }
 
 
@@ -1983,31 +1784,17 @@ namespace curl {
 
     void
     easy::set_ssl_verify_host(bool enable)
-    {
-        return value_or_throw(try_set_ssl_verify_host(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_ssl_verify_host(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, enable);
     }
 
 
     void
     easy::set_ssl_verify_peer(bool enable)
-    {
-        return value_or_throw(try_set_ssl_verify_peer(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_ssl_verify_peer(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_SSL_VERIFYPEER, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_SSL_VERIFYPEER, enable);
     }
 
 
@@ -2028,16 +1815,9 @@ namespace curl {
 
     void
     easy::set_stderr(FILE* stream)
-    {
-        return value_or_throw(try_set_stderr(stream));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_stderr(FILE* stream)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_STDERR, stream);
+        std::ignore = wrap_setopt(raw, CURLOPT_STDERR, stream);
     }
 
 
@@ -2045,22 +1825,15 @@ namespace curl {
     easy::unset_stderr()
         noexcept
     {
-        return wrap_unsetopt(raw, CURLOPT_STDERR);
+        wrap_unsetopt(raw, CURLOPT_STDERR);
     }
 
 
     void
     easy::set_tcp_keep_alive(bool enable)
-    {
-        return value_or_throw(try_set_tcp_keep_alive(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_tcp_keep_alive(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TCP_KEEPALIVE, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_TCP_KEEPALIVE, enable);
     }
 
 
@@ -2115,16 +1888,9 @@ namespace curl {
 
     void
     easy::set_tcp_no_delay(bool no_delay)
-    {
-        return value_or_throw(try_set_tcp_no_delay(no_delay));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_tcp_no_delay(bool no_delay)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TCP_NODELAY, no_delay);
+        std::ignore = wrap_setopt(raw, CURLOPT_TCP_NODELAY, no_delay);
     }
 
 
@@ -2160,31 +1926,17 @@ namespace curl {
 
     void
     easy::set_transfer_text(bool enable)
-    {
-        return value_or_throw(try_set_transfer_text(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_transfer_text(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TRANSFERTEXT, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_TRANSFERTEXT, enable);
     }
 
 
     void
     easy::set_transfer_encoding(bool enable)
-    {
-        return value_or_throw(try_set_transfer_encoding(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_transfer_encoding(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_TRANSFER_ENCODING, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_TRANSFER_ENCODING, enable);
     }
 
 
@@ -2199,6 +1951,8 @@ namespace curl {
     easy::try_set_url(const std::string& url_str)
         noexcept
     {
+        extra_state.url_obj.destroy();
+        setup_extra_state();
         return wrap_setopt(raw, CURLOPT_URL, url_str);
     }
 
@@ -2208,8 +1962,8 @@ namespace curl {
         noexcept
     {
         extra_state.url_obj.destroy();
+        setup_extra_state();
         wrap_unsetopt(raw, CURLOPT_URL);
-        wrap_unsetopt(raw, CURLOPT_CURLU);
     }
 
 
@@ -2284,16 +2038,9 @@ namespace curl {
 
     void
     easy::set_wildcard_match(bool enable)
-    {
-        return value_or_throw(try_set_wildcard_match(enable));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_wildcard_match(bool enable)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_WILDCARDMATCH, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_WILDCARDMATCH, enable);
     }
 
 
@@ -2317,16 +2064,9 @@ namespace curl {
 
     void
     easy::set_ws_options(long mask)
-    {
-        return value_or_throw(try_set_ws_options(mask));
-    }
-
-
-    std::expected<void, error>
-    easy::try_set_ws_options(long mask)
         noexcept
     {
-        return wrap_setopt(raw, CURLOPT_WS_OPTIONS, mask);
+        std::ignore = wrap_setopt(raw, CURLOPT_WS_OPTIONS, mask);
     }
 
 
@@ -2350,33 +2090,17 @@ namespace curl {
 
     curl_socket_t
     easy::get_active_socket()
-        const
-    {
-        return value_or_throw(try_get_active_socket());
-    }
-
-
-    std::expected<curl_socket_t, error>
-    easy::try_get_active_socket()
         const noexcept
     {
-        return wrap_getinfo<curl_socket_t>(raw, CURLINFO_ACTIVESOCKET);
+        return *wrap_getinfo<curl_socket_t>(raw, CURLINFO_ACTIVESOCKET);
     }
 
 
     std::chrono::microseconds
     easy::get_app_connect_time()
-        const
-    {
-        return value_or_throw(try_get_app_connect_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_app_connect_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_APPCONNECT_TIME_T
         );
@@ -2387,18 +2111,7 @@ namespace curl {
     easy::get_ca_info()
         const
     {
-        return value_or_throw(try_get_ca_info());
-    }
-
-
-    std::expected<std::filesystem::path, error>
-    easy::try_get_ca_info()
-        const noexcept
-    {
-        auto result = wrap_getinfo_str(raw, CURLINFO_CAINFO);
-        if (!result)
-            return std::unexpected{result.error()};
-        return std::filesystem::path{std::move(*result)};
+        return *wrap_getinfo_str(raw, CURLINFO_CAINFO);
     }
 
 
@@ -2406,50 +2119,23 @@ namespace curl {
     easy::get_ca_path()
         const
     {
-        return value_or_throw(try_get_ca_path());
-    }
-
-
-    std::expected<std::filesystem::path, error>
-    easy::try_get_ca_path()
-        const noexcept
-    {
-        auto result = wrap_getinfo_str(raw, CURLINFO_CAPATH);
-        if (!result)
-            return std::unexpected{result.error()};
-        return std::filesystem::path{std::move(*result)};
+        return *wrap_getinfo_str(raw, CURLINFO_CAPATH);
     }
 
 
     bool
     easy::get_condition_unmet()
-        const
-    {
-        return value_or_throw(try_get_condition_unmet());
-    }
-
-
-    std::expected<bool, error>
-    easy::try_get_condition_unmet()
         const noexcept
     {
-        return wrap_getinfo<long, bool>(raw, CURLINFO_CONDITION_UNMET);
+        return *wrap_getinfo<long, bool>(raw, CURLINFO_CONDITION_UNMET);
     }
 
 
     std::chrono::microseconds
     easy::get_connect_time()
-        const
-    {
-        return value_or_throw(try_get_connect_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_connect_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_CONNECT_TIME_T
         );
@@ -2460,17 +2146,9 @@ namespace curl {
 
     curl_off_t
     easy::get_conn_id()
-        const
-    {
-        return value_or_throw(try_get_conn_id());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_conn_id()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONN_ID);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_CONN_ID);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 2, 0)
@@ -2478,33 +2156,17 @@ namespace curl {
 
     curl_off_t
     easy::get_content_length_download()
-        const
-    {
-        return value_or_throw(try_get_content_length_download());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_content_length_download()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T);
     }
 
 
     curl_off_t
     easy::get_content_length_upload()
-        const
-    {
-        return value_or_throw(try_get_content_length_upload());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_content_length_upload()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_UPLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_CONTENT_LENGTH_UPLOAD_T);
     }
 
 
@@ -2512,31 +2174,15 @@ namespace curl {
     easy::get_content_type()
         const
     {
-        return value_or_throw(try_get_content_type());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_content_type()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_CONTENT_TYPE);
+        return *wrap_getinfo_str(raw, CURLINFO_CONTENT_TYPE);
     }
 
 
     slist
     easy::get_cookie_list()
-        const
-    {
-        return value_or_throw(try_get_cookie_list());
-    }
-
-
-    std::expected<slist, error>
-    easy::try_get_cookie_list()
         const noexcept
     {
-        return wrap_getinfo<curl_slist*, slist>(raw, CURLINFO_COOKIELIST);
+        return *wrap_getinfo<curl_slist*, slist>(raw, CURLINFO_COOKIELIST);
     }
 
 
@@ -2544,17 +2190,9 @@ namespace curl {
 
     curl_off_t
     easy::get_early_data_sent()
-        const
-    {
-        return value_or_throw(try_get_early_data_sent());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_early_data_sent()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_EARLYDATA_SENT_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_EARLYDATA_SENT_T);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 11, 0)
@@ -2564,15 +2202,7 @@ namespace curl {
     easy::get_effective_method()
         const
     {
-        return value_or_throw(try_get_effective_method());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_effective_method()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_METHOD);
+        return *wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_METHOD);
     }
 
 
@@ -2580,34 +2210,16 @@ namespace curl {
     easy::get_effective_url()
         const
     {
-        return value_or_throw(try_get_effective_url());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_effective_url()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_URL);
+        return *wrap_getinfo_str(raw, CURLINFO_EFFECTIVE_URL);
     }
 
 
     std::chrono::utc_seconds
     easy::get_file_time()
-        const
-    {
-        return value_or_throw(try_get_file_time());
-    }
-
-
-    std::expected<std::chrono::utc_seconds, error>
-    easy::try_get_file_time()
         const noexcept
     {
-        auto value = wrap_getinfo<curl_off_t>(raw, CURLINFO_FILETIME_T);
-        if (!value)
-            return std::unexpected{std::move(value.error())};
-        return std::chrono::utc_seconds{std::chrono::seconds(*value)};
+        auto value = *wrap_getinfo<curl_off_t>(raw, CURLINFO_FILETIME_T);
+        return std::chrono::utc_seconds{std::chrono::seconds(value)};
     }
 
 
@@ -2615,50 +2227,23 @@ namespace curl {
     easy::get_ftp_entry_path()
         const
     {
-        return value_or_throw(try_get_ftp_entry_path());
-    }
-
-
-    std::expected<std::filesystem::path, error>
-    easy::try_get_ftp_entry_path()
-        const noexcept
-    {
-        auto result = wrap_getinfo_str(raw, CURLINFO_FTP_ENTRY_PATH);
-        if (!result)
-            return std::unexpected{result.error()};
-        return std::filesystem::path{std::move(*result)};
+        return *wrap_getinfo_str(raw, CURLINFO_FTP_ENTRY_PATH);
     }
 
 
     long
     easy::get_header_size()
-        const
-    {
-        return value_or_throw(try_get_header_size());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_header_size()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_HEADER_SIZE);
+        return *wrap_getinfo<long>(raw, CURLINFO_HEADER_SIZE);
     }
 
 
     long
     easy::get_http_auth_avail()
-        const
-    {
-        return value_or_throw(try_get_http_auth_avail());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_http_auth_avail()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_AVAIL);
+        return *wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_AVAIL);
     }
 
 
@@ -2666,17 +2251,9 @@ namespace curl {
 
     long
     easy::get_http_auth_used()
-        const
-    {
-        return value_or_throw(try_get_http_auth_used());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_http_auth_used()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_USED);
+        return *wrap_getinfo<long>(raw, CURLINFO_HTTPAUTH_USED);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 12, 0)
@@ -2684,33 +2261,17 @@ namespace curl {
 
     long
     easy::get_http_connect_code()
-        const
-    {
-        return value_or_throw(try_get_http_connect_code());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_http_connect_code()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_HTTP_CONNECTCODE);
+        return *wrap_getinfo<long>(raw, CURLINFO_HTTP_CONNECTCODE);
     }
 
 
     easy::http_version
     easy::get_http_version()
-        const
-    {
-        return value_or_throw(try_get_http_version());
-    }
-
-
-    std::expected<easy::http_version, error>
-    easy::try_get_http_version()
         const noexcept
     {
-        return wrap_getinfo<long, http_version>(raw, CURLINFO_HTTP_VERSION);
+        return *wrap_getinfo<long, http_version>(raw, CURLINFO_HTTP_VERSION);
     }
 
 
@@ -2718,47 +2279,23 @@ namespace curl {
     easy::get_local_ip()
         const
     {
-        return value_or_throw(try_get_local_ip());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_local_ip()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_LOCAL_IP);
+        return *wrap_getinfo_str(raw, CURLINFO_LOCAL_IP);
     }
 
 
     long
     easy::get_local_port()
-        const
-    {
-        return value_or_throw(try_get_local_port());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_local_port()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_LOCAL_PORT);
+        return *wrap_getinfo<long>(raw, CURLINFO_LOCAL_PORT);
     }
 
 
     std::chrono::microseconds
     easy::get_name_lookup_time()
-        const
-    {
-        return value_or_throw(try_get_name_lookup_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_name_lookup_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_NAMELOOKUP_TIME_T
         );
@@ -2767,52 +2304,27 @@ namespace curl {
 
     long
     easy::get_num_connects()
-        const
-    {
-        return value_or_throw(try_get_num_connects());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_num_connects()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_NUM_CONNECTS);
+        return *wrap_getinfo<long>(raw, CURLINFO_NUM_CONNECTS);
     }
 
 
     long
     easy::get_os_errno()
-        const
-    {
-        return value_or_throw(try_get_os_errno());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_os_errno()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_OS_ERRNO);
+        return *wrap_getinfo<long>(raw, CURLINFO_OS_ERRNO);
     }
-
 
 
 #if CURL_AT_LEAST_VERSION(8, 10, 0)
 
     std::chrono::microseconds
     easy::get_post_transfer_time()
-        const
-    {
-        return value_or_throw(try_get_post_transfer_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_post_transfer_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_POSTTRANSFER_TIME_T
         );
@@ -2823,17 +2335,9 @@ namespace curl {
 
     std::chrono::microseconds
     easy::get_pre_transfer_time()
-        const
-    {
-        return value_or_throw(try_get_pre_transfer_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_pre_transfer_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_PRETRANSFER_TIME_T
         );
@@ -2844,37 +2348,21 @@ namespace curl {
     easy::get_primary_ip()
         const
     {
-        return value_or_throw(try_get_primary_ip());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_primary_ip()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_PRIMARY_IP);
+        return *wrap_getinfo_str(raw, CURLINFO_PRIMARY_IP);
     }
 
 
     long
     easy::get_primary_port()
-        const
-    {
-        return value_or_throw(try_get_primary_port());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_primary_port()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_PRIMARY_PORT);
+        return *wrap_getinfo<long>(raw, CURLINFO_PRIMARY_PORT);
     }
 
 
     const std::any&
     easy::get_private()
-        const
+        const noexcept
     {
         return extra_state.private_data;
     }
@@ -2882,6 +2370,7 @@ namespace curl {
 
     std::any&
     easy::get_private()
+        noexcept
     {
         return extra_state.private_data;
     }
@@ -2889,17 +2378,9 @@ namespace curl {
 
     long
     easy::get_proxy_auth_avail()
-        const
-    {
-        return value_or_throw(try_get_proxy_auth_avail());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_proxy_auth_avail()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_AVAIL);
+        return *wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_AVAIL);
     }
 
 
@@ -2907,17 +2388,9 @@ namespace curl {
 
     long
     easy::get_proxy_auth_used()
-        const
-    {
-        return value_or_throw(try_get_proxy_auth_used());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_proxy_auth_used()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_USED);
+        return *wrap_getinfo<long>(raw, CURLINFO_PROXYAUTH_USED);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 12, 0)
@@ -2925,33 +2398,17 @@ namespace curl {
 
     CURLproxycode
     easy::get_proxy_error()
-        const
-    {
-        return value_or_throw(try_get_proxy_error());
-    }
-
-
-    std::expected<CURLproxycode, error>
-    easy::try_get_proxy_error()
         const noexcept
     {
-        return wrap_getinfo<long, CURLproxycode>(raw, CURLINFO_PROXY_ERROR);
+        return *wrap_getinfo<long, CURLproxycode>(raw, CURLINFO_PROXY_ERROR);
     }
 
 
     bool
     easy::get_proxy_ssl_verify_result()
-        const
-    {
-        return value_or_throw(try_get_proxy_ssl_verify_result());
-    }
-
-
-    std::expected<bool, error>
-    easy::try_get_proxy_ssl_verify_result()
         const noexcept
     {
-        return wrap_getinfo<long, bool>(raw, CURLINFO_PROXY_SSL_VERIFYRESULT);
+        return *wrap_getinfo<long, bool>(raw, CURLINFO_PROXY_SSL_VERIFYRESULT);
     }
 
 
@@ -2959,17 +2416,9 @@ namespace curl {
 
     std::chrono::microseconds
     easy::get_queue_time()
-        const
-    {
-        return value_or_throw(try_get_queue_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_queue_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_QUEUE_TIME_T
         );
@@ -2980,33 +2429,17 @@ namespace curl {
 
     long
     easy::get_redirect_count()
-        const
-    {
-        return value_or_throw(try_get_redirect_count());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_redirect_count()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_REDIRECT_COUNT);
+        return *wrap_getinfo<long>(raw, CURLINFO_REDIRECT_COUNT);
     }
 
 
     std::chrono::microseconds
     easy::get_redirect_time()
-        const
-    {
-        return value_or_throw(try_get_redirect_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_redirect_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_REDIRECT_TIME_T
         );
@@ -3017,15 +2450,7 @@ namespace curl {
     easy::get_redirect_url()
         const
     {
-        return value_or_throw(try_get_redirect_url());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_redirect_url()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_REDIRECT_URL);
+        return *wrap_getinfo_str(raw, CURLINFO_REDIRECT_URL);
     }
 
 
@@ -3033,111 +2458,55 @@ namespace curl {
     easy::get_referer()
         const
     {
-        return value_or_throw(try_get_referer());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_referer()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_REFERER);
+        return *wrap_getinfo_str(raw, CURLINFO_REFERER);
     }
 
 
     long
     easy::get_request_size()
-        const
-    {
-        return value_or_throw(try_get_request_size());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_request_size()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_REQUEST_SIZE);
+        return *wrap_getinfo<long>(raw, CURLINFO_REQUEST_SIZE);
     }
 
 
     long
     easy::get_response_code()
-        const
-    {
-        return value_or_throw(try_get_response_code());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_response_code()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_RESPONSE_CODE);
+        return *wrap_getinfo<long>(raw, CURLINFO_RESPONSE_CODE);
     }
 
 
     std::chrono::seconds
     easy::get_retry_after()
-        const
-    {
-        return value_or_throw(try_get_retry_after());
-    }
-
-
-    std::expected<std::chrono::seconds, error>
-    easy::try_get_retry_after()
         const noexcept
     {
-        return wrap_getinfo<long, std::chrono::seconds>(raw, CURLINFO_RETRY_AFTER);
+        return *wrap_getinfo<long, std::chrono::seconds>(raw, CURLINFO_RETRY_AFTER);
     }
 
 
     long
     easy::get_rtsp_client_cseq()
-        const
-    {
-        return value_or_throw(try_get_rtsp_client_cseq());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_rtsp_client_cseq()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_RTSP_CLIENT_CSEQ);
+        return *wrap_getinfo<long>(raw, CURLINFO_RTSP_CLIENT_CSEQ);
     }
 
 
     long
     easy::get_rtsp_cseq_recv()
-        const
-    {
-        return value_or_throw(try_get_rtsp_cseq_recv());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_rtsp_cseq_recv()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_RTSP_CSEQ_RECV);
+        return *wrap_getinfo<long>(raw, CURLINFO_RTSP_CSEQ_RECV);
     }
 
 
     long
     easy::get_rtsp_server_cseq()
-        const
-    {
-        return value_or_throw(try_get_rtsp_server_cseq());
-    }
-
-
-    std::expected<long, error>
-    easy::try_get_rtsp_server_cseq()
         const noexcept
     {
-        return wrap_getinfo<long>(raw, CURLINFO_RTSP_SERVER_CSEQ);
+        return *wrap_getinfo<long>(raw, CURLINFO_RTSP_SERVER_CSEQ);
     }
 
 
@@ -3145,15 +2514,7 @@ namespace curl {
     easy::get_rtsp_session_id()
         const
     {
-        return value_or_throw(try_get_rtsp_session_id());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_rtsp_session_id()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_RTSP_SESSION_ID);
+        return *wrap_getinfo_str(raw, CURLINFO_RTSP_SESSION_ID);
     }
 
 
@@ -3161,15 +2522,7 @@ namespace curl {
     easy::get_scheme()
         const
     {
-        return value_or_throw(try_get_scheme());
-    }
-
-
-    std::expected<std::string, error>
-    easy::try_get_scheme()
-        const noexcept
-    {
-        return wrap_getinfo_str(raw, CURLINFO_SCHEME);
+        return *wrap_getinfo_str(raw, CURLINFO_SCHEME);
     }
 
 
@@ -3177,17 +2530,9 @@ namespace curl {
 
     curl_off_t
     easy::get_size_delivered()
-        const
-    {
-        return value_or_throw(try_get_size_delivered());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_size_delivered()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DELIVERED);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DELIVERED);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 20, 0)
@@ -3195,116 +2540,58 @@ namespace curl {
 
     curl_off_t
     easy::get_size_download()
-        const
-    {
-        return value_or_throw(try_get_size_download());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_size_download()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DOWNLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_DOWNLOAD_T);
     }
 
 
     curl_off_t
     easy::get_size_upload()
-        const
-    {
-        return value_or_throw(try_get_size_upload());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_size_upload()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_UPLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_SIZE_UPLOAD_T);
     }
 
 
     curl_off_t
     easy::get_speed_download()
-        const
-    {
-        return value_or_throw(try_get_speed_download());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_speed_download()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_DOWNLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_DOWNLOAD_T);
     }
 
 
     curl_off_t
     easy::get_speed_upload()
-        const
-    {
-        return value_or_throw(try_get_speed_upload());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_speed_upload()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_UPLOAD_T);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_SPEED_UPLOAD_T);
     }
 
 
     slist
     easy::get_ssl_engines()
-        const
-    {
-        return value_or_throw(try_get_ssl_engines());
-    }
-
-
-    std::expected<slist, error>
-    easy::try_get_ssl_engines()
         const noexcept
     {
-        auto raw_result = wrap_getinfo<curl_slist*>(raw, CURLINFO_SSL_ENGINES);
-        if (!raw_result)
-            return std::unexpected{raw_result.error()};
-        return slist{*raw_result};
+        auto raw_result = *wrap_getinfo<curl_slist*>(raw, CURLINFO_SSL_ENGINES);
+        return slist{raw_result};
     }
 
 
     bool
     easy::get_ssl_verify_result()
-        const
-    {
-        return value_or_throw(try_get_ssl_verify_result());
-    }
-
-
-    std::expected<bool, error>
-    easy::try_get_ssl_verify_result()
         const noexcept
     {
-        return wrap_getinfo<long, bool>(raw, CURLINFO_SSL_VERIFYRESULT);
+        return *wrap_getinfo<long, bool>(raw, CURLINFO_SSL_VERIFYRESULT);
     }
 
 
     std::chrono::microseconds
     easy::get_start_transfer_time()
-        const
-    {
-        return value_or_throw(try_get_start_transfer_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_start_transfer_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_STARTTRANSFER_TIME_T
         );
@@ -3313,17 +2600,9 @@ namespace curl {
 
     std::chrono::microseconds
     easy::get_total_time()
-        const
-    {
-        return value_or_throw(try_get_total_time());
-    }
-
-
-    std::expected<std::chrono::microseconds, error>
-    easy::try_get_total_time()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t, std::chrono::microseconds>(
+        return *wrap_getinfo<curl_off_t, std::chrono::microseconds>(
             raw,
             CURLINFO_TOTAL_TIME_T
         );
@@ -3334,17 +2613,9 @@ namespace curl {
 
     bool
     easy::get_used_proxy()
-        const
-    {
-        return value_or_throw(try_get_used_proxy());
-    }
-
-
-    std::expected<bool, error>
-    easy::try_get_used_proxy()
         const noexcept
     {
-        return wrap_getinfo<long, bool>(raw, CURLINFO_USED_PROXY);
+        return *wrap_getinfo<long, bool>(raw, CURLINFO_USED_PROXY);
     }
 
 #endif // CURL_AT_LEAST_VERSION(8, 7, 0)
@@ -3354,17 +2625,9 @@ namespace curl {
 
     curl_off_t
     easy::get_xfer_id()
-        const
-    {
-        return value_or_throw(try_get_xfer_id());
-    }
-
-
-    std::expected<curl_off_t, error>
-    easy::try_get_xfer_id()
         const noexcept
     {
-        return wrap_getinfo<curl_off_t>(raw, CURLINFO_XFER_ID);
+        return *wrap_getinfo<curl_off_t>(raw, CURLINFO_XFER_ID);
     }
 
 #endif //CURL_AT_LEAST_VERSION(8, 2, 0)
@@ -3503,6 +2766,36 @@ namespace curl {
             } else {
                 wrap_unsetopt(raw, CURLOPT_XFERINFODATA);
                 wrap_unsetopt(raw, CURLOPT_XFERINFOFUNCTION);
+            }
+
+            // Update connect_to list.
+            if (extra_state.connect_to) {
+                curl_easy_setopt(raw, CURLOPT_CONNECT_TO, extra_state.connect_to.data());
+            } else {
+                wrap_unsetopt(raw, CURLOPT_CONNECT_TO);
+            }
+
+            // Update url_obj.
+            if (extra_state.url_obj) {
+                curl_easy_setopt(raw, CURLOPT_CURLU, extra_state.url_obj.data());
+            } else {
+                wrap_unsetopt(raw, CURLOPT_CURLU);
+            }
+
+            // Update http_200_aliases list.
+            if (extra_state.http_200_aliases) {
+                curl_easy_setopt(raw,
+                                 CURLOPT_HTTP200ALIASES,
+                                 extra_state.http_200_aliases.data());
+            } else {
+                wrap_unsetopt(raw, CURLOPT_HTTP200ALIASES);
+            }
+
+            // Update http_headers list.
+            if (extra_state.http_headers) {
+                curl_easy_setopt(raw, CURLOPT_HTTPHEADER, extra_state.http_headers.data());
+            } else {
+                wrap_unsetopt(raw, CURLOPT_HTTPHEADER);
             }
 
         } else {

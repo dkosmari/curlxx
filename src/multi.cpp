@@ -43,7 +43,6 @@ namespace curl {
                     T arg)
             noexcept;
 
-        [[maybe_unused]]
         void
         wrap_unsetopt(CURLM* raw,
                       CURLMoption opt)
