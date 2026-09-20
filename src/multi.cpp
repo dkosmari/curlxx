@@ -317,7 +317,6 @@ namespace curl {
             // Assume only "CURLMSG_DONE" messages exist.
             if (info->msg == CURLMSG_DONE) {
                 return msg_done{
-                    .raw_handle = info->easy_handle,
                     .handle = easy::get_wrapper(info->easy_handle),
                     .result = info->data.result,
                 };
@@ -335,9 +334,10 @@ namespace curl {
         while (auto info = curl_multi_info_read(raw, &pending)) {
             // Assume only "CURLMSG_DONE" messages exist.
             if (info->msg == CURLMSG_DONE)
-                result.emplace_back(info->easy_handle,
-                                    easy::get_wrapper(info->easy_handle),
-                                    info->data.result);
+                result.emplace_back(
+                    easy::get_wrapper(info->easy_handle),
+                    info->data.result
+                );
         }
         return result;
     }
@@ -980,7 +980,7 @@ namespace curl {
         assert(raw_multi == self.raw);
         if (self->extra_state.notify_func) {
             auto handle = easy::get_wrapper(raw_handle);
-            self->extra_state.notify_func(type, handle, raw_handle);
+            self->extra_state.notify_func(type, handle);
         }
     }
 
@@ -998,11 +998,24 @@ namespace curl {
         assert(self);
         try {
             if (self->extra_state.push_func) {
-                auto parent_handle = easy::get_wrapper(raw_parent_handle);
-                return self->extra_state.push_func(parent_handle,
-                                                   raw_parent_handle,
-                                                   raw_new_handle,
-                                                   pushheaders{headers, num_headers});
+                // Wrap the new handle.
+                easy new_handle{raw_new_handle};
+                try {
+                    int result = self->extra_state.push_func(
+                        easy::get_wrapper(raw_parent_handle),
+                        std::move(new_handle),
+                        pushheaders{headers, num_headers}
+                    );
+                    // When the push is rejected, libcurl is still the owner, so release it.
+                    if (result != CURL_PUSH_OK)
+                        std::ignore = new_handle.release();
+                    return result;
+                }
+                catch (...) {
+                    // If an exception escaped from the callback, turn it into an error.
+                    std::ignore = new_handle.release();
+                    throw; // Transfer control to the outter catch.
+                }
             } else
                 return CURL_PUSH_DENY;
         }
@@ -1023,11 +1036,9 @@ namespace curl {
         auto self = reinterpret_cast<multi*>(ctx);
         assert(self);
         if (self->extra_state.socket_func) {
-            auto handle = easy::get_wrapper(raw_handle);
             try {
                 return self->extra_state.socket_func(
-                    handle,
-                    raw_handle,
+                    easy::get_wrapper(raw_handle),
                     fd,
                     what,
                     socket_data

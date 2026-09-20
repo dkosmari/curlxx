@@ -48,7 +48,7 @@ namespace curl {
 
         using closesocket_callback_signature = int (curl_socket_t fd);
 
-        // NOTE: internal handles may not have an easy wrapper (target will be null)
+        // NOTE: internal handles will not have an easy wrapper (target will be null)
         using debug_callback_signature = void (easy* target,
                                                CURL* raw_target,
                                                curl_infotype type,

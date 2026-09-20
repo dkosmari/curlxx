@@ -79,8 +79,7 @@ namespace curl {
         using notify_callback_signature =
             void (
                 unsigned type,
-                easy* handle,
-                CURL* raw_handle
+                easy* handle
             );
 
         using notify_function_t = std::move_only_function<notify_callback_signature>;
@@ -91,8 +90,7 @@ namespace curl {
         using push_callback_signature =
             int (
                 easy* parent_handle,
-                CURL *raw_parent_handle,
-                CURL *raw_new_handle,
+                easy&& new_handle,
                 const pushheaders& headers
             );
 
@@ -102,7 +100,6 @@ namespace curl {
         using socket_callback_signature =
             int (
                 easy* handle,
-                CURL* raw_handle,
                 curl_socket_t fd,
                 int what,
                 void* socket_data
@@ -236,7 +233,6 @@ namespace curl {
 
 
         struct msg_done {
-            CURL* raw_handle;
             easy* handle; ///< Might be null, for internal handles with no wrapper.
             CURLcode result;
         };
