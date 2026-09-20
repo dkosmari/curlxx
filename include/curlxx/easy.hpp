@@ -52,19 +52,19 @@ namespace curl {
         using debug_callback_signature = void (easy* target,
                                                CURL* raw_target,
                                                curl_infotype type,
-                                               std::span<const char> data);
+                                               std::span<const std::byte> data);
 
-        using fnmatch_callback_signature = bool (const std::string& pattern,
-                                                 const std::string& text);
+        using fnmatch_callback_signature = bool (std::string_view pattern,
+                                                 std::string_view text);
 
         using header_callback_signature = std::size_t (std::string_view data);
 
         using opensocket_callback_signature = curl_socket_t (curlsocktype purpose,
                                                              curl_sockaddr* address);
 
-        using read_callback_signature = std::size_t (std::span<char>);
+        using read_callback_signature = std::size_t (std::span<std::byte>);
 
-        using write_callback_signature = std::size_t (std::span<const char>);
+        using write_callback_signature = std::size_t (std::span<const std::byte>);
 
         using xferinfo_callback_signature = int (curl_off_t dltotal,
                                                  curl_off_t dlnow,
@@ -194,61 +194,83 @@ namespace curl {
             noexcept;
 
 
-        std::size_t
-        recv(void* buffer,
-             std::size_t size);
+        std::span<std::byte>
+        recv(std::span<std::byte> buffer);
 
         template<typename T,
                  std::size_t E>
+        requires (E != std::dynamic_extent) && (sizeof(T) == 1)
         inline
         std::span<T>
         recv(std::span<T, E> buffer)
         {
-            auto received = recv(buffer.data(), buffer.size_bytes());
-            return buffer.first(received);
+            auto received = recv(std::as_writable_bytes(buffer));
+            return std::span<T>{
+                reinterpret_cast<T*>(received.data()),
+                received.size()
+            };
         }
 
 
-        std::expected<std::size_t, error>
-        try_recv(void* buffer,
-                 std::size_t size)
+        std::expected<std::span<std::byte>, error>
+        try_recv(std::span<std::byte> buffer)
             noexcept;
 
         template<typename T,
                  std::size_t E>
+        requires(E != std::dynamic_extent) && (sizeof(T) == 1)
         inline
         std::expected<std::span<T>, error>
         try_recv(std::span<T, E> buffer)
-            noexcept;
-
-
-        std::size_t
-        send(const void* buffer,
-             std::size_t size);
-
-        template<typename T,
-                 std::size_t E>
-        inline
-        std::size_t
-        send(std::span<T, E> buffer)
+            noexcept
         {
-            return send(buffer.data(), buffer.size_bytes());
+            auto received = recv(std::as_writable_bytes(buffer));
+            if (!received)
+                return std::unexpected{std::move(received.error())};
+            return std::span<T>{
+                reinterpret_cast<T*>(received->data()),
+                received->size()
+            };
         }
 
 
-        std::expected<std::size_t, error>
-        try_send(const void* buffer,
-                 std::size_t size)
+        std::span<const std::byte>
+        send(std::span<const std::byte> buffer);
+
+        template<typename T,
+                 std::size_t E>
+        requires(E != std::dynamic_extent) && (sizeof(T) == 1)
+        inline
+        std::span<const T>
+        send(std::span<const T, E> buffer)
+        {
+            auto sent = send(std::as_bytes(buffer));
+            return std::span<const T>{
+                reinterpret_cast<const T*>(sent.data()),
+                sent.size()
+            };
+        }
+
+
+        std::expected<std::span<const std::byte>, error>
+        try_send(std::span<const std::byte> buffer)
             noexcept;
 
         template<typename T,
                  std::size_t E>
+        requires(E != std::dynamic_extent) && (sizeof(T) == 1)
         inline
-        std::size_t
-        try_send(std::span<T, E> buffer)
+        std::span<const T>
+        try_send(std::span<const T, E> buffer)
             noexcept
         {
-            return try_send(buffer.data(), buffer.size_bytes());
+            auto sent = try_send(std::as_bytes(buffer));
+            if (!sent)
+                return std::unexpected{std::move(sent.error())};
+            return std::span<const T>{
+                reinterpret_cast<const T*>(sent->data()),
+                sent->size()
+            };
         }
 
 

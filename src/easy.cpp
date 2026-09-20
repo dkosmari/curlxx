@@ -340,45 +340,47 @@ namespace curl {
     }
 
 
-    std::size_t
-    easy::recv(void* buffer,
-               std::size_t size)
+    std::span<std::byte>
+    easy::recv(std::span<std::byte> buffer)
     {
-        return value_or_throw(try_recv(buffer, size));
+        return value_or_throw(try_recv(buffer));
     }
 
 
-    std::expected<std::size_t, error>
-    easy::try_recv(void* buffer,
-                   std::size_t size)
+    std::expected<std::span<std::byte>, error>
+    easy::try_recv(std::span<std::byte> buffer)
         noexcept
     {
         std::size_t received;
-        auto e = curl_easy_recv(raw, buffer, size, &received);
+        auto e = curl_easy_recv(raw,
+                                buffer.data(),
+                                buffer.size(),
+                                &received);
         if (e)
             return std::unexpected{error{e}};
-        return received;
+        return buffer.first(received);
     }
 
 
-    std::size_t
-    easy::send(const void* buffer,
-               std::size_t size)
+    std::span<const std::byte>
+    easy::send(std::span<const std::byte> buffer)
     {
-        return value_or_throw(try_send(buffer, size));
+        return value_or_throw(try_send(buffer));
     }
 
 
-    std::expected<std::size_t, error>
-    easy::try_send(const void* buffer,
-                   std::size_t size)
+    std::expected<std::span<const std::byte>, error>
+    easy::try_send(std::span<const std::byte> buffer)
         noexcept
     {
         std::size_t sent;
-        auto e = curl_easy_send(raw, buffer, size, &sent);
+        auto e = curl_easy_send(raw,
+                                buffer.data(),
+                                buffer.size(),
+                                &sent);
         if (e)
             return std::unexpected{error{e}};
-        return sent;
+        return buffer.first(sent);
     }
 
 
@@ -2840,7 +2842,10 @@ namespace curl {
                     target,
                     raw_target,
                     type,
-                    {data, size}
+                    {
+                        reinterpret_cast<const std::byte*>(data),
+                        size
+                    }
                 );
         }
         catch (...) {
@@ -2924,7 +2929,12 @@ namespace curl {
         assert(self);
         try {
             if (self->extra_state.read_func)
-                return self->extra_state.read_func({buf, size});
+                return self->extra_state.read_func(
+                    {
+                        reinterpret_cast<std::byte*>(buf),
+                        size
+                    }
+                );
             else
                 return CURL_READFUNC_ABORT;
         }
@@ -2945,7 +2955,12 @@ namespace curl {
         assert(self);
         try {
             if (self->extra_state.write_func)
-                return self->extra_state.write_func({buffer, size});
+                return self->extra_state.write_func(
+                    {
+                        reinterpret_cast<const std::byte*>(buffer),
+                        size
+                    }
+                );
             else
                 return CURL_WRITEFUNC_ERROR;
         }
