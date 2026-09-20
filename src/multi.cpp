@@ -300,20 +300,30 @@ namespace curl {
     }
 
 
-    multi::info_result
+    std::optional<multi::msg_done>
     multi::info_read()
         noexcept
     {
-        info_result result;
-        if (auto raw_info = curl_multi_info_read(raw, &result.pending)) {
+        int pending;
+        return info_read(pending);
+    }
+
+
+    std::optional<multi::msg_done>
+    multi::info_read(int& pending)
+        noexcept
+    {
+        if (auto info = curl_multi_info_read(raw, &pending)) {
             // Assume only "CURLMSG_DONE" messages exist.
-            if (raw_info->msg == CURLMSG_DONE) {
-                // NOTE: ignore all non-wrapped handles.
-                if (auto ez = easy::get_wrapper(raw_info->easy_handle))
-                    result.msg.emplace(ez, raw_info->data.result);
+            if (info->msg == CURLMSG_DONE) {
+                return msg_done{
+                    .raw_handle = info->easy_handle,
+                    .handle = easy::get_wrapper(info->easy_handle),
+                    .result = info->data.result,
+                };
             }
         }
-        return result;
+        return {};
     }
 
 
@@ -322,13 +332,12 @@ namespace curl {
     {
         std::vector<msg_done> result;
         int pending;
-        while (auto msg = curl_multi_info_read(raw, &pending)) {
+        while (auto info = curl_multi_info_read(raw, &pending)) {
             // Assume only "CURLMSG_DONE" messages exist.
-            if (msg->msg == CURLMSG_DONE)
-                // NOTE: ignore all non-wrapped handles.
-                if (auto ez = easy::get_wrapper(msg->easy_handle))
-                    result.emplace_back(ez,
-                                        msg->data.result);
+            if (info->msg == CURLMSG_DONE)
+                result.emplace_back(info->easy_handle,
+                                    easy::get_wrapper(info->easy_handle),
+                                    info->data.result);
         }
         return result;
     }
@@ -339,6 +348,13 @@ namespace curl {
                 std::chrono::milliseconds timeout)
     {
         return value_or_throw(try_poll(extra_fds, timeout));
+    }
+
+
+    int
+    multi::poll(std::chrono::milliseconds timeout)
+    {
+        return value_or_throw(try_poll(timeout));
     }
 
 
@@ -357,6 +373,14 @@ namespace curl {
         if (e)
             return std::unexpected{error{e}};
         return result;
+    }
+
+
+    std::expected<int, error>
+    multi::try_poll(std::chrono::milliseconds timeout)
+        noexcept
+    {
+        return try_poll({}, timeout);
     }
 
 

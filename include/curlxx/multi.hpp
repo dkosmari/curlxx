@@ -235,21 +235,21 @@ namespace curl {
 
 
         struct msg_done {
-            easy* handle;
+            CURL* raw_handle;
+            easy* handle; ///< Might be null, for internal handles with no wrapper.
             CURLcode result;
-        };
-
-        struct info_result {
-            std::optional<msg_done> msg{};
-            int pending{};
         };
 
         /**
          * Wrapper for `curl_multi_info_read()`: read multi stack information.
          */
 
-        info_result
+        std::optional<msg_done>
         info_read()
+            noexcept;
+
+        std::optional<msg_done>
+        info_read(int& pending)
             noexcept;
 
         /**
@@ -265,9 +265,16 @@ namespace curl {
         poll(std::span<curl_waitfd> extra_fds,
              std::chrono::milliseconds timeout);
 
+        int
+        poll(std::chrono::milliseconds timeout);
+
         std::expected<int, error>
         try_poll(std::span<curl_waitfd> extra_fds,
                  std::chrono::milliseconds timeout)
+            noexcept;
+
+        std::expected<int, error>
+        try_poll(std::chrono::milliseconds timeout)
             noexcept;
 
         /// Wrapper for `curl_multi_wakeup()`: wake up a sleeping poll call.
