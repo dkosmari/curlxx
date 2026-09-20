@@ -352,9 +352,26 @@ namespace curl {
 
 
     int
+    multi::poll(std::span<curl_waitfd> extra_fds,
+                std::chrono::milliseconds timeout,
+                std::stop_token stopper)
+    {
+        return value_or_throw(try_poll(extra_fds, timeout, std::move(stopper)));
+    }
+
+
+    int
     multi::poll(std::chrono::milliseconds timeout)
     {
         return value_or_throw(try_poll(timeout));
+    }
+
+
+    int
+    multi::poll(std::chrono::milliseconds timeout,
+                std::stop_token stopper)
+    {
+        return value_or_throw(try_poll(timeout, std::move(stopper)));
     }
 
 
@@ -377,10 +394,42 @@ namespace curl {
 
 
     std::expected<int, error>
+    multi::try_poll(std::span<curl_waitfd> extra_fds,
+                    std::chrono::milliseconds timeout,
+                    std::stop_token stopper)
+        noexcept
+    {
+        int timeout_ms = timeout.count();
+        int result;
+        std::stop_callback stop_on_wakeup{
+            stopper,
+            [this] { wakeup(); }
+        };
+        auto e = curl_multi_poll(raw,
+                                 extra_fds.data(),
+                                 extra_fds.size(),
+                                 timeout_ms,
+                                 &result);
+        if (e)
+            return std::unexpected{error{e}};
+        return result;
+    }
+
+
+    std::expected<int, error>
     multi::try_poll(std::chrono::milliseconds timeout)
         noexcept
     {
         return try_poll({}, timeout);
+    }
+
+
+    std::expected<int, error>
+    multi::try_poll(std::chrono::milliseconds timeout,
+                    std::stop_token stopper)
+        noexcept
+    {
+        return try_poll({}, timeout, std::move(stopper));
     }
 
 

@@ -14,6 +14,7 @@
 #include <functional>
 #include <optional>
 #include <span>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -266,7 +267,16 @@ namespace curl {
              std::chrono::milliseconds timeout);
 
         int
+        poll(std::span<curl_waitfd> extra_fds,
+             std::chrono::milliseconds timeout,
+             std::stop_token stopper);
+
+        int
         poll(std::chrono::milliseconds timeout);
+
+        int
+        poll(std::chrono::milliseconds timeout,
+             std::stop_token stopper);
 
         std::expected<int, error>
         try_poll(std::span<curl_waitfd> extra_fds,
@@ -274,7 +284,18 @@ namespace curl {
             noexcept;
 
         std::expected<int, error>
+        try_poll(std::span<curl_waitfd> extra_fds,
+                 std::chrono::milliseconds timeout,
+                 std::stop_token stopper)
+            noexcept;
+
+        std::expected<int, error>
         try_poll(std::chrono::milliseconds timeout)
+            noexcept;
+
+        std::expected<int, error>
+        try_poll(std::chrono::milliseconds timeout,
+                 std::stop_token stopper)
             noexcept;
 
         /// Wrapper for `curl_multi_wakeup()`: wake up a sleeping poll call.
