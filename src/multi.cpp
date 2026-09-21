@@ -592,7 +592,7 @@ namespace curl {
     void
     multi::notify_enable(unsigned type)
     {
-        return value_or_throw(try_notify_enable(raw, type));
+        return value_or_throw(try_notify_enable(type));
     }
 
 
