@@ -977,7 +977,7 @@ namespace curl {
     {
         auto self = reinterpret_cast<multi*>(ctx);
         assert(self);
-        assert(raw_multi == self.raw);
+        assert(raw_multi == self->raw);
         if (self->extra_state.notify_func) {
             auto handle = easy::get_wrapper(raw_handle);
             self->extra_state.notify_func(type, handle);
