@@ -542,13 +542,13 @@ namespace curl {
     multi::try_get_handles()
         const noexcept
     {
-        auto raw_handles = curl_multi_get_handles(raw);
+        CURL** raw_handles = curl_multi_get_handles(raw);
         if (!raw_handles)
             return std::unexpected{error{CURLM_OUT_OF_MEMORY}};
         try {
             std::vector<easy*> result;
-            for (CURL* raw_handle = raw_handles[0]; raw_handle; ++raw_handle)
-                if (auto ez = easy::get_wrapper(raw_handle))
+            for (CURL** it = raw_handles; *it; ++it)
+                if (auto ez = easy::get_wrapper(*it))
                     result.push_back(ez);
 
             curl_free(raw_handles);
