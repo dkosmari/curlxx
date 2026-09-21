@@ -32,7 +32,7 @@ namespace curl {
 
         std::expected<curl_off_t, error>
         wrap_get_offt(CURLM* raw,
-                      CURLMinfo info);
+                      CURLMinfo_offt info);
 
 #endif // CURL_AT_LEAST_VERSION(8, 16, 0)
 
@@ -57,7 +57,7 @@ namespace curl {
 
         std::expected<curl_off_t, error>
         wrap_get_offt(CURLM* raw,
-                      CURLMinfo info)
+                      CURLMinfo_offt info)
         {
             curl_off_t result;
             auto e = curl_multi_get_offt(raw, info, &result);
