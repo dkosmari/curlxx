@@ -934,11 +934,18 @@ namespace curl {
 
 
     void
-    easy::set_url(url url_obj)
+    easy::set_curl_url(const url& url_obj)
         noexcept
     {
-        extra_state.url_obj = std::move(url_obj);
-        setup_extra_state();
+        std::ignore = wrap_setopt(raw, CURLOPT_CURLU, url_obj.data());
+    }
+
+
+    void
+    easy::unset_curl_url()
+        noexcept
+    {
+        return wrap_unsetopt(raw, CURLOPT_CURLU);
     }
 
 
@@ -1953,8 +1960,6 @@ namespace curl {
     easy::try_set_url(const std::string& url_str)
         noexcept
     {
-        extra_state.url_obj.destroy();
-        setup_extra_state();
         return wrap_setopt(raw, CURLOPT_URL, url_str);
     }
 
@@ -1963,8 +1968,6 @@ namespace curl {
     easy::unset_url()
         noexcept
     {
-        extra_state.url_obj.destroy();
-        setup_extra_state();
         wrap_unsetopt(raw, CURLOPT_URL);
     }
 
@@ -2775,13 +2778,6 @@ namespace curl {
                 curl_easy_setopt(raw, CURLOPT_CONNECT_TO, extra_state.connect_to.data());
             } else {
                 wrap_unsetopt(raw, CURLOPT_CONNECT_TO);
-            }
-
-            // Update url_obj.
-            if (extra_state.url_obj) {
-                curl_easy_setopt(raw, CURLOPT_CURLU, extra_state.url_obj.data());
-            } else {
-                wrap_unsetopt(raw, CURLOPT_CURLU);
             }
 
             // Update http_200_aliases list.

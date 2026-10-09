@@ -97,7 +97,6 @@ namespace curl {
             slist    http_200_aliases;
             slist    http_headers;
             slist    connect_to;
-            url      url_obj{nullptr};
             std::any private_data;
         };
 
@@ -686,9 +685,15 @@ namespace curl {
 
         // CURLOPT_CURLU
         // Set URL to work on with a URL handle.
+        // NOTE: The URL object must remain valid, and can be updated at any time before a new
+        // transfer starts.
 
         void
-        set_url(url url_obj)
+        set_curl_url(const url& url_obj)
+            noexcept;
+
+        void
+        unset_curl_url()
             noexcept;
 
 

@@ -403,7 +403,10 @@ namespace curl {
         int result;
         std::stop_callback stop_on_wakeup{
             stopper,
-            [this] { wakeup(); }
+            [this]
+            {
+                std::ignore = try_wakeup();
+            }
         };
         auto e = curl_multi_poll(raw,
                                  extra_fds.data(),
