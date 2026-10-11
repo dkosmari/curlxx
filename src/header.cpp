@@ -20,11 +20,12 @@ namespace curl {
 
 
     void
-    header_iterator::update_data()
+    header_iterator::update_state()
     {
         if (current) {
             data = header{current};
         } else {
+            raw_easy = nullptr;
             data = {};
         }
     }
@@ -40,13 +41,13 @@ namespace curl {
                                      int request_) :
         raw_easy{raw_easy_},
         origin{origin_},
-        request{request_}
+        request{request_},
+        current{curl_easy_nextheader(raw_easy,
+                                     origin,
+                                     request,
+                                     nullptr)}
     {
-        current = curl_easy_nextheader(raw_easy,
-                                       origin,
-                                       request,
-                                       nullptr);
-        update_data();
+        update_state();
     }
 
 
@@ -81,7 +82,7 @@ namespace curl {
                                        origin,
                                        request,
                                        current);
-        update_data();
+        update_state();
         return *this;
     }
 

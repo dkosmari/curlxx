@@ -37,15 +37,15 @@ namespace curl {
 
     class header_iterator {
 
-        curl_header* current = nullptr;
         CURL* raw_easy = nullptr;
         unsigned origin = 0;
         int request = -1;
+        curl_header* current = nullptr;
         header data;
 
 
         void
-        update_data();
+        update_state();
 
 
     public:
