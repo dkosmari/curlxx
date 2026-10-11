@@ -64,6 +64,10 @@ namespace curl {
 
         using read_callback_signature = std::size_t (std::span<std::byte>);
 
+        using sockopt_callback_signature = int (curl_socket_t fd,
+                                                curlsocktype purpose);
+
+
         using write_callback_signature = std::size_t (std::span<const std::byte>);
 
         using xferinfo_callback_signature = int (curl_off_t dltotal,
@@ -78,6 +82,7 @@ namespace curl {
         using fnmatch_function_t     = std::move_only_function<fnmatch_callback_signature>;
         using opensocket_function_t  = std::move_only_function<opensocket_callback_signature>;
         using read_function_t        = std::move_only_function<read_callback_signature>;
+        using sockopt_function_t     = std::move_only_function<sockopt_callback_signature>;
         using write_function_t       = std::move_only_function<write_callback_signature>;
         using xferinfo_function_t    = std::move_only_function<xferinfo_callback_signature>;
 
@@ -91,6 +96,7 @@ namespace curl {
             header_function_t      header_func;
             opensocket_function_t  opensocket_func;
             read_function_t        read_func;
+            sockopt_function_t     sockopt_func;
             write_function_t       write_func;
             xferinfo_function_t    xferinfo_func;
 
@@ -1712,11 +1718,19 @@ namespace curl {
         // CURLOPT_SHARE
         // Share object to use. TODO
 
-        // CURLOPT_SOCKOPTDATA
-        // Data pointer to pass to the sockopt callback. TODO
 
+        // CURLOPT_SOCKOPTDATA
         // CURLOPT_SOCKOPTFUNCTION
-        // Callback for sockopt operations. TODO
+        // Callback for sockopt operations.
+
+        void
+        set_sockopt_function(sockopt_function_t func)
+            noexcept;
+
+        void
+        unset_sockopt_function()
+            noexcept;
+
 
         // CURLOPT_SOCKS5_AUTH
         // Socks5 authentication methods. TODO
@@ -2706,6 +2720,18 @@ namespace curl {
             const noexcept;
 
 
+        /**
+         * Wrapper for curl_easy_nextheader()
+         *
+         * NOTE: you can only perform ONE iteration at a time, since libcurl modifies its
+         * internal state during iteration.
+        */
+        header_iterator
+        get_header_iterator(unsigned origin = CURLH_HEADER,
+                            int request = -1)
+            noexcept;
+
+
         [[nodiscard]]
         static
         easy*
@@ -2767,6 +2793,13 @@ namespace curl {
                     std::size_t,
                     std::size_t size,
                     void* ctx)
+            noexcept;
+
+        static
+        int
+        sockopt_helper(void* ctx,
+                       curl_socket_t fd,
+                       curlsocktype purpose)
             noexcept;
 
         static

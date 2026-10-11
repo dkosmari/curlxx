@@ -1792,6 +1792,24 @@ namespace curl {
 
 
     void
+    easy::set_sockopt_function(sockopt_function_t func)
+        noexcept
+    {
+        extra_state.sockopt_func = std::move(func);
+        setup_extra_state();
+    }
+
+
+    void
+    easy::unset_sockopt_function()
+        noexcept
+    {
+        extra_state.sockopt_func = {};
+        setup_extra_state();
+    }
+
+
+    void
     easy::set_ssl_verify_host(bool enable)
         noexcept
     {
@@ -2671,6 +2689,15 @@ namespace curl {
     }
 
 
+    header_iterator
+    easy::get_header_iterator(unsigned origin,
+                              int request)
+        noexcept
+    {
+        return header_iterator{raw, origin, request};
+    }
+
+
     easy*
     easy::get_wrapper(CURL* handle)
         noexcept
@@ -2753,6 +2780,15 @@ namespace curl {
             } else {
                 wrap_unsetopt(raw, CURLOPT_READDATA);
                 wrap_unsetopt(raw, CURLOPT_READFUNCTION);
+            }
+
+            // Update sockopt function.
+            if (extra_state.sockopt_func) {
+                curl_easy_setopt(raw, CURLOPT_SOCKOPTDATA, this);
+                curl_easy_setopt(raw, CURLOPT_SOCKOPTFUNCTION, &easy::sockopt_helper);
+            } else {
+                wrap_unsetopt(raw, CURLOPT_SOCKOPTDATA);
+                wrap_unsetopt(raw, CURLOPT_SOCKOPTFUNCTION);
             }
 
             // Update write function.
@@ -2936,6 +2972,26 @@ namespace curl {
         }
         catch (...) {
             return CURL_READFUNC_ABORT;
+        }
+    }
+
+
+    int
+    easy::sockopt_helper(void* ctx,
+                         curl_socket_t fd,
+                         curlsocktype purpose)
+        noexcept
+    {
+        auto self = reinterpret_cast<easy*>(ctx);
+        assert(self);
+        try {
+            if (self->extra_state.sockopt_func)
+                return self->extra_state.sockopt_func(fd, purpose);
+            else
+                return CURL_SOCKOPT_ERROR;
+        }
+        catch (...) {
+            return CURL_SOCKOPT_ERROR;
         }
     }
 
