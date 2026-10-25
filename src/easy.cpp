@@ -1813,7 +1813,7 @@ namespace curl {
     easy::set_ssl_verify_host(bool enable)
         noexcept
     {
-        std::ignore = wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, enable);
+        std::ignore = wrap_setopt(raw, CURLOPT_SSL_VERIFYHOST, enable ? 2L : 0L);
     }
 
 
